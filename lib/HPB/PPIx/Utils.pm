@@ -44,6 +44,17 @@ sub create_element :EXPORT {
 	$element;
 }
 
+sub create_node {
+	my ($type, @content) = @_;
+
+	return unless $type->isa ('PPI::Node');
+
+	my $node = $type->new;
+	$node->add_element ($_) for @content;
+
+	$node;
+}
+
 sub create_operator_arrow :EXPORT {
 	create_token_operator ('->');
 }
@@ -52,13 +63,40 @@ sub create_operator_assign :EXPORT {
 	create_token_operator ('=');
 }
 
+sub create_operator_fat_comma :EXPORT {
+	create_token_operator ('=>');
+}
+
+sub create_statement :EXPORT {
+	create_node ("PPI::Statement" => @_);
+}
+
+sub create_statement_expression :EXPORT {
+	create_node ("PPI::Statement::Expression" => @_);
+}
+
 sub create_statement_variable :EXPORT {
-	my (@content) = @_;
+	create_node ("PPI::Statement::Variable" => @_);
+}
 
-	my $variable = PPI::Statement::Variable->new;
-	$variable->add_element ($_) for @content;
+sub create_structure :EXPORT {
+	my ($type, $token, @content) = @_;
 
-	$variable;
+	my $start_element = PPI::Token::Structure->new ($token);
+	my $end_element = PPI::Token::Structure->new ($token =~ tr/([{/)]}/r);
+
+	my $node = $type->new ($start_element);
+	$node->add_element ($_) for $start_element, @content, $end_element;
+
+	$node;
+}
+
+sub create_structure_list :EXPORT {
+	create_structure ("PPI::Structure::List" => shift, create_statement_expression (@_));
+}
+
+sub create_structure_subscript :EXPORT {
+	create_structure ("PPI::Structure::Subscript" => shift, create_statement_expression (@_));
 }
 
 sub create_token_magic :EXPORT {
@@ -155,6 +193,8 @@ sub find_expression_indent :EXPORT {
 	my $line_number = $element->line_number;
 
 	while ($element->line_number == $line_number) {
+		die if $element eq $element->previous_token;
+		say " from $element to ${\ $element->previous_token }";
 		$element = $element->previous_token;
 	}
 
@@ -165,6 +205,17 @@ sub find_expression_indent :EXPORT {
 	}
 
 	@indent;
+}
+
+sub is_function_block :EXPORT {
+}
+
+sub is_function_argument :EXPORT {
+#	is_ppi_token_symbol ($_)
+#		&& do {
+#			my $scope = find_variable_scope ($_);
+#
+#			
 }
 
 sub find_function_argument_names :EXPORT {
@@ -259,9 +310,8 @@ sub find_variable_initialization_expression :EXPORT {
 sub find_variable_scope :EXPORT {
 	my ($variable) = @_;
 
-	until ($variable->isa ('PPI::Structure::Block')) {
-		$variable = $variable->parent;
-	}
+	$variable = $variable->parent
+		until $variable && is_ppi_structure_block ($variable);
 
 	$variable;
 }
@@ -395,8 +445,9 @@ sub is_method_call_name :EXPORT {
 	my ($element, $name) = @_;
 
 	return 0 unless is_method_call ($element);
+	return 0 unless is_ppi_token_word ($element);
 	return $element eq $name if defined $name;
-	return 0;
+	return 1;
 }
 
 sub is_method_call_on :EXPORT {
@@ -615,7 +666,7 @@ sub is_variable_declaration :EXPORT {
 sub is_whitespace :EXPORT {
 	my ($element) = @_;
 
-	$element->isa ('PPI::Token::Whitespace');
+	ref $element && $element->isa ('PPI::Token::Whitespace');
 }
 
 sub match_content :EXPORT {
@@ -635,6 +686,20 @@ sub method_invocant :EXPORT {
 
 	return '' unless is_method_call ($element);
 	$element->sprevious_sibling->sprevious_sibling;
+}
+
+sub next_sibling :EXPORT {
+	my ($element) = @_;
+
+	return $element unless $element;
+	return $element->next_sibling;
+}
+
+sub next_token :EXPORT {
+	my ($element) = @_;
+
+	return $element unless $element;
+	return $element->next_token;
 }
 
 sub operator_arrow :EXPORT {
@@ -676,6 +741,7 @@ sub ppi_location :EXPORT {
 
 	while (1) {
 		$element = $element->previous_token;
+		last unless $element;
 		last unless $element->line_number == $line_number;
 		next unless is_whitespace ($element);
 
@@ -692,6 +758,20 @@ sub ppi_location_emacs :EXPORT {
 	my ($element) = @_;
 
 	ppi_location ($element, "{line_number}:{column_number}");
+}
+
+sub previous_sibling :EXPORT {
+	my ($element) = @_;
+
+	return $element unless $element;
+	return $element->previous_sibling;
+}
+
+sub previous_token :EXPORT {
+	my ($element) = @_;
+
+	return $element unless $element;
+	return $element->previous_token;
 }
 
 sub remove_arguments :EXPORT {
@@ -742,15 +822,19 @@ sub remove_parameter :EXPORT {
 sub remove_preceding_nonsignificant :EXPORT {
 	my ($element) = @_;
 
-	$element->previous_sibling->remove
-		until $element->previous_sibling->significant;
+	return unless $element;
+	while ($element->previous_sibling && ! $element->previous_sibling->significant) {
+		$element->previous_sibling->remove;
+	}
 }
 
 sub remove_following_nonsignificant :EXPORT {
 	my ($element) = @_;
 
-	$element->next_sibling->remove
-		until $element->next_sibling->significant;
+	return unless $element;
+	while ($element->next_sibling && ! $element->next_sibling->significant) {
+		$element->next_sibling->remove;
+	}
 }
 
 sub remove_sprevious_sibling :EXPORT {
@@ -841,7 +925,20 @@ sub split_list :EXPORT {
 	@elements;
 }
 
+sub trim_whitespace :EXPORT {
+	my (@elements) = @_;
+
+	shift @elements while @elements && is_whitespace ($elements[0]);
+	pop @elements while @elements && is_whitespace ($elements[-1]);
+
+	@elements;
+}
+
 sub where (&) :EXPORT {
+	shift;
+}
+
+sub invoke (&) :EXPORT {
 	shift;
 }
 

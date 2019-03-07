@@ -23,6 +23,57 @@ sub EXPORT :ATTR(CODE,BEGIN) {
 	push @EXPORT_OK, *{$symbol}{NAME};
 }
 
+sub expression_until_sibling :EXPORT {
+	my ($from, $to) = @_;
+
+	my @list = ($from);
+	while (1) {
+		my $next = next_sibling ($list[-1]);
+		return unless $next;
+		last if $next == $to;
+		push @list, $next;
+	}
+
+	return @list;
+}
+
+sub lookup_function_call :EXPORT {
+	my ($name) = @_;
+
+	where {
+		is_ppi_token_word ($_, $name)
+			&& is_function_call ($_)
+	};
+}
+
+sub invoke_replace_with_uri_for :EXPORT {
+	my ($uri_for, $key) = @_;
+
+	invoke {
+		my $function_call = $_;
+		my ($parameter) = parse_arg_list ($function_call);
+
+		$function_call->insert_before (create_token_symbol ('$self'));
+		$function_call->insert_before (create_operator_arrow);
+		$function_call->insert_before (create_token_word ($uri_for));
+
+		my @symbols = grep $_->significant, @$parameter;
+
+		$symbols[-1]->insert_after (create_token_whitespace (' '))
+			unless is_whitespace (next_token ($symbols[-1]));
+
+		$symbols[0]->insert_before (create_token_whitespace (' '))
+			unless is_whitespace (previous_token ($symbols[0]));
+
+		$symbols[0]->insert_before (create_token_word ($key));
+		$symbols[0]->insert_before (create_token_whitespace (' '));
+		$symbols[0]->insert_before (create_operator_fat_comma);
+		$symbols[0]->insert_before (create_token_whitespace (' '));
+
+		$function_call->remove;
+	}
+}
+
 sub find_index_of_property_as_argument :EXPORT {
 	my ($element) = @_;
 
@@ -36,6 +87,25 @@ sub find_index_of_property_as_argument :EXPORT {
 	}
 
 	return -1;
+}
+
+sub find_possible_named_argument :EXPORT {
+	my ($element) = @_;
+
+	my $comma = sprevious_sibling ($element);
+	next unless is_operator_any_comma ($comma);
+
+	my $key = sprevious_sibling ($comma);
+
+	return $key if is_ppi_token_word ($key);
+	return;
+}
+
+sub named_argument_value :EXPORT {
+	my ($element) = @_;
+
+	return $element->content if is_ppi_token_word ($element);
+	return;
 }
 
 sub find_property_as_argument :EXPORT {
@@ -143,7 +213,9 @@ sub eliminate_property_as_argument :EXPORT {
 sub eliminate_property_variables :EXPORT {
 	my ($element, $property) = @_;
 
-	for my $variable (find_variables_initialized_from_property ($element, $property)) {
+	my @nodes = find_variables_initialized_from_property ($element, $property);
+
+	for my $variable (@nodes) {
 		my $scope = find_variable_scope ($variable);
 
 		my @expression = find_variable_initialization_expression ($variable, $scope);
@@ -154,6 +226,8 @@ sub eliminate_property_variables :EXPORT {
 
 		remove_variable_declaration ($variable);
 	}
+
+	@nodes;
 }
 
 1;
