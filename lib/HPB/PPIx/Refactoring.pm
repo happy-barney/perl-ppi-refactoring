@@ -10,6 +10,7 @@ use PPIx::Utils qw[ :classification :language :traversal ];
 use HPB::PPIx::Utils;
 use Ref::Util;
 use Safe::Isa;
+use Test::Deep;
 
 our @EXPORT;
 our @EXPORT_OK;
@@ -21,6 +22,10 @@ sub EXPORT :ATTR(CODE,BEGIN) {
 
 	push @EXPORT, *{$symbol}{NAME};
 	push @EXPORT_OK, *{$symbol}{NAME};
+}
+
+sub d {
+	return unless $_[0]; PPI::Dumper->new ($_[0])->print;
 }
 
 sub expression_until_sibling :EXPORT {
@@ -111,7 +116,7 @@ sub named_argument_value :EXPORT {
 sub find_property_as_argument :EXPORT {
 	my ($element, $method) = @_;
 
-	ppix_find ( $element, where {
+	ppix_find ($element, where {
 		is_method_call_name ($_, $method)
 			&& is_method_parameter ($_)
 			&& find_caller_invocant ($_, find_invocant ($_))
@@ -126,6 +131,21 @@ sub find_property_as_argument_of_module_method :EXPORT {
 	grep { exists $declared_functions{ find_caller_method ($_) } }
 		find_property_as_argument ($element, $method)
 		;
+}
+
+sub find_usage_of_function :EXPORT {
+	my ($element, $function) = @_;
+
+	ppix_find ($element, where {
+		is_function_call ($_)
+			&& eq_deeply ("$_", $function)
+	});
+}
+
+sub find_usage_of_idtoprofileuri :EXPORT {
+	my ($element) = @_;
+
+	find_usage_of_function ($element, re (qr/^(?:Tools::ChangeId::)idToProfileUri$/))
 }
 
 sub find_variables_initialized_from_property :EXPORT {
@@ -228,6 +248,14 @@ sub eliminate_property_variables :EXPORT {
 	}
 
 	@nodes;
+}
+
+sub eliminate_usage_of_idtoprofileuri :EXPORT {
+	my ($element) = @_;
+
+	my @nodes = find_usage_of_idtoprofileuri ($element);
+	my $invoke = invoke_replace_with_uri_for (uri_for_account_profile => 'profile_id');
+	$invoke->() for @nodes;
 }
 
 1;
