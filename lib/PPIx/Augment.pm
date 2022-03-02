@@ -9,6 +9,10 @@ package PPIx::Augment {
 	require PPIx::Augment::Fix::Magic_Cast;
 	require PPIx::Augment::Fix::New_Octal_Numbers;
 	require PPIx::Augment::Fix::Ternary_Operator_Colon;
+
+	require PPIx::Augment::Augmentation::Cast_Block;
+
+	use PPIx::Augment::Token;
 	use PPIx::Augment::Token::Operator::Arrow;
 	use PPIx::Augment::Expression::Call::Method;
 
@@ -30,36 +34,33 @@ package PPIx::Augment {
 		$TRACE && say '[Augment] ', '|> ', $_[0]->();
 	}
 
-	sub augment_operator_arrow {
-		my ($self, $document) = @_;
-		my $augment_package = 'PPIx::Augment::Token::Operator::Arrow';
 
-		bless $_, $augment_package
-			for
-			grep { $_->content eq '->' }
-			grep { ! $_->isa ($augment_package) }
-			ppi_find ($document, 'PPI::Token::Operator')
+	sub augment_operator {
+		my ($self, $document) = @_;
+		my %operators = (
+			'->' => 'PPIx::Augment::Token::Operator::Arrow',
+			'=>' => 'PPIx::Augment::Token::Operator::Fat_Comma',
+			','  => 'PPIx::Augment::Token::Operator::Comma',
+			'?'  => 'PPIx::Augment::Token::Operator::Question_Mark',
+		);
+
+		ppix_process $document
+			=> where { is_operator }
+			=> where { ! is_augmented }
+			=> where { exists $operators{ content() } }
+			=> invoke { bless $_, $operators{ content() } }
 			;
 	}
 
 	sub augment_method_call {
 		my ($self, $document) = @_;
 
-		&augment_operator_arrow;
-
-		my @arrows = ppi_find ($document, sub { $_[1]->isa ('PPIx::Augment::Token::Operator::Arrow') });
-
-		for my $element (@arrows) {
-			use feature 'say';
-			say "arrow found at ${\ ppi_location ($element) }";
-
-			PPIx::Augment::Expression::Call::Method->new;
-		
-
-			d $element->sprevious_sibling;
-		}
+		ppix_process $document
+			=> where { is_operator_arrow }
+			=> where { is_method_call snext_sibling }
+			=> invoke { PPIx::Augment::Expression::Call::Method->new ($_) }
+			;
 	}
-
 
 	sub augment {
 		my ($self, $document) = @_;
@@ -79,6 +80,7 @@ package PPIx::Augment {
 		);
 
 		&augment_operator_arrow;
+		&augment_operator;
 		&augment_method_call;
 
 		$document;

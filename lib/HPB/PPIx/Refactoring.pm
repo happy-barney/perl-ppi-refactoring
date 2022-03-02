@@ -257,5 +257,8 @@ sub eliminate_usage_of_idtoprofileuri :EXPORT {
 	$invoke->() for @nodes;
 }
 
+sub find_json_boolean {
+}
+
 1;
 

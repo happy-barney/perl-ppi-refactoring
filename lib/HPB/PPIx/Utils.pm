@@ -1,5 +1,5 @@
 
-use strict;
+use v5.16;
 use warnings;
 use feature 'say';
 use feature 'current_sub';
@@ -7,12 +7,13 @@ use feature 'current_sub';
 package HPB::PPIx::Utils;
 
 use Exporter qw[ import ];
-use PPIx::Utils qw[ :classification :language :traversal ];
+use PPIx::Utils qw[]; #qw[ :classification :language :traversal ];
 use Ref::Util;
 use Safe::Isa;
 
 our @EXPORT;
-our @EXPORT_OK;
+our @EXPORT_OK = (
+);
 
 use Attribute::Handlers;
 
@@ -34,6 +35,12 @@ sub append_statement_with_same_indent :EXPORT {
 	my ($element, $statement) = @_;
 
 	$element->insert_after (create_token_whitespace ("\n\t$statement"));
+}
+
+sub content :EXPORT {
+	my ($element) = @_ ? @_ : ($_);
+
+	return $element->content;
 }
 
 sub create_element :EXPORT {
@@ -490,6 +497,12 @@ sub is_list :EXPORT {
 	$element->$_isa ('PPI::Structure::List' );
 }
 
+sub is_method_call :EXPORT {
+	my ($element) = @_ ? @_ : ($_);
+
+	return PPIx::Utils::is_method_call ($element);
+}
+
 sub is_method_call_name :EXPORT {
 	my ($element, $name) = @_;
 
@@ -529,7 +542,7 @@ sub is_not_invocant :EXPORT {
 }
 
 sub is_operator :EXPORT {
-	my ($element, $name) = @_;
+	my ($element, $name) = @_ ? @_ : ($_);
 
 	return 0 unless $element->$_isa ('PPI::Token::Operator');
 	return $element eq $name if defined $name;
@@ -537,7 +550,7 @@ sub is_operator :EXPORT {
 }
 
 sub is_operator_arrow :EXPORT {
-	my ($element) = @_;
+	my ($element) = @_ ? @_ : ($_);
 
 	is_operator ($element, '->');
 }
@@ -738,7 +751,7 @@ sub method_invocant :EXPORT {
 }
 
 sub next_sibling :EXPORT {
-	my ($element) = @_;
+	my ($element) = @_ ? @_ : ($_);
 
 	return $element unless $element;
 	return $element->next_sibling;
@@ -778,6 +791,29 @@ sub ppix_invoke :EXPORT {
 
 	for (ppix_find ($params{element}, $params{where})) {
 		$params{invoke}->($_);
+	}
+}
+
+sub ppix_process :EXPORT {
+	my ($element, @params) = @_;
+
+	my ($where, @where) = grep $_->isa ('HPB::PPIx::Utils::Where'), @params;
+	my ($invoke) = grep $_->isa ('HPB::PPIx::Utils::Invoke'), @params;
+
+	if (@where) {
+		unshift @where, $where;
+		$where = sub {
+			my $context = $_;
+			my $result = 1;
+			for my $element (@where) {
+				$result &&= $element->(@_);
+			}
+			$result;
+		};
+	}
+
+	for (ppix_find ($element, $where)) {
+		$invoke->($_);
 	}
 }
 
@@ -914,12 +950,12 @@ sub remove_variable_declaration :EXPORT {
 sub replace_element :EXPORT {
 	my ($element, @with_content) = @_;
 
-	$element->insert_after ($_->clone) for reverse @with_content;
+	$element->__insert_after ($_->clone) for reverse @with_content;
 	$element->remove;
 }
 
 sub snext_sibling :EXPORT {
-	my ($element) = @_;
+	my ($element) = @_ ? @_ : ($_);
 
 	return $element unless $element;
 	return $element->snext_sibling;
@@ -984,11 +1020,14 @@ sub trim_whitespace :EXPORT {
 }
 
 sub where (&) :EXPORT {
-	shift;
+	bless shift, 'HPB::PPIx::Utils::Where';
 }
 
 sub invoke (&) :EXPORT {
-	shift;
+	bless shift, 'HPB::PPIx::Utils::Invoke';
 }
+
+package HPB::PPIx::Utils::Where;
+package HPB::PPIx::Utils::Invoke;
 
 1;

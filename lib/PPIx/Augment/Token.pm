@@ -5,6 +5,10 @@ use warnings;
 package PPIx::Augment::Token {
 	use parent qw[ PPIx::Augment::Element PPI::Token ];
 
+	use PPIx::Augment::Token::Operator::Arrow;
+	use PPIx::Augment::Token::Operator::Comma;
+	use PPIx::Augment::Token::Operator::Fat_Comma;
+
 	1;
 };
 
