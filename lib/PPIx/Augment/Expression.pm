@@ -5,6 +5,21 @@ use warnings;
 package PPIx::Augment::Expression {
 	use parent qw[ PPIx::Augment::Statement::Expression ];
 
+	sub _accessor {
+		my ($self, $key, $new) = @_;
+
+		if (@_ > 2) {
+			if ($self->{$key}) {
+				$self->{$key}->__insert_before ($new);
+				$self->{$key}->remove;
+			}
+
+			$self->{$key} = $new
+		}
+
+		$self->{$key};
+	}
+
 	1;
 };
 

@@ -107,6 +107,10 @@ sub create_structure_subscript :EXPORT {
 	create_structure ("PPI::Structure::Subscript" => shift, create_statement_expression (@_));
 }
 
+sub create_token_label :EXPORT {
+	PPI::Token::Label->new ($_[0]);
+}
+
 sub create_token_magic :EXPORT {
 	PPI::Token::Magic->new ($_[0]);
 }
@@ -415,6 +419,12 @@ sub has_snext_sibling :EXPORT {
 	return 1;
 }
 
+sub insert_before_current :EXPORT {
+	my $context = $_;
+
+	$context->__insert_before ($_) for @_;
+}
+
 sub insert_before_element :EXPORT {
 	my ($element, @content) = @_;
 
@@ -489,6 +499,12 @@ sub is_invocant :EXPORT {
 		if defined $method;
 
 	return 1;
+}
+
+sub is_label :EXPORT {
+	my ($element, $name) = @_ ? @_ : ($_);
+
+	$element->$_isa ('PPI::Token::Label');
 }
 
 sub is_list :EXPORT {
@@ -583,6 +599,12 @@ sub is_operator_fat_comma :EXPORT {
 	my ($element) = @_;
 
 	is_operator ($element, '=>');
+}
+
+sub is_operator_question_mark :EXPORT {
+	my ($element) = @_ ? @_ : ($_);
+
+	is_operator ($element, '?');
 }
 
 sub is_semicolon :EXPORT {
@@ -768,6 +790,12 @@ sub operator_arrow :EXPORT {
 	PPI::Token::Operator->new ('->');
 }
 
+sub parent :EXPORT {
+	my ($element) = @_ ? @_ : ($_);
+
+	return $element->parent // $element;
+}
+
 sub ppi_find :EXPORT {
 	my ($element, @what) = @_;
 
@@ -863,6 +891,10 @@ sub remove_arguments :EXPORT {
 	my ($element) = @_;
 
 	remove_snext_sibling ($element) if is_list (snext_sibling ($element));
+}
+
+sub remove_current :EXPORT {
+	$_->remove;
 }
 
 sub remove_invocant :EXPORT {

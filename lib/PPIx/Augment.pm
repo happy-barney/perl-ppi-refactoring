@@ -62,6 +62,18 @@ package PPIx::Augment {
 			;
 	}
 
+	sub augment_conditional_expression {
+		my ($self, $document) = @_;
+
+		ppix_process $document
+			=> where { is_operator_question_mark }
+			=> invoke {
+				say "=> invoke ($_)";
+				PPIx::Augment::Expression::Conditional->new ($_)
+			}
+			;
+	}
+
 	sub augment {
 		my ($self, $document) = @_;
 
@@ -79,9 +91,9 @@ package PPIx::Augment {
 			PPIx::Augment::Augmentation::Term::Variable::,
 		);
 
-		&augment_operator_arrow;
 		&augment_operator;
 		&augment_method_call;
+		&augment_conditional_expression;
 
 		$document;
 	}

@@ -8,6 +8,7 @@ package PPIx::Augment::Token {
 	use PPIx::Augment::Token::Operator::Arrow;
 	use PPIx::Augment::Token::Operator::Comma;
 	use PPIx::Augment::Token::Operator::Fat_Comma;
+	use PPIx::Augment::Token::Operator::Question_Mark;
 
 	1;
 };
