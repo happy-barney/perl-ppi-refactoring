@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use feature 'say';
+use feature 'current_sub';
 
 package HPB::PPIx::Utils;
 
@@ -24,7 +25,7 @@ sub EXPORT :ATTR(CODE,BEGIN) {
 
 sub where (&);
 
-sub _d {
+sub _d :EXPORT {
 	return unless $_[0];
 	PPI::Dumper->new ($_[0])->print;
 }
@@ -123,6 +124,20 @@ sub create_token_whitespace :EXPORT {
 	PPI::Token::Whitespace->new ($_[0]);
 }
 
+sub create_token_comment :EXPORT {
+	PPI::Token::Comment->new ('# ' . $_[0]);
+}
+
+sub create_token_version :EXPORT {
+	PPI::Token::Number::Version->new ($_[0]);
+}
+
+sub create_single_quoted :EXPORT {
+	my $content = $_[0];
+	$content =~ s/(?=[\\'])/\\/g;
+	PPI::Token::Quote::Single->new ("'$_[0]'");
+}
+
 sub find_call_parameters :EXPORT {
 	my ($element) = @_;
 
@@ -194,7 +209,7 @@ sub find_expression_indent :EXPORT {
 
 	while ($element->line_number == $line_number) {
 		die if $element eq $element->previous_token;
-		say " from $element to ${\ $element->previous_token }";
+		#say " from $element to ${\ $element->previous_token }";
 		$element = $element->previous_token;
 	}
 
@@ -204,7 +219,7 @@ sub find_expression_indent :EXPORT {
 		$element = $element->next_token;
 	}
 
-	@indent;
+	join '', map $_->content, @indent;
 }
 
 sub is_function_block :EXPORT {
@@ -218,20 +233,40 @@ sub is_function_argument :EXPORT {
 #			
 }
 
+sub find_owning_sub_block {
+	my ($element) = @_;
+
+	return unless $element;
+	return $element
+		if is_ppi_structure_block ($element)
+		&& (
+			'sub' eq sprevious_sibling ($element)
+			|| is_ppi_statement_sub ($element->parent)
+		)
+			#	|| 'sub' eq sprevious_sibling (sprevious_sibling ($element))
+			#);
+			;
+
+	return __SUB__->($element->parent);
+}
+
 sub find_function_argument_names :EXPORT {
 	my ($element) = @_;
 
 	return unless is_ppi_statement_sub ($element);
 
-	ppix_find (
+	my @list = ppix_find (
 		$element->block,
 		where {
 			is_ppi_token_symbol ($_)
 				&& is_list ($_->parent->parent)
 				&& is_operator_assign ($_->parent->parent->snext_sibling)
 				&& is_ppi_token_magic ($_->parent->parent->snext_sibling->snext_sibling)
+				&& $element->block == find_owning_sub_block ($_)
 			}
 	);
+
+	@list;
 }
 
 sub find_function_call :EXPORT {
@@ -333,6 +368,20 @@ sub find_variable_usage :EXPORT {
 		ppi_find ($block, 'PPI::Token::Regexp::Match'),
 		ppi_find ($block, 'PPI::Token::QuoteLike::Regexp'),
 		;
+
+	@list;
+}
+
+sub find_has_declaration :EXPORT {
+	my ($scope, $where) = @_;
+
+	my @list = ppix_find ($scope, where {
+		return 0 unless ref eq 'PPI::Statement';
+		my $first = $_->child (0);
+		return 0 unless $first->isa ('PPI::Token::Word');
+		return 0 unless $first->content eq 'has';
+		1;
+	});
 
 	@list;
 }

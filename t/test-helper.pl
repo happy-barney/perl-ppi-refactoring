@@ -144,6 +144,7 @@ sub behaves_like_element_classification {
 		expected => $params{expected},
 	));
 }
+
 sub behaves_like_element_lookup {
 	my ($title, %params) = @_;
 

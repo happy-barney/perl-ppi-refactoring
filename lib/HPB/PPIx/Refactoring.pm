@@ -20,7 +20,6 @@ use Attribute::Handlers;
 sub EXPORT :ATTR(CODE,BEGIN) {
     my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
 
-	push @EXPORT, *{$symbol}{NAME};
 	push @EXPORT_OK, *{$symbol}{NAME};
 }
 

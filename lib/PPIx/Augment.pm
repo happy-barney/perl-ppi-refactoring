@@ -9,6 +9,8 @@ package PPIx::Augment {
 	require PPIx::Augment::Fix::Magic_Cast;
 	require PPIx::Augment::Fix::New_Octal_Numbers;
 	require PPIx::Augment::Fix::Ternary_Operator_Colon;
+	use PPIx::Augment::Token::Operator::Arrow;
+	use PPIx::Augment::Expression::Call::Method;
 
 	require PPIx::Augment::Augmentation::Term::Anonymous;
 	require PPIx::Augment::Augmentation::Term::Dereference;
@@ -28,6 +30,37 @@ package PPIx::Augment {
 		$TRACE && say '[Augment] ', '|> ', $_[0]->();
 	}
 
+	sub augment_operator_arrow {
+		my ($self, $document) = @_;
+		my $augment_package = 'PPIx::Augment::Token::Operator::Arrow';
+
+		bless $_, $augment_package
+			for
+			grep { $_->content eq '->' }
+			grep { ! $_->isa ($augment_package) }
+			ppi_find ($document, 'PPI::Token::Operator')
+			;
+	}
+
+	sub augment_method_call {
+		my ($self, $document) = @_;
+
+		&augment_operator_arrow;
+
+		my @arrows = ppi_find ($document, sub { $_[1]->isa ('PPIx::Augment::Token::Operator::Arrow') });
+
+		for my $element (@arrows) {
+			use feature 'say';
+			say "arrow found at ${\ ppi_location ($element) }";
+
+			PPIx::Augment::Expression::Call::Method->new;
+		
+
+			d $element->sprevious_sibling;
+		}
+	}
+
+
 	sub augment {
 		my ($self, $document) = @_;
 
@@ -44,6 +77,9 @@ package PPIx::Augment {
 			PPIx::Augment::Augmentation::Term::Literal::,
 			PPIx::Augment::Augmentation::Term::Variable::,
 		);
+
+		&augment_operator_arrow;
+		&augment_method_call;
 
 		$document;
 	}
