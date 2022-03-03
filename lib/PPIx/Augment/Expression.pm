@@ -9,12 +9,16 @@ package PPIx::Augment::Expression {
 		my ($self, $key, $new) = @_;
 
 		if (@_ > 2) {
+			my $create = 1;
 			if ($self->{$key}) {
+				$create = 0;
 				$self->{$key}->__insert_before ($new);
 				$self->{$key}->remove;
 			}
 
-			$self->{$key} = $new
+			$self->{$key} = $new;
+
+			return ($new, $create);
 		}
 
 		$self->{$key};

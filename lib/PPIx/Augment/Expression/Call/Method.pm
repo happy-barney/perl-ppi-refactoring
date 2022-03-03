@@ -11,6 +11,8 @@ package PPIx::Augment::Expression::Call::Method {
 	sub new {
 		my ($class, $arrow) = @_;
 
+		$arrow //= $class->augmented_arrow;
+
 		my $self = $class->SUPER::new (my $clone = $arrow->clone);
 
 		$self->arrow ($clone);

@@ -12,6 +12,9 @@ use Ref::Util;
 use Safe::Isa;
 use Test::Deep;
 
+use PPI;
+use PPIx::Augment;
+
 our @EXPORT;
 our @EXPORT_OK;
 
@@ -24,7 +27,26 @@ sub EXPORT :ATTR(CODE,BEGIN) {
 }
 
 sub d {
+	require PPI::Dumper;
 	return unless $_[0]; PPI::Dumper->new ($_[0])->print;
+}
+
+sub document :EXPORT {
+	my $document = PPI::Document->new (shift);
+
+	PPIx::Augment->augment ($document);
+}
+
+sub refactor :EXPORT {
+	my ($document, $refactoring, @parameters) = @_;
+
+	unless (Ref::Util::is_coderef ($refactoring)) {
+		my $code = __PACKAGE__->can ($refactoring);
+		die "Unknown refactoring $refactoring" unless $code;
+		$refactoring = $code;
+	}
+
+	$refactoring->($document, @parameters);
 }
 
 sub expression_until_sibling :EXPORT {
@@ -257,7 +279,108 @@ sub eliminate_usage_of_idtoprofileuri :EXPORT {
 	$invoke->() for @nodes;
 }
 
+sub is_augmented_conditional_expression {
+	my ($element) = @_ ? @_ : ($_);
+
+	$element->isa ('PPIx::Augment::Expression::Conditional');
+}
+
+sub is_augmented_method_call {
+	my ($element) = @_ ? @_ : ($_);
+
+	$element->isa ('PPIx::Augment::Expression::Call::Method');
+}
+
+sub is_json_boolean_method_call {
+	my ($element) = @_ ? @_ : ($_);
+
+	my %modules = map +($_ => 1), qw[ JSON JSON::XS JSON::MaybeXS ];
+	my %methods = map +($_ => 1), qw[ true false ];
+
+	$modules{ $element->invocant } && $methods{ $element->method };
+}
+
+sub ensure_import_function {
+	my ($document, $module, $function) = @_;
+
+	my @imports = ppix_find $document => where { is_use_statement };
+	my @module  = grep { $_->module eq $module } @imports;
+
+	if (my ($module) = @module) {
+		die "Unimplemented - module $module imported more then once"
+			if @module > 1;
+
+		my ($argument) = my @arguments = $module->arguments;
+
+		die "Unimplemented - odule $module doesn't have exactly one argument"
+			if @arguments != 1;
+
+		die "Unimplemented - odule $module argument is not qw"
+			unless $argument->isa ('PPI::Token::QuoteLike::Words');
+
+		return if grep { $_ eq $function } $argument->literal;
+
+		my $content = $argument->content;
+		$content =~ s/(?=\s*.$)/ $function/;
+
+		$argument->set_content ($content);
+
+		return 1;
+	}
+
+	die "Unimplemented - no imports yet"
+		unless @imports;
+
+	my $import = create_statement_include (
+		create_token_word ('use'),
+		create_token_whitespace (' '),
+		create_token_word ($module),
+		create_token_whitespace (' '),
+		create_token_word_list ("qw($function)"),
+		create_token_semicolon,
+	);
+
+	insert_after_element (
+		$imports[-1],
+		create_token_new_line,
+		$import,
+	);
+
+	return;
+}
+
 sub find_json_boolean {
+	my ($document) = @_;
+
+	require PPIx::Augment::Expression::Call::Function;
+
+	return unless ppix_process $document
+		=> where { is_augmented_conditional_expression }
+		=> where { is_augmented_method_call $_->then_expression }
+		=> where { is_augmented_method_call $_->else_expression }
+		=> where { is_json_boolean_method_call $_->then_expression }
+		=> where { is_json_boolean_method_call $_->else_expression }
+		=> invoke {
+			my @negate = ($_->then_expression->method->content eq 'false')
+				? (create_token_operator ('!'))
+				: ()
+				;
+
+			my $call = PPIx::Augment::Expression::Call::Function->new (
+				function => create_token_word ('json_boolean'),
+				arguments => create_argument_list (
+					@negate,
+					$_->condition->clone,
+				)
+			);
+
+			replace_element $_ => $call;
+		}
+		;
+
+	ensure_import_function ($document, 'Veure::Util::Data', 'json_boolean');
+
+	return 1;
 }
 
 1;

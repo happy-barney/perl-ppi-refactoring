@@ -12,9 +12,6 @@ package PPIx::Augment::Expression::Conditional {
 			my $clone = $question_mark->clone
 		);
 
-		say "=> qm - $question_mark";
-		say "=> clone - $clone";
-
 		$self->question_mark ($clone);
 
 		$self->_find_condition ($question_mark);
@@ -60,7 +57,6 @@ package PPIx::Augment::Expression::Conditional {
 	sub _find_else_expression {
 		my ($self, $question_mark) = @_;
 
-		say "lookingfor else (colon) ...";
 		while (my $element = $question_mark->next_sibling) {
 			my $is_significant = $element->significant;
 

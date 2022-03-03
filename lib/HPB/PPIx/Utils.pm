@@ -43,6 +43,15 @@ sub content :EXPORT {
 	return $element->content;
 }
 
+sub create_argument_list :EXPORT {
+	create_structure_list (
+		'(',
+		@_ ? create_token_whitespace (' ') : (),
+		@_,
+		@_ ? create_token_whitespace (' ') : (),
+	);
+}
+
 sub create_element :EXPORT {
 	my ($text) = @_;
 
@@ -87,6 +96,10 @@ sub create_statement_variable :EXPORT {
 	create_node ("PPI::Statement::Variable" => @_);
 }
 
+sub create_statement_include :EXPORT {
+	create_node ("PPI::Statement::Include" => @_);
+}
+
 sub create_structure :EXPORT {
 	my ($type, $token, @content) = @_;
 
@@ -94,7 +107,8 @@ sub create_structure :EXPORT {
 	my $end_element = PPI::Token::Structure->new ($token =~ tr/([{/)]}/r);
 
 	my $node = $type->new ($start_element);
-	$node->add_element ($_) for $start_element, @content, $end_element;
+	$node->add_element ($_) for @content;
+	$node->{finish} = $end_element;
 
 	$node;
 }
@@ -115,8 +129,16 @@ sub create_token_magic :EXPORT {
 	PPI::Token::Magic->new ($_[0]);
 }
 
+sub create_token_new_line :EXPORT {
+	create_token_whitespace ("\n");
+}
+
 sub create_token_operator :EXPORT {
 	PPI::Token::Operator->new ($_[0]);
+}
+
+sub create_token_semicolon :EXPORT {
+	create_token_structure (';');
 }
 
 sub create_token_structure :EXPORT {
@@ -129,6 +151,12 @@ sub create_token_symbol :EXPORT {
 
 sub create_token_word :EXPORT {
 	PPI::Token::Word->new ($_[0]);
+}
+
+sub create_token_word_list :EXPORT {
+	my $token = PPI::Token::QuoteLike::Words->new ('qw');
+	$token->set_content ($_[0]);
+	$token;
 }
 
 sub create_token_whitespace :EXPORT {
@@ -419,6 +447,12 @@ sub has_snext_sibling :EXPORT {
 	return 1;
 }
 
+sub insert_after_element :EXPORT {
+	my ($element, @content) = @_;
+
+	$element->__insert_after ($_) for reverse @content;
+}
+
 sub insert_before_current :EXPORT {
 	my $context = $_;
 
@@ -516,7 +550,13 @@ sub is_list :EXPORT {
 sub is_method_call :EXPORT {
 	my ($element) = @_ ? @_ : ($_);
 
-	return PPIx::Utils::is_method_call ($element);
+	return 0 unless PPIx::Utils::is_method_call ($element);
+
+	return 1 if is_ppi_token_symbol ($element);
+	return 1 if is_ppi_token_word ($element);
+	return 1 if is_ppi_token_cast ($element) && $element->content eq '$';
+
+	return 0;
 }
 
 sub is_method_call_name :EXPORT {
@@ -607,21 +647,6 @@ sub is_operator_question_mark :EXPORT {
 	is_operator ($element, '?');
 }
 
-sub is_semicolon :EXPORT {
-	my ($element) = @_;
-
-	$element->isa ('PPI::Token::Structure') && $element->content eq ';';
-}
-
-sub is_symbol :EXPORT {
-	my ($element, $name) = @_;
-
-	return 0 unless $element;
-	return unless $element->isa ('PPI::Token::Symbol');
-	return $element->content eq $name if defined $name;
-	return 1;
-}
-
 sub is_parameter :EXPORT {
 	my ($element) = @_;
 
@@ -643,6 +668,12 @@ sub is_ppi_structure_list :EXPORT {
 	my ($element) = @_;
 
 	$element->$_isa ('PPI::Structure::List') // 0;
+}
+
+sub is_ppi_structure_subscript :EXPORT {
+	my ($element) = @_;
+
+	$element->$_isa ('PPI::Structure::Subscript') // 0;
 }
 
 sub is_ppi_statement_expression :EXPORT {
@@ -710,11 +741,26 @@ sub is_project_context_method_call :EXPORT {
 		;
 }
 
+sub is_semicolon :EXPORT {
+	my ($element) = @_;
+
+	$element->isa ('PPI::Token::Structure') && $element->content eq ';';
+}
+
 sub is_subroutine_definition :EXPORT {
 	my ($element) = @_;
 
 	is_subroutine_declaration ($element)
 		&& scalar ppi_find ($element => 'PPI::Structure::Block');
+}
+
+sub is_symbol :EXPORT {
+	my ($element, $name) = @_;
+
+	return 0 unless $element;
+	return unless $element->isa ('PPI::Token::Symbol');
+	return $element->content eq $name if defined $name;
+	return 1;
 }
 
 sub is_token_my :EXPORT {
@@ -733,6 +779,23 @@ sub is_token_shift :EXPORT {
 	my ($element) = @_;
 
 	is_ppi_token_word ($element, 'shift');
+}
+
+sub is_unary_operator :EXPORT {
+	my ($element) = @_ ? @_ : ($_);
+
+	return 0 unless is_operator ($element);
+	return 1 unless $element->sprevious_sibling;
+	return 1 if is_operator ($element->sprevious_sibling);
+
+	return 0;
+}
+
+sub is_use_statement :EXPORT {
+	my ($element) = @_ ? @_ : ($_);
+
+	return unless $element->isa ('PPI::Statement::Include');
+	return $element->type eq 'use';
 }
 
 sub is_variable_declaration :EXPORT {
@@ -840,9 +903,12 @@ sub ppix_process :EXPORT {
 		};
 	}
 
-	for (ppix_find ($element, $where)) {
+	my @found = ppix_find ($element, $where);
+	for (@found) {
 		$invoke->($_);
 	}
+
+	scalar @found;
 }
 
 sub ppi_location :EXPORT {
@@ -994,7 +1060,7 @@ sub snext_sibling :EXPORT {
 }
 
 sub sprevious_sibling :EXPORT {
-	my ($element) = @_;
+	my ($element) = @_ ? @_ : ($_);
 
 	return $element unless $element;
 	return $element->sprevious_sibling;
