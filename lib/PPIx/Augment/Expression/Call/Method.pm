@@ -5,24 +5,31 @@ use warnings;
 package PPIx::Augment::Expression::Call::Method {
 	use parent qw[ PPIx::Augment::Expression ];
 
-	use HPB::PPIx::Utils qw[];
-	use PPIx::Augment::Token::Operator::Arrow;
+	require PPIx::Augment::Expression::Invocant;
+	require PPIx::Augment::Expression::Method_Arguments;
+	require PPIx::Augment::Expression::Method_Reference;
+	require PPIx::Augment::Token::Operator::Arrow;
 
-	sub new {
-		my ($class, $arrow) = @_;
+	use HPB::PPIx::Utils (
+		qw[ it_is_operator_arrow ],
+	);
 
-		$arrow //= $class->augmented_arrow;
+	use namespace::clean;
 
-		my $self = $class->SUPER::new (my $clone = $arrow->clone);
+	sub augment {
+		my ($class, $augment_from) = @_;
 
-		$self->arrow ($clone);
+		# Expectation: $augment_from is an arrow operator
+		return
+			unless it_is_operator_arrow ($augment_from);
 
-		$self->_find_method ($arrow);
-		$self->_find_invocant ($arrow);
+		my $invocant  = PPIx::Augment::Expression::Invocant->augment ($augment_from);
+		my $method    = PPIx::Augment::Expression::Method_Reference->augment ($augment_from);
+		my $arguments = PPIx::Augment::Expression::Method_Arguments->augment ($method);
 
-		HPB::PPIx::Utils::replace_element $arrow, $self;
-
-		return $self;
+		my $self = $class->_augment_build (
+			grep $_, $invocant, $method, $arguments
+		);
 	}
 
 	sub augmented_arrow {

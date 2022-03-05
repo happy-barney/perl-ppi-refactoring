@@ -10,6 +10,15 @@ package PPIx::Augment::Token {
 	use PPIx::Augment::Token::Operator::Fat_Comma;
 	use PPIx::Augment::Token::Operator::Question_Mark;
 
+	sub augment {
+		my ($class, $token) = @_;
+
+		bless $token, $class
+			unless $token->isa (__PACKAGE__);
+
+		return $token;
+	}
+
 	1;
 };
 

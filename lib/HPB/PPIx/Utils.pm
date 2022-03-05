@@ -465,30 +465,6 @@ sub insert_before_element :EXPORT {
 	$element->insert_before ($_) for @content;
 }
 
-sub its_sprevious_sibling (&) :EXPORT {
-	my ($code) = @_;
-
-	return unless $_;
-
-	local $_ = $_->sprevious_sibling;
-
-	return unless $_;
-
-	$code->();
-}
-
-sub its_snext_sibling (&) :EXPORT {
-	my ($code) = @_;
-
-	return unless $_;
-
-	local $_ = $_->snext_sibling;
-
-	return unless $_;
-
-	$code->();
-}
-
 sub is_argument_declaration :EXPORT {
 	my ($element) = @_;
 
@@ -601,7 +577,7 @@ sub is_operator :EXPORT {
 	my ($element, $name) = @_ ? @_ : ($_);
 
 	return 0 unless $element->$_isa ('PPI::Token::Operator');
-	return $element eq $name if defined $name;
+	return 0 if defined $name && $element->content ne $name;
 	return 1;
 }
 
@@ -656,6 +632,10 @@ sub is_parameter :EXPORT {
 		;
 
 	return 0;
+}
+
+sub is_ppi_element {
+	$_[0]->$_isa ('PPI::Element');
 }
 
 sub is_ppi_structure_block :EXPORT {
@@ -814,6 +794,57 @@ sub is_whitespace :EXPORT {
 	my ($element) = @_;
 
 	ref $element && $element->isa ('PPI::Token::Whitespace');
+}
+
+sub its_snext_sibling :EXPORT {
+	return unless $_;
+	return $_->snext_sibling;
+}
+
+sub its_snext_sibling_is (&) :EXPORT {
+	my ($code) = @_;
+
+	local $_ = its_snext_sibling;
+
+	return unless $_;
+
+	$code->();
+}
+
+sub its_sprevious_sibling :EXPORT {
+	return unless $_;
+	return $_->sprevious_sibling;
+}
+
+sub its_sprevious_sibling_is (&) :EXPORT {
+	my ($code) = @_;
+
+	local $_ = its_sprevious_sibling;
+
+	return unless $_;
+
+	$code->();
+}
+
+sub it_is {
+	my ($package) = @_;
+
+	$_->$_isa ($package) || 0;
+}
+
+sub it_is_structure_block :EXPORT {
+	it_is (PPI::Structure::Block::);
+}
+
+sub it_is_token_cast :EXPORT {
+	my (@types) = @_;
+	my $element = $_;
+
+	return 0 unless it_is (PPI::Token::Cast::);
+	return 1 unless @types;
+
+	return 1 if grep { $element eq $_ } @types;
+	return 0;
 }
 
 sub match_content :EXPORT {
@@ -1048,7 +1079,7 @@ sub remove_variable_declaration :EXPORT {
 sub replace_element :EXPORT {
 	my ($element, @with_content) = @_;
 
-	$element->__insert_after ($_->clone) for reverse @with_content;
+	$element->__insert_before ($_) for @with_content;
 	$element->remove;
 }
 

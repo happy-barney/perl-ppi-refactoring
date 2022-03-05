@@ -52,9 +52,24 @@ package PPIx::Augment {
 			;
 	}
 
-	sub augment_method_call {
+	sub fix_cast_block {
 		my ($self, $document) = @_;
 
+		verbose { 'fix_cast_block - make ${} single node' };
+		ppix_process $document
+			=> where { it_is_token_cast }
+			=> where { its_snext_sibling_is { it_is_structure_block } }
+			=> invoke {
+				my $expression = PPI::Statement::Expression->new;
+				$expression->add_element ($_->clone);
+				$self->_move_next_insignificant_siblings ($_);
+				$self->_move_next_sibling ($_);
+
+			}
+	}
+
+	sub augment_method_call {
+		my ($self, $document) = @_;
 		ppix_process $document
 			=> where { is_operator_arrow }
 			=> where { is_method_call snext_sibling }
@@ -96,6 +111,16 @@ package PPIx::Augment {
 		&augment_conditional_expression;
 
 		$document;
+	verbose { "augment_conditional_expression" };
+	my @nodes = reverse ppix_find $document
+		=> where { is_operator_question_mark }
+		;
+
+	for (@nodes) {
+		trace { say ppi_location ($_) };
+		trace { say "=> ${\ sprevious_sibling }" };
+		trace { say "=> ${\ snext_sibling }" };
+		PPIx::Augment::Expression::Conditional->new ($_)
 	}
 
 	sub fix {
@@ -111,6 +136,38 @@ package PPIx::Augment {
 
 		$document;
 	}
+sub augment_dereference_expression {
+	my ($self, $document) = @_;
+
+	require PPIx::Augment::Expression::Dereference;
+
+	verbose { "augment_dereference_expression" };
+
+	ppix_process $document
+		=> where { is_operator_arrow }
+		=> where { ! is_augmented }
+		=> invoke {
+			PPIx::Augment::Expression::Dereference->augment ($_);
+		}
+		;
+}
+
+sub augment {
+	my ($self, $document) = @_;
+
+	verbose { "Fix some PPI deficiences" };
+	&fix_ternary_operator_colon;
+	&fix_ternary_operator_colon;
+
+	# Organize document little bit better
+	&augment_dereference_expression;
+	#&augment_method_call;
+	#&augment_conditional_expression;
+	#&augment_operator;
+
+	#say "[Augment] <<<";
+	$document;
+}
 
 	1;
 }

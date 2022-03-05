@@ -5,6 +5,10 @@ use warnings;
 package PPIx::Augment::Expression::Lhs {
 	use parent qw[ PPIx::Augment::Expression ];
 
+	sub augment {
+		return &PPIx::Augment::Expression::_augment_sprevious_sibling;
+	}
+
 	1;
 };
 

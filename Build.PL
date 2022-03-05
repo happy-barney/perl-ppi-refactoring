@@ -24,10 +24,12 @@ my %module_build_args = (
   "recursive_test_files" => 1,
   "requires" => {
     "Attribute::Handlers" => 0,
+    "Carp::Always" => 0,
     "Exporter" => 0,
     "Module::Load" => 0,
     "PPI" => 0,
     "PPI::Document" => 0,
+    "PPI::Dumper" => 0,
     "PPI::Element" => 0,
     "PPI::Node" => 0,
     "PPI::Statement" => 0,
@@ -97,41 +99,44 @@ my %module_build_args = (
     "PPI::Token::Unknown" => 0,
     "PPI::Token::Whitespace" => 0,
     "PPI::Token::Word" => 0,
+    "PPIx::Augment::Expression::Lhs::Invocant" => 0,
+    "PPIx::Augment::Rhs" => 0,
     "PPIx::Utils" => 0,
     "Ref::Util" => 0,
     "Safe::Isa" => 0,
+    "Test::Deep" => 0,
+    "feature" => 0,
     "namespace::clean" => 0,
     "parent" => 0,
-    "perl" => "5.014",
+    "perl" => "v5.16.0",
+    "strict" => 0,
     "warnings" => 0
   },
   "test_requires" => {
+    "Data::Printer" => 0,
     "Hash::Util" => 0,
-    "PPI::Dumper" => 0,
     "Pod::Simple::SimpleTree" => 0,
+    "Shared::Examples::PPIx::Utils" => 0,
     "Sub::Override" => 0,
-    "Test::Deep" => 0,
     "Test::Differences" => 0,
-    "Test::More" => 0,
+    "Test::More" => "0.88",
     "Test::Warnings" => 0,
-    "require::relative" => 0,
-    "strict" => 0
+    "require::relative" => 0
   }
 );
 
 
 my %fallback_build_requires = (
+  "Data::Printer" => 0,
   "Hash::Util" => 0,
   "Module::Build" => "0.28",
-  "PPI::Dumper" => 0,
   "Pod::Simple::SimpleTree" => 0,
+  "Shared::Examples::PPIx::Utils" => 0,
   "Sub::Override" => 0,
-  "Test::Deep" => 0,
   "Test::Differences" => 0,
-  "Test::More" => 0,
+  "Test::More" => "0.88",
   "Test::Warnings" => 0,
-  "require::relative" => 0,
-  "strict" => 0
+  "require::relative" => 0
 );
 
 
