@@ -104,6 +104,7 @@ my %module_build_args = (
     "warnings" => 0
   },
   "test_requires" => {
+    "Hash::Util" => 0,
     "PPI" => 0,
     "PPI::Dumper" => 0,
     "Pod::Simple::SimpleTree" => 0,
@@ -118,6 +119,7 @@ my %module_build_args = (
 
 
 my %fallback_build_requires = (
+  "Hash::Util" => 0,
   "Module::Build" => "0.28",
   "PPI" => 0,
   "PPI::Dumper" => 0,

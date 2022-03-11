@@ -9,6 +9,7 @@ plan tests => 3;
 
 use_ok 'PPIx::Augment';
 use_ok 'PPIx::Augment::Elements';
+use_ok 'PPIx::Augment::Utils';
 
 had_no_warnings;
 

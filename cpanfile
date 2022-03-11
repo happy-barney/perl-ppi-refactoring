@@ -86,6 +86,7 @@ on 'build' => sub {
 };
 
 on 'test' => sub {
+  requires "Hash::Util" => "0";
   requires "PPI" => "0";
   requires "PPI::Dumper" => "0";
   requires "Pod::Simple::SimpleTree" => "0";

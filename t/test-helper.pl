@@ -6,11 +6,16 @@ use Test::More import => [qw[ !ok ]];
 use Test::Deep qw[!cmp_deeply !cmp_bag !cmp_set !cmp_methods];
 use Test::Differences qw[];
 use Test::Warnings qw[ :no_end_test had_no_warnings ];
+use Hash::Util;
 
 use Safe::Isa;
 
 use PPI;
 use PPI::Dumper;
+
+use PPIx::Augment;
+use PPIx::Augment::Utils;
+use PPIx::Augment::Nodeset;
 
 sub it {
 	my ($title, %args) = @_;
@@ -89,6 +94,49 @@ sub expect_element {
 		if @children;
 
 	return $expectation;
+}
+
+sub behaves_like_ppi_find {
+	my ($title, %params) = @_;
+
+	local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+	Hash::Util::lock_keys %params, qw[ find document expected ];
+
+	my $document = $params{document}->$_isa ('PPI::Document')
+		? $params{document}
+		: PPI::Document->new ($params{document})
+		;
+
+	my $got = $document->find ($params{find}) || [];
+
+	is_deeply ($got, $params{expected}, $title)
+		or do { PPI::Dumper->new ($document)->print };
+}
+
+sub behaves_like_element_classification {
+	my ($title, %params) = @_;
+
+	local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+	Hash::Util::lock_keys %params, qw[ classification document expected ];
+
+	behaves_like_ppi_find ($title => (
+		find     => sub { $params{classification}->(local $_ = $_[1]) },
+		document => $params{document},
+		expected => $params{expected},
+	));
+}
+sub behaves_like_element_lookup {
+	my ($title, %params) = @_;
+
+	Hash::Util::lock_keys %params, qw[ code where expected ];
+
+	my $document = PPI::Document->new (\ $params{code});
+
+	my @got = HPB::PPIx::Utils::ppix_find ($document, $params{where});
+
+	is_deeply \@got, $params{expected}, $title;
 }
 
 1;
