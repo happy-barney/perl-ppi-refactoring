@@ -6,6 +6,7 @@ package PPIx::Augment {
 	require PPIx::Augment::Elements;
 
 	require PPIx::Augment::Augmentation::Rebless;
+	require PPIx::Augment::Fix::Ternary_Operator_Colon;
 
 	our $VERBOSE = 0;
 	our $TRACE = 0;
@@ -39,6 +40,7 @@ package PPIx::Augment {
 		verbose { "Fix some PPI problems" };
 
 		&$_ for grep { $_ } map { ($_->can ('requires'), $_->can ('fix')) } (
+			PPIx::Augment::Fix::Ternary_Operator_Colon::,
 		);
 
 		$document;

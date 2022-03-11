@@ -9,6 +9,7 @@ use Test::Warnings qw[ :no_end_test had_no_warnings ];
 use Hash::Util;
 
 use Safe::Isa;
+use Sub::Override;
 
 use PPI;
 use PPI::Dumper;
@@ -16,6 +17,13 @@ use PPI::Dumper;
 use PPIx::Augment;
 use PPIx::Augment::Utils;
 use PPIx::Augment::Nodeset;
+
+sub _ppix_augment_apply {
+	my ($document, $class, @methods) = @_;
+
+	$_->(undef, $document)
+		for grep $_, map $class->can ($_), @methods;
+}
 
 sub it {
 	my ($title, %args) = @_;
@@ -96,7 +104,7 @@ sub expect_element {
 	return $expectation;
 }
 
-sub behaves_like_ppi_find {
+sub behaves_like_ppix_find {
 	my ($title, %params) = @_;
 
 	local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -108,9 +116,9 @@ sub behaves_like_ppi_find {
 		: PPI::Document->new ($params{document})
 		;
 
-	my $got = $document->find ($params{find}) || [];
+	my $got = [ map "$_", ppix_find $document, $params{find} ];
 
-	is_deeply ($got, $params{expected}, $title)
+	Test::Deep::cmp_deeply ($got, $params{expected}, $title)
 		or do { PPI::Dumper->new ($document)->print };
 }
 

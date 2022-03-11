@@ -90,6 +90,7 @@ on 'test' => sub {
   requires "PPI" => "0";
   requires "PPI::Dumper" => "0";
   requires "Pod::Simple::SimpleTree" => "0";
+  requires "Sub::Override" => "0";
   requires "Test::Deep" => "0";
   requires "Test::Differences" => "0";
   requires "Test::More" => "0";
