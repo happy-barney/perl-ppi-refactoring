@@ -5,7 +5,7 @@ use warnings;
 use Test::More;
 use Test::Warnings qw[ :no_end_test had_no_warnings ];
 
-plan tests => 3;
+plan tests => 4;
 
 use_ok 'PPIx::Augment';
 use_ok 'PPIx::Augment::Elements';
