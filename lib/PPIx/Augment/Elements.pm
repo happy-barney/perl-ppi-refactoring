@@ -76,6 +76,10 @@ package PPIx::Augment::Elements {
 	# PPIx::Augment elements
 	use PPIx::Augment::Context::Package;
 	use PPIx::Augment::Expression;
+	use PPIx::Augment::Expression::Invocant;
+	use PPIx::Augment::Expression::Invoked_Method;
+	use PPIx::Augment::Expression::Lhs;
+	use PPIx::Augment::Expression::Rhs;
 	use PPIx::Augment::Expression::Term;
 	use PPIx::Augment::Expression::Term::Anonymous::Arrayref;
 	use PPIx::Augment::Expression::Term::Anonymous::Coderef;
@@ -84,6 +88,7 @@ package PPIx::Augment::Elements {
 	use PPIx::Augment::Expression::Term::Do::Block;
 	use PPIx::Augment::Expression::Term::Literal;
 	use PPIx::Augment::Expression::Term::Variable;
+	use PPIx::Augment::Structure::Arguments;
 
 	1;
 };

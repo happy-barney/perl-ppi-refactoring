@@ -15,6 +15,7 @@ package PPIx::Augment {
 	require PPIx::Augment::Augmentation::Term::Do_Block;
 	require PPIx::Augment::Augmentation::Term::Literal;
 	require PPIx::Augment::Augmentation::Term::Variable;
+	require PPIx::Augment::Augmentation::Expression::Reference;
 
 	our $VERBOSE = 0;
 	our $TRACE = 0;

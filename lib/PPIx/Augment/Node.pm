@@ -5,8 +5,21 @@ use warnings;
 package PPIx::Augment::Node {
 	use parent qw[ PPIx::Augment::Element PPI::Node ];
 
+	use Safe::Isa;
+
 	sub content {
 		&PPI::Node::content;
+	}
+
+	sub _search_child {
+		my ($self, $wanted) = @_;
+
+		for my $child (@{ $self->{children} }) {
+			return $child
+				if $child->$_isa ($wanted);
+		}
+
+		return;
 	}
 
 	1;
