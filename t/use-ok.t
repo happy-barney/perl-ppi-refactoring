@@ -5,10 +5,11 @@ use warnings;
 use Test::More;
 use Test::Warnings qw[ :no_end_test had_no_warnings ];
 
-plan tests => 5;
+plan tests => 6;
 
 use_ok 'PPIx::Augment';
 use_ok 'PPIx::Augment::Elements';
+use_ok 'PPIx::Augment::Fix::New_Octal_Numbers';
 use_ok 'PPIx::Augment::Fix::Ternary_Operator_Colon';
 use_ok 'PPIx::Augment::Utils';
 
