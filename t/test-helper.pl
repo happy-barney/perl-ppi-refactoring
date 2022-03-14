@@ -7,6 +7,7 @@ use Test::Deep qw[!cmp_deeply !cmp_bag !cmp_set !cmp_methods];
 use Test::Differences qw[];
 use Test::Warnings qw[ :no_end_test had_no_warnings ];
 use Hash::Util;
+use Ref::Util;
 
 use Safe::Isa;
 use Sub::Override;
@@ -63,8 +64,10 @@ sub check_ppi {
 
 	local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-	my $got = $params{document} // $params{element};
+	my $got = $params{document};
 	$got = augmented_document (\ $got) unless ref $got;
+
+	my $document = $got;
 
 	if (my $where = $params{where} // $params{where_first}) {
 		my @found = ppix_find ($got, $where);
@@ -72,14 +75,20 @@ sub check_ppi {
 		$got = $params{where_first} ? $found[0] : PPIx::Augment::Nodeset->new (map $_->clone, @found);
 	}
 
-	it $title
-		=> got    => $got
-		=> expect => $params{expect},
-		or do {
-			diag (PPI::Dumper->new ($_)->string)
-				for Ref::Util::is_plain_arrayref ($got) ? @$got : $got
-		}
-	;
+	my $ok = 0;
+
+	if ($got) {
+		$ok = it $title
+			=> got    => $got
+			=> expect => $params{expect}
+			;
+	} else {
+		$ok = Test::More::fail $title;
+	}
+
+	$ok || diag (PPI::Dumper->new ($got || $document)->string);
+
+	return $ok;
 }
 
 sub document {

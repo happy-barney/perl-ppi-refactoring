@@ -10,6 +10,8 @@ package PPIx::Augment {
 	require PPIx::Augment::Fix::New_Octal_Numbers;
 	require PPIx::Augment::Fix::Ternary_Operator_Colon;
 
+	require PPIx::Augment::Augmentation::Term::Literal;
+
 	our $VERBOSE = 0;
 	our $TRACE = 0;
 
@@ -31,6 +33,7 @@ package PPIx::Augment {
 		verbose { "Organize document little bit better" };
 
 		&$_ for grep { $_ } map { ($_->can ('requires'), $_->can ('augment')) } (
+			PPIx::Augment::Augmentation::Term::Literal::,
 		);
 
 		$document;
