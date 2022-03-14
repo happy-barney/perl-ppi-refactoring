@@ -332,12 +332,12 @@ package PPIx::Augment::Utils {
 #
 #		it_is ($element, PPIx::Augment::Expression::Term::Dereference::);
 #	}
-#
-#	sub it_is_augmented_variable    :EXPORT {
-#		my ($element) = _it_args @_;
-#
-#		it_is ($element, PPIx::Augment::Expression::Term::Variable::);
-#	}
+
+	sub it_is_augmented_variable    :EXPORT {
+		my ($element) = _it_args @_;
+
+		it_is ($element, PPIx::Augment::Expression::Term::Variable::);
+	}
 
 	sub it_is_document              :EXPORT {
 		my ($element) = _it_args @_;
