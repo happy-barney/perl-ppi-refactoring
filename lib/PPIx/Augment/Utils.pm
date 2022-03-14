@@ -327,11 +327,11 @@ package PPIx::Augment::Utils {
 		it_is ($element, PPIx::Augment::Element::);
 	}
 
-#	sub it_is_augmented_dereference :EXPORT {
-#		my ($element) = _it_args @_;
-#
-#		it_is ($element, PPIx::Augment::Expression::Term::Dereference::);
-#	}
+	sub it_is_augmented_dereference :EXPORT {
+		my ($element) = _it_args @_;
+
+		it_is ($element, PPIx::Augment::Expression::Term::Dereference::);
+	}
 
 	sub it_is_augmented_variable    :EXPORT {
 		my ($element) = _it_args @_;

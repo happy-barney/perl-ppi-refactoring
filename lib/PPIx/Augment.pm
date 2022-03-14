@@ -11,6 +11,7 @@ package PPIx::Augment {
 	require PPIx::Augment::Fix::Ternary_Operator_Colon;
 
 	require PPIx::Augment::Augmentation::Term::Anonymous;
+	require PPIx::Augment::Augmentation::Term::Dereference;
 	require PPIx::Augment::Augmentation::Term::Do_Block;
 	require PPIx::Augment::Augmentation::Term::Literal;
 	require PPIx::Augment::Augmentation::Term::Variable;
@@ -37,6 +38,7 @@ package PPIx::Augment {
 
 		&$_ for grep { $_ } map { ($_->can ('requires'), $_->can ('augment')) } (
 			PPIx::Augment::Augmentation::Term::Anonymous::,
+			PPIx::Augment::Augmentation::Term::Dereference::,
 			PPIx::Augment::Augmentation::Term::Do_Block::,
 			PPIx::Augment::Augmentation::Term::Literal::,
 			PPIx::Augment::Augmentation::Term::Variable::,

@@ -80,6 +80,7 @@ package PPIx::Augment::Elements {
 	use PPIx::Augment::Expression::Term::Anonymous::Arrayref;
 	use PPIx::Augment::Expression::Term::Anonymous::Coderef;
 	use PPIx::Augment::Expression::Term::Anonymous::Hashref;
+	use PPIx::Augment::Expression::Term::Dereference;
 	use PPIx::Augment::Expression::Term::Do::Block;
 	use PPIx::Augment::Expression::Term::Literal;
 	use PPIx::Augment::Expression::Term::Variable;
