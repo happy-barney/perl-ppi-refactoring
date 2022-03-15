@@ -3,6 +3,8 @@
 
 requires "Attribute::Handlers" => "0";
 requires "Exporter" => "0";
+requires "Module::Load" => "0";
+requires "PPI" => "0";
 requires "PPI::Document" => "0";
 requires "PPI::Element" => "0";
 requires "PPI::Node" => "0";
@@ -87,7 +89,6 @@ on 'build' => sub {
 
 on 'test' => sub {
   requires "Hash::Util" => "0";
-  requires "PPI" => "0";
   requires "PPI::Dumper" => "0";
   requires "Pod::Simple::SimpleTree" => "0";
   requires "Sub::Override" => "0";
