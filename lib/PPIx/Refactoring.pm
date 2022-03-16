@@ -84,6 +84,15 @@ package PPIx::Refactoring {
 		$self->{modified} ||= $self->apply ($refactoring, @params);
 	}
 
+	sub ensure_import_function {
+		my ($context, $document, $module, @functions) = @_;
+
+		return undef
+			// $context->refactor ('veure::extend-imports', $module, @functions)
+			// $context->refactor ('veure::insert-import', $module, @functions)
+			;
+	}
+
 	1;
 }
 

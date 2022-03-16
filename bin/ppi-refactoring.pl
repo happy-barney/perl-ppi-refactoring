@@ -26,6 +26,8 @@ while (my $head = shift @list) {
 }
 
 my @refactorings = (
+	[ 'veure::json-constants' ],
+	#[ 'veure::eliminate-direct-json-import' ],
 );
 
 PPIx::Refactoring->find_refactoring (@$_) for @refactorings;
