@@ -91,6 +91,21 @@ subtest "PPI nodes counterparts" => sub {
 	behaves_like_augmented_ppi_class 'PPI::Token::Word';
 };
 
+subtest "PPIx augmented nodes" => sub {
+	sub behaves_like_ppix_augment_class;
+	plan tests => 9;
+
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Anonymous';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Anonymous::Arrayref';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Anonymous::Hashref';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Anonymous::Coderef';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Do::Block';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Literal';
+	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Variable';
+};
+
 had_no_warnings;
 
 done_testing;
@@ -182,6 +197,20 @@ sub behaves_like_augmented_ppi_class {
 			=> got    => [ search_isa $augment_class ]
 			=> expect => [ (map { augmented_class $_ } search_isa $ppi_class), $ppi_class ]
 			or diag "check PPIx::Augment::Elements, it should load them all"
+			;
+
+		its_isa_tree_should_be_documented $augment_class;
+	};
+}
+
+sub behaves_like_ppix_augment_class {
+	my ($augment_class) = @_;
+
+	subtest "PPIx::Augment class $augment_class" => sub {
+		plan tests => 2;
+
+		ok "it is PPIx::Augment element - $augment_class"
+			=> got => scalar eval { $augment_class->isa (PPI::Element::) }
 			;
 
 		its_isa_tree_should_be_documented $augment_class;

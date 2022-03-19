@@ -73,6 +73,16 @@ package PPIx::Augment::Elements {
 	use PPIx::Augment::Token::Whitespace;
 	use PPIx::Augment::Token::Word;
 
+	# PPIx::Augment elements
+	use PPIx::Augment::Expression;
+	use PPIx::Augment::Expression::Term;
+	use PPIx::Augment::Expression::Term::Anonymous::Arrayref;
+	use PPIx::Augment::Expression::Term::Anonymous::Coderef;
+	use PPIx::Augment::Expression::Term::Anonymous::Hashref;
+	use PPIx::Augment::Expression::Term::Do::Block;
+	use PPIx::Augment::Expression::Term::Literal;
+	use PPIx::Augment::Expression::Term::Variable;
+
 	1;
 };
 
