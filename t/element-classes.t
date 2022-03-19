@@ -95,6 +95,7 @@ subtest "PPIx augmented nodes" => sub {
 	sub behaves_like_ppix_augment_class;
 	plan tests => 9;
 
+	behaves_like_ppix_augment_class 'PPIx::Augment::Context::Package';
 	behaves_like_ppix_augment_class 'PPIx::Augment::Expression';
 	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term';
 	behaves_like_ppix_augment_class 'PPIx::Augment::Expression::Term::Anonymous';

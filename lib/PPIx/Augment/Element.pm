@@ -5,6 +5,21 @@ use warnings;
 package PPIx::Augment::Element {
 	use parent qw[ PPI::Element ];
 
+	use PPI::Document;
+	use PPIx::Augment::Context::Package;
+
+	sub PPI::Element::context_namespace {
+		my ($self) = @_;
+
+		my $element = $self;
+		do {
+			return $element->namespace if $element->isa (PPIx::Augment::Context::Package::);
+			return '::' if $element->isa (PPI::Document::);
+		} while $element = parent $element;
+
+		return;
+	}
+
 	1;
 };
 

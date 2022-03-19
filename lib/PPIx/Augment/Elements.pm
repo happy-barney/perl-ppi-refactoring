@@ -74,6 +74,7 @@ package PPIx::Augment::Elements {
 	use PPIx::Augment::Token::Word;
 
 	# PPIx::Augment elements
+	use PPIx::Augment::Context::Package;
 	use PPIx::Augment::Expression;
 	use PPIx::Augment::Expression::Term;
 	use PPIx::Augment::Expression::Term::Anonymous::Arrayref;

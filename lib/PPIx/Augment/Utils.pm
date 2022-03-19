@@ -618,6 +618,10 @@ package PPIx::Augment::Utils {
 		return _ppi_true;
 	}
 
+	sub its_last_element (&)        :EXPORT {
+		_its_where $_->last_element, @_;
+	}
+
 	sub its_next_sibling (&)        :EXPORT {
 		_its_where $_->next_sibling, @_;
 	}
