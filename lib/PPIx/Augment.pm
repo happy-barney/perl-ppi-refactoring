@@ -3,6 +3,43 @@ use v5.14;
 use warnings;
 
 package PPIx::Augment {
+	require PPIx::Augment::Elements;
+
+	our $VERBOSE = 0;
+	our $TRACE = 0;
+
+	sub verbose (&) {
+		($VERBOSE || $TRACE) && say '[Augment] ', $_[0]->();
+	}
+
+	sub trace (&) {
+		$TRACE && say '[Augment] ', '|> ', $_[0]->();
+	}
+
+	sub augment {
+		my ($self, $document) = @_;
+
+		&fix;
+
+		verbose { "Organize document little bit better" };
+
+		&$_ for grep { $_ } map { ($_->can ('requires'), $_->can ('augment')) } (
+		);
+
+		$document;
+	}
+
+	sub fix {
+		my ($self, $document) = @_;
+
+		verbose { "Fix some PPI problems" };
+
+		&$_ for grep { $_ } map { ($_->can ('requires'), $_->can ('fix')) } (
+		);
+
+		$document;
+	}
+
 	1;
 }
 
