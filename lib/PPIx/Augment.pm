@@ -5,6 +5,8 @@ use warnings;
 package PPIx::Augment {
 	require PPIx::Augment::Elements;
 
+	require PPIx::Augment::Augmentation::Rebless;
+
 	our $VERBOSE = 0;
 	our $TRACE = 0;
 
@@ -18,6 +20,8 @@ package PPIx::Augment {
 
 	sub augment {
 		my ($self, $document) = @_;
+
+		&PPIx::Augment::Augmentation::Rebless::augment;
 
 		&fix;
 
