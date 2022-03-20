@@ -6,6 +6,8 @@ package PPIx::Augment {
 	use PPI;
 	use Safe::Isa;
 
+	require PPIx::Augment::Fix::Ternary_Operator_Colon;
+
 	sub new {
 		my ($class, @args) = @_;
 
@@ -28,6 +30,7 @@ package PPIx::Augment {
 
 	sub augmentations {
 		+(
+			PPIx::Augment::Fix::Ternary_Operator_Colon::,
 		)
 	}
 
