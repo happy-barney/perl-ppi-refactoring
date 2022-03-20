@@ -6,6 +6,7 @@ package PPIx::Augment {
 	use PPI;
 	use Safe::Isa;
 
+	require PPIx::Augment::Fix::New_Octal_Numbers;
 	require PPIx::Augment::Fix::Ternary_Operator_Colon;
 
 	sub new {
@@ -30,6 +31,7 @@ package PPIx::Augment {
 
 	sub augmentations {
 		+(
+			PPIx::Augment::Fix::New_Octal_Numbers::,
 			PPIx::Augment::Fix::Ternary_Operator_Colon::,
 		)
 	}
