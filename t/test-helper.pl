@@ -18,7 +18,12 @@ use Sub::Override;
 use PPI;
 use PPI::Dumper;
 
+use PPIx::Augment;
 use PPIx::Augment::Utils;
+
+sub augmented_document {
+	PPIx::Augment->augment (document (@_));
+}
 
 sub check_ppi {
 	my ($title, %params) = @_;
@@ -29,7 +34,7 @@ sub check_ppi {
 
 	unless (exists $params{got}) {
 		$got = $params{document} // $params{element};
-		$got = document ($got) unless $got->$_isa ('PPI::Element');
+		$got = augmented_document ($got) unless $got->$_isa ('PPI::Element');
 		$found = $got;
 
 		my $where = $params{where};

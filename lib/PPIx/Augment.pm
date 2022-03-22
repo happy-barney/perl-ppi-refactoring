@@ -3,6 +3,34 @@ use v5.14;
 use warnings;
 
 package PPIx::Augment {
+	use PPI;
+	use Safe::Isa;
+
+	sub new {
+		my ($class, @args) = @_;
+
+		return $class->augment (@args);
+	}
+
+	sub augment {
+		my ($self, $source) = @_;
+
+		$source = PPI::Document::->new ($source)
+			unless $source->$_isa (PPI::Document::);
+
+		for my $augmentation ($self->augmentations) {
+			$augmentation->requires ($source) if $augmentation->can ('requires');
+			$augmentation->augment ($source);
+		}
+
+		$source;
+	}
+
+	sub augmentations {
+		+(
+		)
+	}
+
 	1;
 }
 
