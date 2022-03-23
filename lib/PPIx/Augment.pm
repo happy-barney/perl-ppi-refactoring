@@ -31,6 +31,27 @@ package PPIx::Augment {
 		)
 	}
 
+	no warnings 'redefine';
+	# handle multiline prototypes - usually signatures
+	sub PPI::Token::Prototype::__TOKENIZER__on_char {
+		my $class = shift;
+		my $t     = shift;
+
+		# Suck in until we find the closing paren (or the end of line)
+		pos $t->{line} = $t->{line_cursor};
+		die "regex should always match" if $t->{line} !~ m/\G([^\)]*\)?)/gc;
+		$t->{token}->{content} .= $1;
+		$t->{line_cursor} += length $1;
+
+		# Shortcut if end of line
+		return 0 unless $1 =~ /\)$/;
+
+
+		# Found the closing paren
+		my $rv = $t->_finalize_token->__TOKENIZER__on_char( $t );
+		$rv;
+	}
+
 	1;
 }
 
