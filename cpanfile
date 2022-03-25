@@ -9,8 +9,12 @@ on 'build' => sub {
 };
 
 on 'test' => sub {
+  requires "Safe::Isa" => "0";
+  requires "Test::Deep" => "0";
+  requires "Test::Differences" => "0";
   requires "Test::More" => "0";
   requires "Test::Warnings" => "0";
+  requires "require::relative" => "0";
 };
 
 on 'configure' => sub {

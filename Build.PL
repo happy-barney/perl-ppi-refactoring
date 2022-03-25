@@ -27,16 +27,24 @@ my %module_build_args = (
     "warnings" => 0
   },
   "test_requires" => {
+    "Safe::Isa" => 0,
+    "Test::Deep" => 0,
+    "Test::Differences" => 0,
     "Test::More" => 0,
-    "Test::Warnings" => 0
+    "Test::Warnings" => 0,
+    "require::relative" => 0
   }
 );
 
 
 my %fallback_build_requires = (
   "Module::Build" => "0.28",
+  "Safe::Isa" => 0,
+  "Test::Deep" => 0,
+  "Test::Differences" => 0,
   "Test::More" => 0,
-  "Test::Warnings" => 0
+  "Test::Warnings" => 0,
+  "require::relative" => 0
 );
 
 
