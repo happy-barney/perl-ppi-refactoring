@@ -187,6 +187,13 @@ sub test_deep_cmp {
 	return $class;
 }
 
+sub _ppix_augment_apply {
+	my ($document, $class, @methods) = @_;
+
+	$_->(undef, $document)
+		for grep $_, map $class->can ($_), @methods;
+}
+
 sub _test_deep_cmp_val {
 	state $class = test_deep_cmp (
 		isa  => [ 'Test::Deep::Cmp' ],
