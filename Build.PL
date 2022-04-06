@@ -23,42 +23,44 @@ my %module_build_args = (
   "module_name" => "PPIx::Augment",
   "recursive_test_files" => 1,
   "requires" => {
+    "Attribute::Handlers" => 0,
+    "Exporter" => 0,
+    "PPI" => 0,
+    "PPI::Singletons" => 0,
+    "PPIx::Utils" => 0,
+    "Ref::Util" => 0,
+    "Safe::Isa" => 0,
+    "Scalar::Util" => 0,
     "perl" => "5.014",
     "warnings" => 0
   },
   "test_requires" => {
-    "PPI" => 0,
     "PPI::Dumper" => 0,
     "Path::Tiny" => 0,
-    "Ref::Util" => 0,
-    "Safe::Isa" => 0,
-    "Scalar::Util" => 0,
     "Sub::Install" => 0,
     "Sub::Override" => 0,
     "Test::Deep" => 0,
     "Test::Differences" => 0,
     "Test::More" => 0,
     "Test::Warnings" => 0,
-    "require::relative" => 0
+    "require::relative" => 0,
+    "strict" => 0
   }
 );
 
 
 my %fallback_build_requires = (
   "Module::Build" => "0.28",
-  "PPI" => 0,
   "PPI::Dumper" => 0,
   "Path::Tiny" => 0,
-  "Ref::Util" => 0,
-  "Safe::Isa" => 0,
-  "Scalar::Util" => 0,
   "Sub::Install" => 0,
   "Sub::Override" => 0,
   "Test::Deep" => 0,
   "Test::Differences" => 0,
   "Test::More" => 0,
   "Test::Warnings" => 0,
-  "require::relative" => 0
+  "require::relative" => 0,
+  "strict" => 0
 );
 
 

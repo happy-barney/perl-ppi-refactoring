@@ -18,6 +18,8 @@ use Sub::Override;
 use PPI;
 use PPI::Dumper;
 
+use PPIx::Augment::Utils;
+
 sub check_ppi {
 	my ($title, %params) = @_;
 
@@ -37,7 +39,7 @@ sub check_ppi {
 		}
 
 		if ($where) {
-			$found = $got->find ($where);
+			$found = [ ppix_find ($got, $where) ];
 		}
 	}
 
@@ -147,6 +149,16 @@ sub ok {
 	it ($title, %args);
 }
 
+sub nok {
+	my ($title, %args) = @_;
+
+	local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+	$args{expect} = bool (0);
+
+	it ($title, %args);
+}
+
 sub test_deep_cmp {
 	my (%methods) = @_;
 
@@ -156,8 +168,13 @@ sub test_deep_cmp {
 	my $class = $prefix . ++$serial;
 	my $isa = delete $methods{isa} // _test_deep_cmp_val ();
 
-	$isa = join ' ', Ref::Util::is_arrayref $isa ? @$isa : $isa;
-	eval "package $class; use parent qw[ $isa ];";
+	{
+		my @isa = Ref::Util::is_arrayref ($isa) ? @$isa : ($isa);
+		eval "require $_" for @isa;
+
+		no strict 'refs';
+		@{ "$class\::ISA" } = @isa;
+	}
 
 	Sub::Install::install_sub ({ into => $class, as => $_, code => $methods{$_} })
 		for keys %methods;
