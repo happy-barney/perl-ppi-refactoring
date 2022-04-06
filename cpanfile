@@ -9,10 +9,14 @@ on 'build' => sub {
 };
 
 on 'test' => sub {
+  requires "PPI" => "0";
+  requires "PPI::Dumper" => "0";
   requires "Path::Tiny" => "0";
+  requires "Ref::Util" => "0";
   requires "Safe::Isa" => "0";
   requires "Scalar::Util" => "0";
   requires "Sub::Install" => "0";
+  requires "Sub::Override" => "0";
   requires "Test::Deep" => "0";
   requires "Test::Differences" => "0";
   requires "Test::More" => "0";

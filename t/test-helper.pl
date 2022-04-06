@@ -9,9 +9,77 @@ use Test::Deep qw[!cmp_deeply !cmp_bag !cmp_set !cmp_methods];
 use Test::Differences qw[];
 use Test::Warnings qw[ :no_end_test had_no_warnings ];
 
+use Ref::Util qw[];
 use Safe::Isa;
 use Scalar::Util qw[];
 use Sub::Install qw[];
+use Sub::Override;
+
+use PPI;
+use PPI::Dumper;
+
+sub check_ppi {
+	my ($title, %params) = @_;
+
+	local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+	my $got = my $found = $params{got};
+
+	unless (exists $params{got}) {
+		$got = $params{document} // $params{element};
+		$got = document ($got) unless $got->$_isa ('PPI::Element');
+		$found = $got;
+
+		my $where = $params{where};
+
+		if (my $where_first = $params{first}) {
+			$where = sub { state $i = 0; $where_first->(@_) && ($i++ > 0 ? undef : 1) };
+		}
+
+		if ($where) {
+			$found = $got->find ($where);
+		}
+	}
+
+	it ($title
+		=> got    => $found
+		=> expect => $params{expect}
+	) or do {
+		diag (PPI::Dumper->new ($_)->string)
+			for Ref::Util::is_plain_arrayref ($got) ? @$got : $got
+	};
+}
+
+sub document {
+	my ($source) = @_;
+	return $source if ref $source && $source->isa (PPI::Document::);
+
+	$source = $source->stringify
+		if $source->$_isa ('Path::Tiny');
+
+	PPI::Document->new (
+		$source =~ m/\n/ || ! -e $source
+			? \ $source
+			: $source
+		);
+}
+
+sub expect_element {
+	my ($class, @children) = @_;
+
+	my $expectation = expect_instance_of ($class);
+
+	$expectation &= Test::Deep::methods (content => shift @children)
+		if @children && ! ref $children[0];
+
+	$expectation &= Test::Deep::listmethods (children => shift @children)
+		if @children == 1 && Ref::Util::is_plain_arrayref ($children[0]);
+
+	$expectation &= Test::Deep::listmethods (children => \ @children)
+		if @children;
+
+	return $expectation;
+}
 
 sub expect_instance_of {
 	my ($namespace) = @_;
@@ -40,6 +108,10 @@ sub expect_instance_of {
 	);
 
 	return $class->new ($namespace);
+}
+
+sub expect_nodeset {
+	return [ @_ ];
 }
 
 sub it {
