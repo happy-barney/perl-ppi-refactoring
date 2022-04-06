@@ -9,6 +9,7 @@ on 'build' => sub {
 };
 
 on 'test' => sub {
+  requires "Path::Tiny" => "0";
   requires "Safe::Isa" => "0";
   requires "Test::Deep" => "0";
   requires "Test::Differences" => "0";

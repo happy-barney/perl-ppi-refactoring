@@ -2,7 +2,9 @@
 use v5.14;
 use warnings;
 
-use Test::More import => [qw[ !ok !is !is_deeply ]];
+use require::relative 'test-helper-fixture.pl';
+
+use Test::More import => [qw[ !ok ]];
 use Test::Deep qw[!cmp_deeply !cmp_bag !cmp_set !cmp_methods];
 use Test::Differences qw[];
 use Test::Warnings qw[ :no_end_test had_no_warnings ];

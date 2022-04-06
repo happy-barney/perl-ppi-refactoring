@@ -27,6 +27,7 @@ my %module_build_args = (
     "warnings" => 0
   },
   "test_requires" => {
+    "Path::Tiny" => 0,
     "Safe::Isa" => 0,
     "Test::Deep" => 0,
     "Test::Differences" => 0,
@@ -39,6 +40,7 @@ my %module_build_args = (
 
 my %fallback_build_requires = (
   "Module::Build" => "0.28",
+  "Path::Tiny" => 0,
   "Safe::Isa" => 0,
   "Test::Deep" => 0,
   "Test::Differences" => 0,
