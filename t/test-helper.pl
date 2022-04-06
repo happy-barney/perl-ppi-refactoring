@@ -10,6 +10,37 @@ use Test::Differences qw[];
 use Test::Warnings qw[ :no_end_test had_no_warnings ];
 
 use Safe::Isa;
+use Scalar::Util qw[];
+use Sub::Install qw[];
+
+sub expect_instance_of {
+	my ($namespace) = @_;
+
+	state $class = test_deep_cmp (
+		isa             => [ 'Test::Deep::Obj' ],
+		descend         => sub {
+			my ($self, $got) = @_;
+			return $self->Test::Deep::Obj::descend ($got) && ref ($got) eq $self->{val};
+		},
+		diag_message    => sub {
+			my ($self, $where) = @_;
+			return "Checking instance type of $where";
+		},
+		renderGot       => sub {
+			my ($self, $got) = @_;
+
+			return $self->Test::Deep::Obj::renderGot ($got)
+				unless Scalar::Util::blessed ($got);
+			return "blessed into '${\ ref $got }'";
+		},
+		renderExp       => sub {
+			my ($self) = @_;
+			return "blessed into '$self->{val}'";
+		},
+	);
+
+	return $class->new ($namespace);
+}
 
 sub it {
 	my ($title, %args) = @_;
@@ -42,6 +73,31 @@ sub ok {
 	$args{expect} = bool (1);
 
 	it ($title, %args);
+}
+
+sub test_deep_cmp {
+	my (%methods) = @_;
+
+	state $serial = 0;
+	my $prefix = 'Test::Deep::Cmp::__ANON__::';
+
+	my $class = $prefix . ++$serial;
+	my $isa = delete $methods{isa} // _test_deep_cmp_val ();
+
+	$isa = join ' ', Ref::Util::is_arrayref $isa ? @$isa : $isa;
+	eval "package $class; use parent qw[ $isa ];";
+
+	Sub::Install::install_sub ({ into => $class, as => $_, code => $methods{$_} })
+		for keys %methods;
+
+	return $class;
+}
+
+sub _test_deep_cmp_val {
+	state $class = test_deep_cmp (
+		isa  => [ 'Test::Deep::Cmp' ],
+		init => sub { $_[0]->{val} = $_[1] },
+	);
 }
 
 1;
