@@ -506,16 +506,22 @@ package PPIx::Augment::Utils {
 		return current;
 	}
 
+	sub find_filename                   :Exported(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		while (1) {
+			return q () unless $element;
+			return $element->filename if $element->$_isa (PPI::Document::);
+			$element = $element->parent;
+		}
+	}
+
 	sub first_child                     :Exported(accessor) {
 		return _accessor_scalar_node (child => &element, 0) || no_element;
 	}
 
 	sub first_token                     :Exported(accessor) {
 		return eval { _accessor_scalar (first_token => &element) } || no_element;
-	}
-
-	sub first_token                     :Exported(accessor) {
-		return _accessor_scalar (first_token => &element) || no_element;
 	}
 
 	sub following_insignificant         :Exported(accessor) {
@@ -963,29 +969,6 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_include : ppi_exclude_all;
 	}
 
-	sub find_filename                   :Exported(accessor) {
-		my ($element) = _effective_arguments @_;
-
-		while (1) {
-			return '' unless $element;
-			return $element->filename if $element->$_isa (PPI::Document::);
-			$element = $element->parent;
-		}
-	}
-
-	sub following_insignificant         :Exported(accessor) {
-		my ($element) = _effective_arguments @_;
-
-		my @following_insignificant;
-
-		while (it_is_insignificant ($element->next_sibling)) {
-			push @following_insignificant, $element->next_sibling;
-			$element = $following_insignificant[-1];
-		}
-
-		return @following_insignificant;
-	}
-
 	sub is_not                          :Exported(classification) {
 		my ($cond) = @_;
 
@@ -1076,12 +1059,20 @@ package PPIx::Augment::Utils {
 		it_is_token_operator &element, q (->), @_;
 	}
 
+	sub it_is_operator_bitwise_xor      :Exported(classification) {
+		it_is_operator ([q (^)], @_);
+	}
+
 	sub it_is_operator_colon            :Exported(classification) {
 		it_is_token_operator &element, q (:), @_;
 	}
 
 	sub it_is_operator_fat_arrow        :Exported(classification) {
 		it_is_token_operator &element, q (=>), @_;
+	}
+
+	sub it_is_operator_modulus          :Exported(classification) {
+		it_is_operator ([q (%)], @_);
 	}
 
 	sub it_is_package_declaration       :Exported(classification) {
