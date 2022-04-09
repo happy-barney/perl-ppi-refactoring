@@ -24,7 +24,9 @@ my %module_build_args = (
   "recursive_test_files" => 1,
   "requires" => {
     "Attribute::Handlers" => 0,
+    "Carp::Always" => 0,
     "Exporter::Tiny" => 0,
+    "Getopt::Long" => 0,
     "List::Util" => 0,
     "MCE" => 0,
     "MCE::Queue" => 0,
@@ -59,7 +61,6 @@ my %module_build_args = (
     "warnings" => 0
   },
   "test_requires" => {
-    "Carp::Always" => 0,
     "Context::Singleton" => 0,
     "Path::Tiny" => 0,
     "Perl::Critic::Policy::BuiltinFunctions::ProhibitReverseSortBlock" => 0,
@@ -75,7 +76,6 @@ my %module_build_args = (
 
 
 my %fallback_build_requires = (
-  "Carp::Always" => 0,
   "Context::Singleton" => 0,
   "Module::Build" => "0.28",
   "Path::Tiny" => 0,

@@ -405,6 +405,7 @@ package PPIx::Augment::Utils {
 		while (@queue) {
 			my ($current, $index) = @{ shift @queue };
 			next unless $current;
+			# when $current is replaced it loses its parent reference so save it now
 			my $parent = $current->parent;
 
 			if ($parent) {
@@ -429,6 +430,78 @@ package PPIx::Augment::Utils {
 		}
 
 		return $rv;
+	}
+
+	sub move_next_insignificant         :Exported {
+		my ($from_element, $to_element) = @_;
+
+		while (my $sibling = $from_element->next_sibling) {
+			last if $sibling->significant;
+
+			move_next_sibling ($from_element, $to_element);
+		}
+	}
+
+	sub move_next_sibling               :Exported {
+		my ($from_element, $to_element) = @_;
+
+		if (my $sibling = $from_element->next_sibling) {
+			$to_element->add_element ($sibling->clone);
+			$sibling->remove;
+		}
+	}
+
+	sub move_prev_insignificant         :Exported {
+		my ($from_element, $to_element) = @_;
+
+		while (my $sibling = $from_element->next_sibling) {
+			last if $sibling->significant;
+
+			move_prev_sibling ($from_element, $to_element);
+		}
+	}
+
+	sub move_prev_sibling               :Exported {
+		my ($from_element, $to_element) = @_;
+
+		if (my $sibling = $from_element->next_sibling) {
+			$to_element->add_element ($sibling->clone);
+			$sibling->remove;
+		}
+	}
+
+	sub operator_is_expected            :Exported {
+		my ($element) = _effective_arguments @_;
+
+		my $previous = $element->sprevious_sibling;
+
+		return ppi_false unless $previous;
+
+		if ($element->content eq q (%)) {
+			return ppi_false if it_is_operator ($previous);
+			return ppi_false if it_is_token_word ($previous, qr/^(my|our|local|state)$/);
+			return ppi_true;
+		}
+
+		return ppi_true;
+	}
+
+	sub operator_isnt_expected          :Exported {
+		! &operator_is_expected;
+	}
+
+	sub ppix_transform_reverse          :Exported {
+		my ($element, @params) = @_;
+
+		_ppix_transform ($element, -1, -1, @params);
+	}
+
+	sub significant_children            :Exported {
+		my ($element) = _effective_arguments @_;
+
+		return unless it_is_node ($element);
+
+		grep $_->significant, $element->children;
 	}
 
 	sub child                           :Exported(accessor) {
@@ -484,6 +557,10 @@ package PPIx::Augment::Utils {
 
 	sub current_content ()              :Exported(accessor) {
 		return content ();
+	}
+
+	sub current_insert_after            :Exported(accessor) {
+		element_insert_after ($_, @_);
 	}
 
 	sub document                        :Exported(accessor) {
@@ -610,6 +687,10 @@ package PPIx::Augment::Utils {
 
 	sub snext_sibling                   :Exported(accessor) {
 		return _accessor_scalar (snext_sibling => &element) || no_element;
+	}
+
+	sub snext_siblings                  :Exported(accessor) {
+		grep { $_->significant } next_siblings @_;
 	}
 
 	sub snext_token                     :Exported(accessor) {
@@ -881,6 +962,10 @@ package PPIx::Augment::Utils {
 		return element_create (PPI::Statement:: => @_);
 	}
 
+	sub create_statement_expression     :Exported(builder) {
+		element_create (PPI::Statement::Expression:: => @_);
+	}
+
 	sub create_statement_include        :Exported(builder) {
 		my %args = @_;
 
@@ -900,6 +985,10 @@ package PPIx::Augment::Utils {
 			@arguments,
 			create_token_semicolon (),
 		));
+	}
+
+	sub create_statement_variable       :Exported(builder) {
+		element_create (PPI::Statement::Variable:: => @_);
 	}
 
 	sub create_structure                :Exported(builder) {
@@ -1020,6 +1109,17 @@ package PPIx::Augment::Utils {
 
 	sub it_is_insignificant             :Exported(classification) {
 		return it_is_element ([{ significant => sub { ! $_[0] } }], @_);
+	}
+
+	sub it_is_literal                   :Exported(classification) {
+		my ($element) = _effective_arguments @_;
+
+		return ppi_false
+			|| it_is ($element, PPI::Token::Number::)
+			|| it_is ($element, PPI::Token::Quote::)
+			|| it_is ($element, PPI::Token::QuoteLike::)
+			|| it_is ($element, PPI::Token::Regexp::)
+			;
 	}
 
 	sub it_is_method_call               :Exported(classification) {
@@ -1181,6 +1281,16 @@ package PPIx::Augment::Utils {
 
 	sub it_is_structure                 :Exported(classification) {
 		return it_is &element, PPI::Structure::, @_;
+		my ($element, $class, $content) = _effective_arguments @_;
+
+		return ppi_false unless it_is ($element, $class);
+		return ppi_true unless $content;
+
+		return ppi_true if $element->start  eq $content;
+		return ppi_true if $element->finish eq $content;
+		return ppi_true if $element->braces eq $content;
+
+		return ppi_false;
 	}
 
 	sub it_is_structure_block           :Exported(classification) {
@@ -1417,6 +1527,15 @@ package PPIx::Augment::Utils {
 		return it_is_statement_include &element, { type => q (use) }, @_;
 	}
 
+	sub it_isnt_augmented_yet           :Exported(classification) {
+		my ($element) = _effective_arguments @_;
+
+		return ppi_false_dont_descent if it_is_augmented ($element);
+		return ppi_false_dont_descent if it_is_augmented ($element->parent);
+
+		return ppi_true;
+	}
+
 	sub its                             :Exported(classification) {
 		my ($method, $where) = @_;
 
@@ -1612,6 +1731,27 @@ package PPIx::Augment::Utils {
 		}
 
 		return $node;
+	}
+
+	sub element_replace_with            :Exported(transformation) {
+		my ($element, $class, @elements) = @_;
+
+		my @to_remove = grep $_->parent, @elements;
+
+		my $new_element;
+		if ($class->isa (PPI::Token::)) {
+			$new_element = $class->new (join q (), @elements);
+		} else {
+			$new_element = $class->new;
+			$new_element->add_element ($_->parent ? $_->clone : $_)
+				for @elements;
+		}
+
+		$element->__insert_before ($new_element);
+
+		$_->remove for @to_remove;
+
+		return $new_element;
 	}
 
 	sub elements_wrap                   :Exported(transformation) {
