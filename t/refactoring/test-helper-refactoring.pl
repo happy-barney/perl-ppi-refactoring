@@ -31,9 +31,7 @@ sub test_ppix_refactoring {
 	my $refactoring = $params{refactoring} // testing_refactoring;
 	my $document = augmented_document ($params{document});
 
-	if (exists $params{filename}) {
-		$document->{filename} = $params{filename};
-	}
+	$document->{filename} //= $params{filename} // 'inline-document';
 
 	my ($ok, $diag) = (1, undef);
 
