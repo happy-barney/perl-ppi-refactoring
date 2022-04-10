@@ -39,6 +39,7 @@ my %module_build_args = (
     "Ref::Util" => 0,
     "Safe::Isa" => 0,
     "Scalar::Util" => 0,
+    "namespace::clean" => 0,
     "parent" => 0,
     "perl" => "5.014",
     "warnings" => 0

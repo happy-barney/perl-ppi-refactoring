@@ -17,6 +17,7 @@ requires "Path::Tiny" => "0";
 requires "Ref::Util" => "0";
 requires "Safe::Isa" => "0";
 requires "Scalar::Util" => "0";
+requires "namespace::clean" => "0";
 requires "parent" => "0";
 requires "perl" => "5.014";
 requires "warnings" => "0";
