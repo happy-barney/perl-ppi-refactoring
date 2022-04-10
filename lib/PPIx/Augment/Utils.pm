@@ -459,6 +459,17 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (content => &element) // q ();
 	}
 
+	sub context_namespace               :Exported(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		while ($element) {
+			return $element->namespace if it_is (\ [$element], PPIx::Augment::Context::Package::);
+			$element = $element->parent;
+		}
+
+		return;
+	}
+
 	sub context_namespace_element       :Exported(accessor) {
 		my ($element) = _effective_arguments @_;
 
@@ -1808,6 +1819,18 @@ Both can be negative.
 Returns C<content> of L</effective element>, empty string otherwise.
 
 =head2 current_content ()
+
+Returns content of L</current element>.
+
+=head2 context_namespace
+
+Returns namespace of package I<effective element> belongs to.
+returns C<undef> when there is no package statement available.
+
+=head2 context_namespace_element
+
+Returns L<PPIx::Augment::Context::Package> I<effective element> belongs to.
+returns C<empty element> when there is no package statement available.
 
 =head2 document
 
