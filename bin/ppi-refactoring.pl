@@ -22,8 +22,10 @@ my @queue =
 	;
 
 my @refactorings = (
-	[ 'veure::json-constants', 'true' ],
+	#[ 'veure::json-constants', 'true' ],
 	#[ 'veure::json-constants', 'false' ],
+	#[ 'eliminate-cache-variable', 'json_true' ],
+	[ 'eliminate-cache-variable', 'json_false' ],
 	#[ 'veure::eliminate-direct-json-import' ],
 );
 
@@ -48,14 +50,18 @@ mce_loop {
 
 	$0 = "[ppi-refactoring] $_";
 
-	my $refactoring = PPIx::Refactoring->new ("$_");
+	eval {
+		my $document = PPI::Document->new ("$_");
+		my $refactoring = PPIx::Refactoring->new ("$_");
 
-	$refactoring->refactor (@$_) for @refactorings;
+		$refactoring->refactor (@$_) for @refactorings;
 
-	if ($refactoring->{modified}) {
-		MCE->say ("Modify $_");
-	}
-	$refactoring->save;
+		if ($refactoring->{modified}) {
+			MCE->say ("Modify $_");
+			$refactoring->save;
+		}
+		1;
+	} // MCE->say ("Failed $_\n$@");
 } @queue;
 
 
