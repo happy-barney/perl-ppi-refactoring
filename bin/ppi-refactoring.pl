@@ -22,6 +22,9 @@ my @queue =
 	;
 
 my @refactorings = (
+	[ 'veure::json-constants', 'true' ],
+	#[ 'veure::json-constants', 'false' ],
+	#[ 'veure::eliminate-direct-json-import' ],
 );
 
 PPIx::Refactoring->find_refactoring (@$_) for @refactorings;

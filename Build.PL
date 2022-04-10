@@ -24,6 +24,7 @@ my %module_build_args = (
   "recursive_test_files" => 1,
   "requires" => {
     "Attribute::Handlers" => 0,
+    "Carp::Always" => 0,
     "Exporter" => 0,
     "List::MoreUtils" => 0,
     "List::Util" => 0,
