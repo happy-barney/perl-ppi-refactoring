@@ -6,6 +6,10 @@ package PPIx::Augment {
 	use PPI;
 	use Safe::Isa;
 
+	require PPIx::Augment::Document;
+
+	require PPIx::Augment::Augmentation::Context::Package;
+
 	require PPIx::Augment::Fix::Magic_Cast;
 	require PPIx::Augment::Fix::New_Octal_Numbers;
 	require PPIx::Augment::Fix::Newline_Spaces;
@@ -23,6 +27,8 @@ package PPIx::Augment {
 		$source = PPI::Document::->new ($source)
 			unless $source->$_isa (PPI::Document::);
 
+		bless $source, PPIx::Augment::Document::;
+
 		for my $augmentation ($self->augmentations) {
 			$augmentation->requires ($source) if $augmentation->can ('requires');
 			$augmentation->augment ($source);
@@ -37,6 +43,8 @@ package PPIx::Augment {
 			PPIx::Augment::Fix::New_Octal_Numbers::,
 			PPIx::Augment::Fix::Newline_Spaces::,
 			PPIx::Augment::Fix::Ternary_Operator_Colon::,
+
+			PPIx::Augment::Augmentation::Context::Package::,
 		)
 	}
 

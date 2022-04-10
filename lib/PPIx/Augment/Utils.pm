@@ -12,6 +12,8 @@ package PPIx::Augment::Utils {
 	use Safe::Isa;
 	use Scalar::Util qw[];
 
+	use PPIx::Augment::Context::Package;
+
 	our (@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
 	# Reimplementing of Exporter::Attributes as far as it requires 5.16
@@ -205,6 +207,28 @@ package PPIx::Augment::Utils {
 
 		return '' unless it_is_element ($element);
 		return $element->content;
+	}
+
+	sub context_namespace               :Exported :Exportable(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		while ($element) {
+			return $element->namespace if it_is (\ [$element], PPIx::Augment::Context::Package::);
+			$element = $element->parent;
+		}
+
+		return;
+	}
+
+	sub context_namespace_element       :Exported :Exportable(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		while ($element) {
+			return $element if it_is (\ [ $element ], PPIx::Augment::Context::Package::);
+			$element = $element->parent;
+		}
+
+		return '';
 	}
 
 	sub create_statement                :Exported :Exportable(builder) {
@@ -832,6 +856,16 @@ Returns empty list when I<effective element> is not an instance of L<PPI::Node>.
 
 Returns content of I<effective element> when it is an instance of L<PPI::Element>.
 Returns empty string otherwise.
+
+=head2 context_namespace
+
+Returns namespace of package I<effective element> belongs to.
+returns C<undef> when there is no package statement available.
+
+=head2 context_namespace_element
+
+Returns L<PPIx::Augment::Context::Package> I<effective element> belongs to.
+returns C<empty element> when there is no package statement available.
 
 =head2 current ()
 

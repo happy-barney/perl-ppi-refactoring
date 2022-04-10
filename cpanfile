@@ -3,12 +3,16 @@
 
 requires "Attribute::Handlers" => "0";
 requires "Exporter" => "0";
+requires "List::MoreUtils" => "0";
 requires "PPI" => "0";
+requires "PPI::Document" => "0";
+requires "PPI::Node" => "0";
 requires "PPI::Singletons" => "0";
 requires "PPIx::Utils" => "0";
 requires "Ref::Util" => "0";
 requires "Safe::Isa" => "0";
 requires "Scalar::Util" => "0";
+requires "parent" => "0";
 requires "perl" => "5.014";
 requires "warnings" => "0";
 

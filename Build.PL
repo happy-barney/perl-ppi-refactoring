@@ -25,12 +25,16 @@ my %module_build_args = (
   "requires" => {
     "Attribute::Handlers" => 0,
     "Exporter" => 0,
+    "List::MoreUtils" => 0,
     "PPI" => 0,
+    "PPI::Document" => 0,
+    "PPI::Node" => 0,
     "PPI::Singletons" => 0,
     "PPIx::Utils" => 0,
     "Ref::Util" => 0,
     "Safe::Isa" => 0,
     "Scalar::Util" => 0,
+    "parent" => 0,
     "perl" => "5.014",
     "warnings" => 0
   },

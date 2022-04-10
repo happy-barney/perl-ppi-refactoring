@@ -72,6 +72,37 @@ sub document {
 		);
 }
 
+sub expect_context_namespace {
+	my ($namespace) = @_;
+
+	state $class = test_deep_cmp (
+		isa             => 'Test::Deep::Shallow',
+		_transform_got  => sub {
+			my ($self, $got) = @_;
+			scalar PPIx::Augment::Utils::context_namespace ($got);
+		},
+		descend         => sub {
+			my ($self, $got) = @_;
+			return $self->Test::Deep::Shallow::descend ($self->_transform_got ($got));
+		},
+		diag_message    => sub {
+			my ($self, $where) = @_;
+			return "Comparing context_namespace ($where)";
+		},
+		renderExp       => sub {
+			my ($self) = @_;
+			return Test::Deep::render_val ($self->{val});
+		},
+		renderGot       => sub {
+			my ($self, $val) = @_;
+			$val = $self->_transform_got ($val);
+			return Test::Deep::render_val ($val);
+		},
+	);
+
+	$class->new ($namespace);
+}
+
 sub expect_element {
 	my ($class, @children) = @_;
 

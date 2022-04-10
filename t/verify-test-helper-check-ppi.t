@@ -6,7 +6,7 @@ use require::relative 'test-helper.pl';
 
 check_ppi "should parse fixture path 'simple-document.pl'"
 	=> document => fixture_path ('simple-document.pl')
-	=> expect   => expect_element ('PPI::Document' => (
+	=> expect   => expect_element ('PPIx::Augment::Document' => (
 		expect_element ('PPI::Statement' => (
 			expect_element ('PPI::Token::Number'     => '1'),
 			expect_element ('PPI::Token::Structure'  => ';'),
@@ -16,7 +16,7 @@ check_ppi "should parse fixture path 'simple-document.pl'"
 
 check_ppi "should parse fixture 'simple-document.pl'"
 	=> document => fixture ('simple-document.pl')
-	=> expect   => expect_element ('PPI::Document' => (
+	=> expect   => expect_element ('PPIx::Augment::Document' => (
 		expect_element ('PPI::Statement' => (
 			expect_element ('PPI::Token::Number'     => '1'),
 			expect_element ('PPI::Token::Structure'  => ';'),
