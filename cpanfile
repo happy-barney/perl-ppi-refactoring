@@ -3,6 +3,7 @@
 
 requires "Attribute::Handlers" => "0";
 requires "Exporter::Tiny" => "0";
+requires "List::Util" => "0";
 requires "MCE" => "0";
 requires "MCE::Queue" => "0";
 requires "Module::Find" => "0";
@@ -18,7 +19,6 @@ requires "PPI::Token" => "0";
 requires "PPI::Token::Number" => "0";
 requires "PPI::Token::Number::Octal" => "0";
 requires "PPI::Token::Symbol" => "0";
-requires "PPIx::Augment::Augmentation::Context::Package" => "0";
 requires "Path::Iterator::Rule" => "0";
 requires "Path::Tiny" => "0";
 requires "Perl::Critic::Document" => "0";
@@ -47,6 +47,7 @@ on 'test' => sub {
   requires "Perl::Critic::Policy::BuiltinFunctions::ProhibitReverseSortBlock" => "0";
   requires "Perl::Critic::Policy::BuiltinFunctions::ProhibitStringySplit" => "0";
   requires "Perl::Critic::Policy::BuiltinFunctions::RequireBlockGrep" => "0";
+  requires "Test::Differences" => "0";
   requires "Test::More" => "0";
   requires "Test::Warnings" => "0";
   requires "Test::YAFT" => "0";
