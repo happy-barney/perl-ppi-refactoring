@@ -4,7 +4,7 @@ use warnings;
 
 use require::relative "../../test-helper.pl";
 
-my $following_empty_line = document (<<'DOCUMENT');
+my $following_empty_line = augmented_document (<<'DOCUMENT');
 foo;
 
 bar;

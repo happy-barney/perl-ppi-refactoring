@@ -52,6 +52,7 @@ sub check_ppi {
 		=> got    => $found
 		=> expect => $params{expect}
 	) or do {
+		diag ("Got PPI:");
 		diag (PPI::Dumper->new ($_)->string)
 			for Ref::Util::is_plain_arrayref ($got) ? @$got : $got
 	};

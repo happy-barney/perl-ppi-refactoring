@@ -8,6 +8,7 @@ package PPIx::Augment {
 
 	require PPIx::Augment::Fix::Magic_Cast;
 	require PPIx::Augment::Fix::New_Octal_Numbers;
+	require PPIx::Augment::Fix::Newline_Spaces;
 	require PPIx::Augment::Fix::Ternary_Operator_Colon;
 
 	sub new {
@@ -34,6 +35,7 @@ package PPIx::Augment {
 		+(
 			PPIx::Augment::Fix::Magic_Cast::,
 			PPIx::Augment::Fix::New_Octal_Numbers::,
+			PPIx::Augment::Fix::Newline_Spaces::,
 			PPIx::Augment::Fix::Ternary_Operator_Colon::,
 		)
 	}
