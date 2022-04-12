@@ -24,6 +24,7 @@ my @queue =
 my @refactorings = (
 	[ 'move-signatures-after-attributes' ],
 	[ 'eliminate-cache-variable', 'json_false' ],
+	[ 'eliminate-unused-import', qw[ --module JSON::MaybeXS --no-implicit-imports ] ],
 );
 
 PPIx::Refactoring->find_refactoring (@$_) for @refactorings;
