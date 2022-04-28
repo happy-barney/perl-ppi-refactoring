@@ -25,8 +25,9 @@ my @refactorings = (
 	#[ 'veure::json-constants', 'true' ],
 	#[ 'veure::json-constants', 'false' ],
 	#[ 'eliminate-cache-variable', 'json_true' ],
-	[ 'eliminate-cache-variable', 'json_false' ],
+	#[ 'eliminate-cache-variable', 'json_false' ],
 	#[ 'veure::eliminate-direct-json-import' ],
+	[ 'veure::move-signatures-after-attributes' ],
 );
 
 PPIx::Refactoring->find_refactoring (@$_) for @refactorings;
