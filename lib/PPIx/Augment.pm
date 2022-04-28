@@ -15,6 +15,8 @@ package PPIx::Augment {
 	require PPIx::Augment::Fix::Newline_Spaces;
 	require PPIx::Augment::Fix::Ternary_Operator_Colon;
 
+	use constant NEW_LINES_IN_PROTOTYPE_FIXED => (version->parse ($PPI::VERSION) >= v1.273);
+
 	sub new {
 		my ($class, @args) = @_;
 
@@ -49,24 +51,25 @@ package PPIx::Augment {
 	}
 
 	no warnings 'redefine';
-	# handle multiline prototypes - usually signatures
-	sub PPI::Token::Prototype::__TOKENIZER__on_char {
-		my $class = shift;
-		my $t     = shift;
+	unless (NEW_LINES_IN_PROTOTYPE_FIXED) {
+		# handle multiline prototypes - usually signatures
+		sub PPI::Token::Prototype::__TOKENIZER__on_char {
+			my $class = shift;
+			my $t     = shift;
 
-		# Suck in until we find the closing paren (or the end of line)
-		pos $t->{line} = $t->{line_cursor};
-		die "regex should always match" if $t->{line} !~ m/\G([^\)]*\)?)/gc;
-		$t->{token}->{content} .= $1;
-		$t->{line_cursor} += length $1;
+			# Suck in until we find the closing paren (or the end of line)
+			pos $t->{line} = $t->{line_cursor};
+			die "regex should always match" if $t->{line} !~ m/\G([^\)]*\)?)/gc;
+			$t->{token}->{content} .= $1;
+			$t->{line_cursor} += length $1;
 
-		# Shortcut if end of line
-		return 0 unless $1 =~ /\)$/;
+			# Shortcut if end of line
+			return 0 unless $1 =~ /\)$/;
 
-
-		# Found the closing paren
-		my $rv = $t->_finalize_token->__TOKENIZER__on_char( $t );
-		$rv;
+			# Found the closing paren
+			my $rv = $t->_finalize_token->__TOKENIZER__on_char( $t );
+			$rv;
+		}
 	}
 
 	1;
