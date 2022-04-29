@@ -876,7 +876,24 @@ package PPIx::Augment::Utils {
 	}
 
 	sub create_statement_include        :Exported(builder) {
-		element_create (PPI::Statement::Include:: => @_);
+		my %args = @_;
+
+		my @arguments;
+
+		if ($args{arguments}) {
+			@arguments = (
+				create_token_whitespace (' '),
+				$args{arguments},
+			);
+		}
+
+		element_create (PPI::Statement::Include:: => (
+			create_token_word ($args{type}),
+			create_token_whitespace (' '),
+			create_token_word ($args{module}),
+			@arguments,
+			create_token_semicolon (),
+		));
 	}
 
 	sub create_structure                :Exported(builder) {
@@ -894,6 +911,17 @@ package PPIx::Augment::Utils {
 
 	sub create_structure_block          :Exported(builder) {
 		return create_structure (PPI::Structure::Block::, q ('{'), @_);
+	}
+
+	sub create_token_quote_single ($)   :Exported(builder) {
+		my ($value) = @_;
+
+		$value =~ s/(?:[\\'])/\\$1/g;
+
+		my $token = PPI::Token::Quote::Single::->new ('\'');
+		$token->{content} = "'$value'";
+
+		return $token;
 	}
 
 	sub create_token_semicolon          :Exported(builder) {

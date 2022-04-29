@@ -53,12 +53,9 @@ package PPIx::Refactoring::veure::insert_import {
 
 		my $functions = join ' ', @{ $params{imports} };
 		my $import = create_statement_include (
-			create_token_word ('use'),
-			create_token_whitespace (' '),
-			create_token_word ($params{module}),
-			create_token_whitespace (' '),
-			create_token_word_list ("qw($functions)"),
-			create_token_semicolon,
+			type => 'use',
+			module => $params{module},
+			arguments => create_token_word_list ("qw($functions)"),
 		);
 
 		element_insert_before (
