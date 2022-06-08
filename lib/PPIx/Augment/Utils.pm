@@ -882,14 +882,14 @@ package PPIx::Augment::Utils {
 
 		if ($args{arguments}) {
 			@arguments = (
-				create_token_whitespace (' '),
+				create_token_whitespace (q ( )),
 				$args{arguments},
 			);
 		}
 
 		element_create (PPI::Statement::Include:: => (
 			create_token_word ($args{type}),
-			create_token_whitespace (' '),
+			create_token_whitespace (q ( )),
 			create_token_word ($args{module}),
 			@arguments,
 			create_token_semicolon (),
@@ -918,8 +918,8 @@ package PPIx::Augment::Utils {
 
 		$value =~ s/(?:[\\'])/\\$1/g;
 
-		my $token = PPI::Token::Quote::Single::->new ('\'');
-		$token->{content} = "'$value'";
+		my $token = PPI::Token::Quote::Single::->new (q (\'));
+		$token->{content} = qq ('$value');
 
 		return $token;
 	}
@@ -1662,7 +1662,7 @@ package PPIx::Augment::Utils {
 		return scalar map { $invoke->() } ppix_find $element, $where;
 	}
 
-	sub ppix_refactor                   :Exported(traversal){
+	sub ppix_refactor                   :Exported(traversal) {
 		my ($element, @params) = @_;
 
 		my $where  = _process_where  (@params);
@@ -1675,7 +1675,7 @@ package PPIx::Augment::Utils {
 			return unless @found;
 
 			for (@found) {
-				say STDERR find_filename , $_->line_number
+				say STDERR find_filename , $_->line_number;
 			}
 
 			return 1;

@@ -6,7 +6,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
-use List::Util qw[ max ];
+use List::Util qw[ max uniq ];
 use Path::Tiny;
 use Path::Iterator::Rule;
 use PPIx::Augment;
@@ -32,7 +32,10 @@ use Time::HiRes qw[ gettimeofday tv_interval ];
 
 my $start_time = [gettimeofday];
 
-mce_loop {
+open my $fh, '>', 'out-find'
+	or die "Unable open file: $!";
+
+my @list = uniq mce_loop {
 	my ($mce, $chunk_ref, $chunk_id) = @_;
 
 	$0 = "[ppi-refactoring] $_";
@@ -41,15 +44,19 @@ mce_loop {
 		my $document = PPIx::Augment->new ("$_");
 
 		ppix_process $document
-			=> where { it_is_token_word qr/\b(true|false)$/ }
+			=> where { it_is_operator_arrow }
+			=> where { its_snext_sibling { it_is_token_word { content => 'new' } } }
+			#=> where { its_sprevious_sibling { ! it_is_token_word } }
 			=> invoke {
-				MCE->say (join ': ', find_filename, $_->line_number, $_)
+				MCE->gather (join ': ', find_filename, $_->line_number, sprevious_sibling);
+				#MCE->gather (content sprevious_sibling);;
 			};
 
 		1;
 	} // MCE->say ("Failed $_\n$@");
 } @queue;
 
+say $fh $_ for sort @list;
 
 my $finish_time = [Time::HiRes::gettimeofday];
 
