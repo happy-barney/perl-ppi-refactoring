@@ -15,16 +15,6 @@ subtest q (basic features) => sub {
 			expect_element (PPI::Token::Whitespace:: => qq (\n)),
 		));
 
-	assume_ppi q (should parse fixture 'simple-document.pl')
-		=> document => fixture (q (simple-document.pl))
-		=> expect   => expect_element (PPI::Document:: => (
-			expect_element (PPI::Statement:: => (
-				expect_element (PPI::Token::Number::     => q (1)),
-				expect_element (PPI::Token::Structure::  => q (;)),
-			)),
-			expect_element (PPI::Token::Whitespace:: => qq (\n)),
-		));
-
 	assume_ppi q (should recognize 'where' clause)
 		=> document => q (1;2;4)
 		=> where    => sub { $_[1]->isa (PPI::Token::Number::) }

@@ -86,8 +86,12 @@ use_ok q (PPIx::Augment::Token::Symbol);
 use_ok q (PPIx::Augment::Token::Unknown);
 use_ok q (PPIx::Augment::Token::Whitespace);
 use_ok q (PPIx::Augment::Token::Word);
+use_ok q (PPIx::Augment::Tools::MCE);
 use_ok q (PPIx::Augment::Utils);
 use_ok q (PPIx::Augment::Utils::Exporter);
+use_ok q (PPIx::Refactoring::Repair::Critic::Policy);
+use_ok q (PPIx::Refactoring::Repair::Critic::Policy::BuiltinFunctions::ProhibitStringySplit);
+use_ok q (PPIx::Refactoring::Repair::Critic::Policy::CodeLayout::RequireTrailingCommaAtNewline);
 
 had_no_warnings;
 done_testing;

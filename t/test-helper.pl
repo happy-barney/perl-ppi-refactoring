@@ -19,6 +19,7 @@ use PPIx::Augment::Utils;
 
 sub _build_argument_function;
 sub assume_ppi;
+sub augmented_document;
 sub deduce_undef;
 sub distribution_root;
 sub fixture_path;
@@ -132,6 +133,13 @@ sub _build_argument_function {
 		;
 
 	return ($function, @args);
+	}
+
+sub _ppix_augment_apply {
+	my ($document, $class, @methods) = @_;
+
+	$_->(undef, $document)
+		for grep $_, map $class->can ($_), @methods;
 }
 
 sub arrange_document (&) {
@@ -213,6 +221,10 @@ sub assume_ppi {
 			ppi_dump $found;
 		};
 	};
+}
+
+sub augmented_document {
+	return PPIx::Augment::->augment (ppi_document (@_));
 }
 
 sub deduce_undef {
