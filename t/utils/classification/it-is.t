@@ -84,3 +84,55 @@ subtest q (negative classification) => sub {
 
 had_no_warnings;
 done_testing;
+
+
+testing_classification { \& it_is };
+
+my $element = PPI::Token::Word::->new (q (foo));
+
+assert_classification q (should accept element when it is an instance of class)
+	=> element => $element
+	=> with    => [ PPI::Element:: ]
+	=> expect  => expect_ppi_true
+	;
+
+assert_classification q (should reject element when it isn't an instance of class)
+	=> element => $element
+	=> with    => [ PPI::Statement:: ]
+	=> expect  => expect_ppi_false
+	;
+
+assert_classification q (should accept element when it is an instance of class and matches content exactly)
+	=> element => $element
+	=> with    => [ PPI::Token::, q (foo) ]
+	=> expect  => expect_ppi_true
+	;
+
+assert_classification q (should accept element when it is an instance of class and matches content by regex)
+	=> element => $element
+	=> with    => [ PPI::Token::, qr (o) ]
+	=> expect  => expect_ppi_true
+	;
+
+assert_classification q (should reject element when it is an instance of class and doesn't match content exactly)
+	=> element => $element
+	=> with    => [ PPI::Token::, q (foo), q (bar) ]
+	=> expect  => expect_ppi_false
+	;
+
+assert_classification q (should accept element when it is an instance of class and doesn't match content by regex)
+	=> element => $element
+	=> with    => [ PPI::Token::, q (foo), qr (b) ]
+	=> expect  => expect_ppi_false
+	;
+
+assert_classification q (should reject element when it isn't an instance class even if content matches)
+	=> element => $element
+	=> with    => [ PPI::Statement::, q (foo) ]
+	=> expect  => expect_ppi_false
+	;
+
+had_no_warnings;
+
+done_testing;
+

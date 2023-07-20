@@ -2606,6 +2606,43 @@ Alias for L</ppi_exclude_all ()>
 
 Alias for L</ppi_include ()>
 
+=head2 it_is
+
+    it_is q (PPI::Element);
+    it_is $maybe_element, q (PPI::Element);
+    it_is q (PPI::Element), ... conditions ...;
+
+Basic classification, checks whether effective element is an instance of CLASS.
+
+=head2 it_is_element [$element], [@conditions]
+
+    it_is_element;
+    it_is_element $maybe_element;
+    it_is_element ... conditions ...;
+
+Check whether effective element is an instance of C<PPI::Element>.
+
+=head2 it_is_node [$element], [@conditions]
+
+    it_is_node;
+    it_is_node $maybe_node;
+    it_is_node ... conditions ...;
+
+Check whether effective element is an instance of C<PPI::Node>
+(ie <PPI::Element> that can have children)
+
+=head2 ppix_exclude ()
+
+Alias for L</ppi_exclude ()>
+
+=head2 ppix_exclude_all ()
+
+Alias for L</ppi_exclude_all ()>
+
+=head2 ppix_include ()
+
+Alias for L</ppi_include ()>
+
 =head1 TRANSFORMATION FUNCTIONS
 
 Helper functions to modify L</effective element>.
