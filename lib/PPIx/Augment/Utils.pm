@@ -462,7 +462,7 @@ package PPIx::Augment::Utils {
 	}
 
 	sub current_content ()              :Exported(accessor) {
-		return content;
+		return content ();
 	}
 
 	sub document                        :Exported(accessor) {
@@ -1580,6 +1580,42 @@ L</no element> otherwise.
 
 =head2 previous_sibling
 
+Calls <PPI::Element>'s C<previous_sibling> method on L</effective element>
+or returns L</no element>.
+
+=head2 previous_token
+
+Calls <PPI::Element>'s C<previous_token> method on L</effective element>
+or returns L</no element>.
+
+=head2 snext_sibling
+
+Calls <PPI::Element>'s C<parent> method on L</effective element>
+or returns L</no element>.
+
+=head2 sprevious_sibling
+
+    sprevious_sibling;
+    sprevious_sibling $element;
+
+Returns previous significant sibling of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 sprevious_token
+
+    sprevious_token;
+    sprevious_token $element;
+
+Returns previous significant token of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 content
+
+Calls <PPI::Element>'s C<content> method on L</effective element>
+or returns empty string when L</no element>.
+
+=head2 previous_sibling
+
     previous_sibling;
     previous_sibling $element;
 
@@ -1680,6 +1716,22 @@ or returns L</no element>.
 =head2 significant
 
 Calls <PPI::Element>'s C<significant> method on L</effective element>
+or returns L</no element>.
+
+=head2 current ()
+
+Returns L</current element>.
+
+=head2 current ()
+
+Returns L</current element>.
+
+=head2 child INDEX
+
+    child $index;
+    child $element, $index;
+
+Calls <PPI::Node>'s C<child> method on L</effective element>
 or returns L</no element>.
 
 =head1 BUILDER FUNCTIONS
@@ -2310,10 +2362,6 @@ Shortcut for calling L</it_is> with L<PPI::Token::HereDoc>.
 
 =head2 it_is_token_label
 
-    it_is_token_label $element?, @conditions?
-
-Shortcut for calling L</it_is> with L<PPI::Token::Label>.
-
 =head2 it_is_token_magic
 
     it_is_token_magic $element?, @conditions?
@@ -2614,6 +2662,49 @@ Alias for L</ppi_include ()>
 
 Basic classification, checks whether effective element is an instance of CLASS.
 
+=head2 it_is_token_label
+
+    it_is_token_label $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Label>.
+
+=head2 it_is [$element], $CLASS, [@conditions]
+
+Every classification function accepts optional conditions.
+Multiple conditions are evaluated as logical and.
+
+Condition types:
+
+=over
+
+=item undef
+
+Treated as "condition doesn't exist" (ie, returns C<ppi_include>)
+
+=item scalar
+
+Compares stringwise element's content with given value
+
+=item regexp
+
+Applies regexp on element's content
+
+=item coderef
+
+Calls it with element's content as an argument
+
+=item single key hashref
+
+Use different method (passed as a key) then C<content> to access value to compare.
+
+Method name can be either method name of tested element or L<PPIx::Augment::Utils>
+accessor.
+
+Such method is used instead of C<content>, applying C<undef>,
+C<scalar>, C<regexp>, or C<coderef> comparisions using hashref's value.
+
+=back
+
 =head2 it_is_element [$element], [@conditions]
 
     it_is_element;
@@ -2630,18 +2721,6 @@ Check whether effective element is an instance of C<PPI::Element>.
 
 Check whether effective element is an instance of C<PPI::Node>
 (ie <PPI::Element> that can have children)
-
-=head2 ppix_exclude ()
-
-Alias for L</ppi_exclude ()>
-
-=head2 ppix_exclude_all ()
-
-Alias for L</ppi_exclude_all ()>
-
-=head2 ppix_include ()
-
-Alias for L</ppi_include ()>
 
 =head1 TRANSFORMATION FUNCTIONS
 
@@ -2910,6 +2989,43 @@ L</where (&)> block, when executed
 =item has L</current element> populated with found element
 
 =back
+
+=head2 its_sprevious_sibling (&)
+
+=head2 ppi_false ()
+
+Represents value C<PPI> uses to exclude current element but continues with
+its children.
+
+FYI, it's C<defined> value
+
+=head2 ppi_false_dont_descent ()
+
+Represents value C<PPI> uses to exclude current element and its children
+
+FYI, it's C<undef>
+
+=head2 ppix_find_next_siblings
+
+	my @elements = ppix_find_parent $element
+		=> where  { ... condition 1 ... }
+		=> where  { ... condition 2 ... }
+		=> invoke { ... }
+		=> invoke { ... }
+		;
+
+Similar to L</ppix_find> but investigates next siblings of starting element insteads.
+
+=head2 ppix_find_previous_siblings
+
+	my @elements = ppix_find_parent $element
+		=> where  { ... condition 1 ... }
+		=> where  { ... condition 2 ... }
+		=> invoke { ... }
+		=> invoke { ... }
+		;
+
+Similar to L</ppix_find> but investigates next siblings of starting element insteads.
 
 =head1 AUTHOR
 
