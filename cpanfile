@@ -11,6 +11,7 @@ requires "PPI" => "v1.278.0";
 requires "PPI::Document" => "0";
 requires "PPI::Element" => "0";
 requires "PPI::Node" => "0";
+requires "PPI::Statement::Include" => "0";
 requires "PPI::Structure" => "0";
 requires "PPI::Structure::List" => "0";
 requires "PPI::Token" => "0";

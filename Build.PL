@@ -33,6 +33,7 @@ my %module_build_args = (
     "PPI::Document" => 0,
     "PPI::Element" => 0,
     "PPI::Node" => 0,
+    "PPI::Statement::Include" => 0,
     "PPI::Structure" => 0,
     "PPI::Structure::List" => 0,
     "PPI::Token" => 0,
