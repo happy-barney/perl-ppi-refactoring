@@ -1368,6 +1368,15 @@ package PPIx::Augment::Utils {
 		&element_remove;
 	}
 
+	sub dont_descend_if (&)             :Exported(tranversal) {
+		my ($code) = @_;
+
+		return $code->()
+			? ppi_false_dont_descent
+			: ppi_true
+			;
+	}
+
 	sub invoke (&)                      :Exported(traversal) {
 		my ($code) = @_;
 
