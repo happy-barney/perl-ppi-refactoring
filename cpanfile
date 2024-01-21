@@ -44,6 +44,7 @@ on 'build' => sub {
 
 on 'test' => sub {
   requires "Context::Singleton" => "0";
+  requires "Hash::Util" => "0";
   requires "Path::Tiny" => "0";
   requires "Perl::Critic::Policy::BuiltinFunctions::ProhibitReverseSortBlock" => "0";
   requires "Perl::Critic::Policy::BuiltinFunctions::ProhibitStringySplit" => "0";

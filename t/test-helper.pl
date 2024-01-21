@@ -5,6 +5,7 @@ use warnings;
 use Carp::Always; # must be before Test::YAFT - replaces $SIG{__WARN__}
 
 use Context::Singleton;
+use Hash::Util;
 use Path::Tiny qw ();
 use PPI v1.277;
 use PPI::Dumper;
@@ -241,15 +242,80 @@ sub distribution_root {
 	return tests_root->parent;
 }
 
+sub behaves_like_element_classification {
+	my ($title, %params) = @_;
+
+	Test::YAFT::test_frame {
+		Hash::Util::lock_keys %params, qw[ classification document expected ];
+
+		behaves_like_ppi_find ($title => (
+			find     => sub { $params{classification}->(local $_ = $_[1]) },
+			document => $params{document},
+			expected => $params{expected},
+		));
+	}
+}
+
+sub behaves_like_element_lookup {
+	my ($title, %params) = @_;
+
+	Test::YAFT::test_frame {
+		Hash::Util::lock_keys %params, qw[ code where expected ];
+
+		my $document = PPI::Document->new (\ $params{code});
+
+		my @got = HPB::PPIx::Utils::ppix_find ($document, $params{where});
+
+		is_deeply \@got, $params{expected}, $title;
+	}
+}
+
+sub behaves_like_ppix_find {
+	my ($title, %params) = @_;
+
+	Test::YAFT::test_frame {
+		Hash::Util::lock_keys %params, qw[ find document expected ];
+
+		my $document = $params{document}->$_isa (q ('PPI::Document'))
+			? $params{document}
+			: PPI::Document::->new ($params{document})
+			;
+
+		my $got = [ map qq ("$_"), ppix_find $document, $params{find} ];
+
+		Test::Deep::cmp_deeply ($got, $params{expected}, $title)
+			or do { PPI::Dumper->new ($document)->print };
+	}
+}
+
+sub check_document_integrity {
+	my ($document) = @_;
+
+	subtest q ("every document element should have parent") => sub {
+		my @queue = $document->children;
+		while (@queue) {
+			my $head = shift @queue;
+
+			my $refaddr = Scalar::Util::refaddr ($head);
+			ok qq ("should have parent - $refaddr - ${\ ref $head }")
+				=> got => defined $PPI::Singletons::_PARENT{$refaddr}
+				;
+
+			next unless it_is_node ($head);
+			push @queue, $head->children;
+		}
+	};
+}
+
 sub expect (&) {
 	expect => shift->()
-	}
+}
 
 sub expect_context_namespace {
 	my ($namespace) = @_;
 
 	state $class = test_deep_cmp (
-		isa             => 'Test::Deep::Shallow',
+		isa             => q ('Test::Deep::Shallow'),
 		_transform_got  => sub {
 			my ($self, $got) = @_;
 			scalar PPIx::Augment::Utils::context_namespace ($got);
@@ -260,7 +326,7 @@ sub expect_context_namespace {
 		},
 		diag_message    => sub {
 			my ($self, $where) = @_;
-			return "Comparing context_namespace ($where)";
+			return qq ("Comparing context_namespace ($where)");
 		},
 		renderExp       => sub {
 			my ($self) = @_;
@@ -340,7 +406,7 @@ sub expect_no_element () {
 }
 
 sub expect_nodeset {
-	return [ @_ ];
+	return \ @_;
 }
 
 sub fixture {

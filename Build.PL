@@ -62,6 +62,7 @@ my %module_build_args = (
   },
   "test_requires" => {
     "Context::Singleton" => 0,
+    "Hash::Util" => 0,
     "Path::Tiny" => 0,
     "Perl::Critic::Policy::BuiltinFunctions::ProhibitReverseSortBlock" => 0,
     "Perl::Critic::Policy::BuiltinFunctions::ProhibitStringySplit" => 0,
@@ -77,6 +78,7 @@ my %module_build_args = (
 
 my %fallback_build_requires = (
   "Context::Singleton" => 0,
+  "Hash::Util" => 0,
   "Module::Build" => "0.28",
   "Path::Tiny" => 0,
   "Perl::Critic::Policy::BuiltinFunctions::ProhibitReverseSortBlock" => 0,
