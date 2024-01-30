@@ -461,6 +461,10 @@ package PPIx::Augment::Utils {
 		return $_;
 	}
 
+	sub current_content ()              :Exported(accessor) {
+		return content;
+	}
+
 	sub document                        :Exported(accessor) {
 		return _accessor_scalar (&element, q (document));
 	}
@@ -1663,14 +1667,19 @@ L</no element> otherwise.
 Returns top element (one without parent) of L</effective element>
 if possible, L</no_element ()> otherwise.
 
-=head2 child
+=head2 previous_sibling
 
-	child INDEX
+Calls <PPI::Element>'s C<previous_sibling> method on L</effective element>
+or returns L</no element>.
 
-    child $index;
-    child $element, $index;
+=head2 previous_token
 
-Calls <PPI::Node>'s C<child> method on L</effective element>
+Calls <PPI::Element>'s C<previous_token> method on L</effective element>
+or returns L</no element>.
+
+=head2 significant
+
+Calls <PPI::Element>'s C<significant> method on L</effective element>
 or returns L</no element>.
 
 =head1 BUILDER FUNCTIONS
