@@ -1338,6 +1338,10 @@ package PPIx::Augment::Utils {
 		return _traverse_search (&_build_args_traversal, \ &parent);
 	}
 
+	sub ppix_search_previous_sibling    :Exported(traversal) {
+		return _traverse (&_build_args_traversal, \ &previous_sibling);
+	}
+
 	sub ppix_transform                  :Exported(traversal) {
 		return _traverse_transform (&_build_args_traversal, 0, 1);
 	}
@@ -2786,6 +2790,17 @@ element instead.
 
 Similar to L</ppix_search> but investigates parents of starting element
 insteads.
+
+=head2 ppix_search_previous_sibling
+
+	my @elements = ppix_search_parent $element
+		=> where  { ... condition 1 ... }
+		=> where  { ... condition 2 ... }
+		=> invoke { ... }
+		=> invoke { ... }
+		;
+
+Similar to L</ppix_search> but investigates next siblings of starting element insteads.
 
 =head2 ppix_transform
 
