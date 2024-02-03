@@ -449,12 +449,20 @@ package PPIx::Augment::Utils {
 		return _accessor_children children => &element, @_;
 	}
 
+	sub column_number                   :Exported(accessor) {
+		return _accessor_scalar (&element, q (column_number));
+	}
+
 	sub content                         :Exported(accessor) {
 		return _accessor_scalar (content => &element) // q ();
 	}
 
 	sub current ()                      :Exported(accessor) {
 		return $_;
+	}
+
+	sub document                        :Exported(accessor) {
+		return _accessor_scalar (&element, q (document));
 	}
 
 	sub element                         :Exported(accessor) {
@@ -487,6 +495,10 @@ package PPIx::Augment::Utils {
 
 	sub last_token                      :Exported(accessor) {
 		return eval { _accessor_scalar (last_token => &element) } || no_element;
+	}
+
+	sub line_number                     :Exported(accessor) {
+		return _accessor_scalar (line_number => &element) || no_element;
 	}
 
 	sub next_sibling                    :Exported(accessor) {
@@ -1427,7 +1439,8 @@ either whether they are accessible via direct method or have to be populated.
 
 All accessor functions recognize C</no element> and return corresponding value.
 
-Unless specified otherwise, all functions work with L</effective element>.
+Unless specified otherwise, all functions work with L</effective element>
+and return L</no element> when requested element doesn't exist.
 
 =head2 child
 
@@ -1460,6 +1473,8 @@ child to return.
 
 Both can be negative.
 
+=head2 column_number
+
 =head2 content
 
     content;
@@ -1470,6 +1485,11 @@ Returns C<content> of L</effective element>, empty string otherwise.
 =head2 current ()
 
 Returns L</current element>.
+
+=head2 document
+
+Returns L<PPI::Document> element L</effective element> belongs to
+or returns L</no element>.
 
 =head2 element
 
@@ -1511,6 +1531,8 @@ L<no_element> otherwise.
 
 Returns C<last_token> of L</effective element> if possible,
 L</no element> otherwise.
+
+=head2 line_number
 
 =head2 next_sibling
 
@@ -1636,6 +1658,16 @@ L</no element> otherwise.
 
 Returns top element (one without parent) of L</effective element>
 if possible, L</no_element ()> otherwise.
+
+=head2 child
+
+	child INDEX
+
+    child $index;
+    child $element, $index;
+
+Calls <PPI::Node>'s C<child> method on L</effective element>
+or returns L</no element>.
 
 =head1 BUILDER FUNCTIONS
 
