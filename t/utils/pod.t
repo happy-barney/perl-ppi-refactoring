@@ -81,6 +81,7 @@ assume_pod_sections
 		q (head2 build_token_structure ($)),
 		q (head2 build_token_whitespace ($)),
 		q (head2 build_token_word ($)),
+		q (head2 parse_tokens),
 	],
 	q (head1 CLASSIFICATION FUNCTIONS) => [
 		q (head2 exclude_all (&)),

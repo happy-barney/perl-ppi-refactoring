@@ -798,6 +798,15 @@ package PPIx::Augment::Utils {
 			@_
 	}
 
+	sub parse_tokens                    :Exported(builder) {
+		return
+			# when linked with document content is removed on document destruction
+			map  { map { $_->remove } $_->tokens }
+			map  { PPI::Document::->new (\ $_) }
+			grep { $_ }
+			@_
+	}
+
 	sub exclude_all (&)                 :Exported(classification) {
 		my $code = shift;
 		my $result = Ref::Util::is_plain_coderef ($code) ? $code->() : $code;
@@ -1825,6 +1834,13 @@ Builds instance of L<PPI::Token::Whitespace>.
 Builds instance of L<PPI::Token::Word>.
 
 =head2 build_token_regexp_literal
+
+=head2 parse_tokens
+
+    parse_tokens (qq (\n));
+    parse_tokens (q (0), q (1 == 2));
+
+Parse each argument and returns all tokens.
 
 =head1 CLASSIFICATION FUNCTIONS
 
