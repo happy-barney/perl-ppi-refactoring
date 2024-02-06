@@ -1,19 +1,26 @@
 
+* Repair::PPI
+  - `goto & foo` -> should be symbol
+  - prototype vs signature
+  - quotelike::words - should be Node
+  - where there can be interpolation - should be Node
+
+* Refactorings
+  - Upgrade::Prototype
+  - Upgrade::Signature
+  - Upgrade::To::Perl
+  - Upgrade::To::Perl::V512
+  - Upgrade::To::Perl::V512::Strict
+  - Upgrade::To::Perl::V512::Package
+  - Upgrade::To::Perl::V514
+  - Upgrade::To::Perl::V514::Package
+  - Upgrade::To::Perl::V516
+  - Downgrade::Perl
+  - LSTP
+  - Upgrade::Feature::X
+  - Downgrade::Feature::X
+
 * TODO [0/2]
-  - [-] Augmentation::Magic_Cast
-	- [-] code
-	- [-] test
-	- [-] [4/6] utils
-	  - [-] element_replace
-	  - [X] element_remove
-	  - [-] insert_before
-	  - [X] snext_sibling
-	  - [X] create_token_cast
-	  - [X] it_is_token_magic
-	- [-] [1/3] test utils
-	  - [ ] testing_augmentation
-	  - [X] arrange_document
-	  - [ ] assume_augmented
   - [ ] [0/1] Improvements
 	- [ ] insert_before
 	  - [ ] splice children directly
@@ -27,9 +34,12 @@
   - [X] Augmentation::Repair::PPI::Newline_Spaces
   - [X] Augmentation::Repair::PPI::Ternary_Operator_Colon
   - [X] Augmentation::Repair::PPI::V534_Octal_Number
+  - [ ] Augmentation::Declared::Variable
+  - [ ] Augmentation::Argument
   - [ ] Augmentation::Interpolation
   - [ ] Augmentation::Statement::Use
   - [ ] Augmentation::Variable_Argument
+  - [ ] Augmentation::Quoted (Quoted::Context, ...)
 
 * Refactorings
   - [ ] Refactoring - require-explicit-import
@@ -49,7 +59,47 @@
   - [ ] Refactoring - replace-symbol
 	- example: JSON::true => Veure::Data::json_true
 
+* Plan 2
+  - [ ] Fix::New_Octal_Numbers
+  - [ ] Fix::Magic_Cast
+  - [ ] Fix::Ternary_Operator_Colon
+  - [ ] Fix::Indent
+  - [ ] Augment::Context::Namespace
+  - [ ] Refactoring::Force_Trailing_Comma
+  - [ ] Refactoring::Eliminate_Trailing_Comma
+  - [ ] Refactoring::Eliminate_Unused_Import_Symbols
+  - [ ] Refactoring::Reorder_Functions
+  - [ ] Refactoring::Use_Signatures
+  - [ ] Refactoring::Fix::Critic::CodeLayout::RequireTrailingCommaAtNewline
+  - [ ] Refactoring::Fix::Critic::ValuesAndExpressions::ProhibitMagicNumbers
+
+
+
+* Plan
+  - [ ] test-helper [0/2]
+	- [ ] common expetations
+	- [ ] test coverage
+  - [X] Utils - exporter attributes
+  - [X] Utils - tri-state constants
+  - [X] Utils - current element, effective element
+  - [ ] Utils - classification conditions
+  - [X] Utils - where, invoke
+  - [X] Utils - ppix_find
+  - [X] Utils - ppix_find_parent
+  - [ ] Utils - ppix_find_child
+  - [ ] Utils - ppix_find_previous_sibling
+  - [ ] Utils - ppix_find_next_sibling
+  - [ ] Utils - it_is, it_is_element, it_is_node, ...
+  - [ ] Utils - its_parent, its_*_sibling
+
+* Augmentations
+  - [ ] Context::Package
+  - [ ] Node interpolated
+  - [ ] Pod elements
+
 * Custom refactorings
+
+** use explicit imports
 
 ** eliminate-cacheing-variables
 

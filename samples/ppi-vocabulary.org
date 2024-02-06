@@ -1,0 +1,348 @@
+
+* sub foo { my ($self) = @_; }
+  PPI::Statement::Sub
+    PPI::Token::Word    'sub'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'foo'
+    PPI::Token::Whitespace      ' '
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Variable
+        PPI::Token::Word        'my'
+        PPI::Token::Whitespace          ' '
+        PPI::Structure::List    ( ... )
+          PPI::Statement::Expression
+            PPI::Token::Symbol          '$self'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Operator    '='
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Magic       '@_'
+        PPI::Token::Structure   ';'
+      PPI::Token::Whitespace    ' '
+  PPI::Token::Whitespace        '\n'
+
+* sub foo { my ($self, $bar) = @_; }
+  PPI::Statement::Sub
+    PPI::Token::Word    'sub'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'foo'
+    PPI::Token::Whitespace      ' '
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Variable
+        PPI::Token::Word        'my'
+        PPI::Token::Whitespace          ' '
+        PPI::Structure::List    ( ... )
+          PPI::Statement::Expression
+            PPI::Token::Symbol          '$self'
+            PPI::Token::Operator        ','
+            PPI::Token::Whitespace      ' '
+            PPI::Token::Symbol          '$bar'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Operator    '='
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Magic       '@_'
+        PPI::Token::Structure   ';'
+      PPI::Token::Whitespace    ' '
+  PPI::Token::Whitespace        '\n'
+
+* sub bar { my $self = shift; }
+  PPI::Statement::Sub
+    PPI::Token::Word    'sub'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'bar'
+    PPI::Token::Whitespace      ' '
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Variable
+        PPI::Token::Word        'my'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Symbol      '$self'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Operator    '='
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Word        'shift'
+        PPI::Token::Structure   ';'
+      PPI::Token::Whitespace    ' '
+  PPI::Token::Whitespace        '\n'
+
+* sub bar { my $self = shift; my $bar = shift; }
+  PPI::Statement::Sub
+    PPI::Token::Word    'sub'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'bar'
+    PPI::Token::Whitespace      ' '
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Variable
+        PPI::Token::Word        'my'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Symbol      '$self'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Operator    '='
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Word        'shift'
+        PPI::Token::Structure   ';'
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Variable
+        PPI::Token::Word        'my'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Symbol      '$bar'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Operator    '='
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Word        'shift'
+        PPI::Token::Structure   ';'
+      PPI::Token::Whitespace    ' '
+  PPI::Token::Whitespace        '\n'
+
+* sub bar { my ($self, $bar) = (shift, shift); }
+  PPI::Statement::Sub
+    PPI::Token::Word    'sub'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'bar'
+    PPI::Token::Whitespace      ' '
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Variable
+        PPI::Token::Word        'my'
+        PPI::Token::Whitespace          ' '
+        PPI::Structure::List    ( ... )
+          PPI::Statement::Expression
+            PPI::Token::Symbol          '$self'
+            PPI::Token::Operator        ','
+            PPI::Token::Whitespace      ' '
+            PPI::Token::Symbol          '$bar'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Operator    '='
+        PPI::Token::Whitespace          ' '
+        PPI::Structure::List    ( ... )
+          PPI::Statement::Expression
+            PPI::Token::Word    'shift'
+            PPI::Token::Operator        ','
+            PPI::Token::Whitespace      ' '
+            PPI::Token::Word    'shift'
+        PPI::Token::Structure   ';'
+      PPI::Token::Whitespace    ' '
+  PPI::Token::Whitespace        '\n'
+
+* sub bar { return sub { shift } }
+  PPI::Statement::Sub
+    PPI::Token::Word    'sub'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'bar'
+    PPI::Token::Whitespace      ' '
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Break
+        PPI::Token::Word        'return'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Word        'sub'
+        PPI::Token::Whitespace          ' '
+        PPI::Structure::Block   { ... }
+          PPI::Token::Whitespace        ' '
+          PPI::Statement
+            PPI::Token::Word    'shift'
+          PPI::Token::Whitespace        ' '
+      PPI::Token::Whitespace    ' '
+  PPI::Token::Whitespace        '\n'
+
+
+* sub { my $params = shift; }
+  PPI::Statement
+    PPI::Token::Word    'sub'
+    PPI::Token::Whitespace      ' '
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement::Variable
+        PPI::Token::Word        'my'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Symbol      '$params'
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Operator    '='
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Word        'shift'
+        PPI::Token::Structure   ';'
+      PPI::Token::Whitespace    ' '
+* use Apache2::Request;
+  PPI::Statement::Include
+    PPI::Token::Word    'use'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'Apache2::Request'
+    PPI::Token::Structure       ';'
+
+* my $params = Apache2::Request->new($self->r)->param;
+    PPI::Token::Word    'my'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Symbol          '$params'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Operator        '='
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'Apache2::Request'
+    PPI::Token::Operator        '->'
+    PPI::Token::Word    'new'
+    PPI::Structure::List        ( ... )
+      PPI::Statement::Expression
+        PPI::Token::Symbol      '$self'
+        PPI::Token::Operator    '->'
+        PPI::Token::Word        'r'
+    PPI::Token::Operator        '->'
+    PPI::Token::Word    'param'
+    PPI::Token::Structure       ';'
+
+* ( my $location = $self->r->uri ) =~ s/(?:\/)?$//;
+    PPI::Statement
+      PPI::Token::Whitespace    '\n'
+      PPI::Token::Whitespace    '\n\t'
+      PPI::Structure::List      ( ... )
+        PPI::Token::Whitespace          ' '
+        PPI::Statement::Variable
+          PPI::Token::Word      'my'
+          PPI::Token::Whitespace        ' '
+          PPI::Token::Symbol    '$location'
+          PPI::Token::Whitespace        ' '
+          PPI::Token::Operator          '='
+          PPI::Token::Whitespace        ' '
+          PPI::Token::Symbol    '$self'
+          PPI::Token::Operator          '->'
+          PPI::Token::Word      'r'
+          PPI::Token::Operator          '->'
+          PPI::Token::Word      'uri'
+        PPI::Token::Whitespace          ' '
+      PPI::Token::Whitespace    ' '
+      PPI::Token::Operator      '=~'
+      PPI::Token::Whitespace    ' '
+      PPI::Token::Regexp::Substitute    's/(?:\/)?$//'
+      PPI::Token::Structure     ';'
+* use parent ...
+  PPI::Statement::Include
+    PPI::Token::Word    'use'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'parent'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Quote::Single   ''ReportExporter''
+    PPI::Token::Structure       ';'
+
+* $self->chainInputDataHandler(sub{ PULL_REQUEST(@_); })
+  PPI::Statement
+    PPI::Token::Symbol          '$self'
+    PPI::Token::Operator        '->'
+    PPI::Token::Word    'chainInputDataHandler'
+    PPI::Structure::List        ( ... )
+      PPI::Statement
+        PPI::Token::Word        'sub'
+        PPI::Structure::Block   { ... }
+          PPI::Token::Whitespace        ' '
+          PPI::Statement
+            PPI::Token::Word    'PULL_REQUEST'
+            PPI::Structure::List        ( ... )
+              PPI::Statement::Expression
+                PPI::Token::Magic       '@_'
+            PPI::Token::Structure       ';'
+          PPI::Token::Whitespace        ' '
+
+* shift @var
+  PPI::Statement
+    PPI::Token::Word    'shift'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Symbol          '@var'
+    PPI::Token::Structure       ';'
+
+* shift @{$var}
+  PPI::Statement
+    PPI::Token::Word    'shift'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Cast    '@'
+    PPI::Structure::Block       { ... }
+      PPI::Statement
+        PPI::Token::Symbol      '$var'
+    PPI::Token::Structure       ';'
+
+*  shift @{ $var }
+  PPI::Statement
+    PPI::Token::Word    'shift'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Cast    '@'
+    PPI::Structure::Block       { ... }
+      PPI::Token::Whitespace    ' '
+      PPI::Statement
+        PPI::Token::Symbol      '$var'
+      PPI::Token::Whitespace    ' '
+    PPI::Token::Structure       ';'
+
+* foo => shift @_
+  PPI::Statement
+    PPI::Token::Word    'foo'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Operator        '=>'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Word    'shift'
+    PPI::Token::Whitespace      ' '
+    PPI::Token::Magic   '@_'
+    PPI::Token::Operator        ','
+
+* $self->foo($self->bar, $self->baz ($self->bar))
+
+  PPI::Statement
+    PPI::Token::Symbol          '$self'
+    PPI::Token::Operator        '->'
+    PPI::Token::Word    'foo'
+    PPI::Structure::List        ( ... )
+      PPI::Statement::Expression
+        PPI::Token::Symbol      '$self'
+        PPI::Token::Operator    '->'
+        PPI::Token::Word        'bar'
+        PPI::Token::Operator    ','
+        PPI::Token::Whitespace          ' '
+        PPI::Token::Symbol      '$self'
+        PPI::Token::Operator    '->'
+        PPI::Token::Word        'baz'
+        PPI::Token::Whitespace          ' '
+        PPI::Structure::List    ( ... )
+          PPI::Statement::Expression
+            PPI::Token::Symbol          '$self'
+            PPI::Token::Operator        '->'
+            PPI::Token::Word    'bar'
+* my $project_struct = Apache::InternalContextHandler::getRestProject($self, $self->c3, $project_id);
+  PPI::Statement::Variable
+    PPI::Token::Word  	'my'
+    PPI::Token::Whitespace  	' '
+    PPI::Token::Symbol  	'$project_struct'
+    PPI::Token::Whitespace  	' '
+    PPI::Token::Operator  	'='
+    PPI::Token::Whitespace  	' '
+    PPI::Token::Word  	'Apache::InternalContextHandler::getRestProject'
+    PPI::Structure::List  	( ... )
+      PPI::Statement::Expression
+        PPI::Token::Symbol  	'$self'
+        PPI::Token::Operator  	','
+        PPI::Token::Whitespace  	' '
+        PPI::Token::Symbol  	'$self'
+        PPI::Token::Operator  	'->'
+        PPI::Token::Word  	'c3'
+        PPI::Token::Operator  	','
+        PPI::Token::Whitespace  	' '
+        PPI::Token::Symbol  	'$project_id'
+    PPI::Token::Structure  	';'
+
+* my $c3 = $self->c3;
+  PPI::Statement::Variable
+    PPI::Token::Word  	'my'
+    PPI::Token::Whitespace  	' '
+    PPI::Token::Symbol  	'$c3'
+    PPI::Token::Whitespace  	' '
+    PPI::Token::Operator  	'='
+    PPI::Token::Whitespace  	' '
+    PPI::Token::Symbol  	'$self'
+    PPI::Token::Operator  	'->'
+    PPI::Token::Word  	'c3'
+    PPI::Token::Structure  	';'
+* $arg{C3} =
+  PPI::Statement
+    PPI::Token::Symbol  	'$arg'
+    PPI::Structure::Subscript  	{ ... }
+      PPI::Statement::Expression
+        PPI::Token::Word  	'C3'
+    PPI::Token::Whitespace  	' '
+    PPI::Token::Operator  	'='
+    PPI::Token::Whitespace  	' '

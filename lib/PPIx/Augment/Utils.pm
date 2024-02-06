@@ -546,7 +546,7 @@ package PPIx::Augment::Utils {
 		my ($element) = _effective_arguments @_;
 
 		while ($element) {
-			return $element->namespace if it_is (\ [$element], PPIx::Augment::Context::Package::);
+			#return $element->namespace if it_is (\ [$element], PPIx::Augment::Context::Package::);
 			$element = $element->parent;
 		}
 
@@ -557,7 +557,7 @@ package PPIx::Augment::Utils {
 		my ($element) = _effective_arguments @_;
 
 		return ppix_find_parent $element
-			=> where { it_is $element, PPIx::Augment::Context::Package:: }
+			#=> where { it_is $element, PPIx::Augment::Context::Package:: }
 			;
 	}
 
@@ -1071,7 +1071,7 @@ package PPIx::Augment::Utils {
 	sub is_not                          :Exported(classification) {
 		my ($cond) = @_;
 
-		$cond ? ppi_false : ppi_true;
+		$cond ? ppi_exclude : ppi_include;
 	}
 
 	sub it_is                           :Exported(classification) {
@@ -1112,9 +1112,7 @@ package PPIx::Augment::Utils {
 	}
 
 	sub it_is_followed_by_empty_line    :Exported(classification) {
-		my $element = &element;
-
-		return it_is_empty_line next_sibling;
+		return it_is_empty_line &next_sibling;
 	}
 
 	sub it_is_insignificant             :Exported(classification) {
@@ -1124,7 +1122,7 @@ package PPIx::Augment::Utils {
 	sub it_is_literal                   :Exported(classification) {
 		my ($element) = _effective_arguments @_;
 
-		return ppi_false
+		return ppi_exclude
 			|| it_is ($element, PPI::Token::Number::)
 			|| it_is ($element, PPI::Token::Quote::)
 			|| it_is ($element, PPI::Token::QuoteLike::)
@@ -1135,7 +1133,7 @@ package PPIx::Augment::Utils {
 	sub it_is_method_call               :Exported(classification) {
 		my ($element, @conditions) = _effective_arguments @_;
 
-		return ppi_false
+		return ppi_include
 			unless 0
 			|| PPIx::Utils::is_method_call ($element)
 			|| it_is_token_symbol (\ [$element])
@@ -1209,7 +1207,7 @@ package PPIx::Augment::Utils {
 			last unless $previous_sibling;
 
 			if (it_is_token_new_line ($previous_sibling)) {
-				return ppi_true if it_is_token_new_line (\ [$previous_sibling->previous_sibling]);
+				return ppi_include if it_is_token_new_line (\ [$previous_sibling->previous_sibling]);
 				last;
 			}
 
@@ -1218,7 +1216,7 @@ package PPIx::Augment::Utils {
 			$element = $previous_sibling;
 		}
 
-		return ppi_false;
+		return ppi_exclude;
 	}
 
 	sub it_is_semicolon                 :Exported(classification) {
@@ -1293,14 +1291,14 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Structure::, @_;
 		my ($element, $class, $content) = _effective_arguments @_;
 
-		return ppi_false unless it_is ($element, $class);
-		return ppi_true unless $content;
+		return ppi_exclude unless it_is ($element, $class);
+		return ppi_include unless $content;
 
-		return ppi_true if $element->start  eq $content;
-		return ppi_true if $element->finish eq $content;
-		return ppi_true if $element->braces eq $content;
+		return ppi_include if $element->start  eq $content;
+		return ppi_include if $element->finish eq $content;
+		return ppi_include if $element->braces eq $content;
 
-		return ppi_false;
+		return ppi_exclude;
 	}
 
 	sub it_is_structure_block           :Exported(classification) {
@@ -1382,9 +1380,9 @@ package PPIx::Augment::Utils {
 	sub it_is_token_indentation         :Exported(classification) {
 		my ($element) = _effective_arguments @_;
 
-		return ppi_false unless it_is_token_whitespace (\ [$element]);
-		return ppi_false if it_is_token_new_line (\ [$element]);
-		return ppi_true;
+		return ppi_exclude unless it_is_token_whitespace (\ [$element]);
+		return ppi_exclude if it_is_token_new_line (\ [$element]);
+		return ppi_include;
 	}
 
 	sub it_is_token_label               :Exported(classification) {
@@ -1540,22 +1538,22 @@ package PPIx::Augment::Utils {
 	sub it_isnt_augmented_yet           :Exported(classification) {
 		my ($element) = _effective_arguments @_;
 
-		return ppi_false_dont_descent if it_is_augmented ($element);
-		return ppi_false_dont_descent if it_is_augmented ($element->parent);
+		return ppi_exclude_all if it_is_augmented ($element);
+		return ppi_exclude_all if it_is_augmented ($element->parent);
 
-		return ppi_true;
+		return ppi_include;
 	}
 
 	sub its                             :Exported(classification) {
 		my ($method, $where) = @_;
 
-		return ppi_false
+		return ppi_exclude
 			unless it_is_element
 			;
 
 		my $element = current->$method;
 
-		return ppi_false
+		return ppi_exclude
 			unless it_is_element
 			;
 
@@ -1654,7 +1652,7 @@ package PPIx::Augment::Utils {
 			unless it_is_element ($element)
 			;
 
-		for my $with_element (grep { it_is_element ($_) } reverse @what) {
+		for my $with_element (grep { it_is_element ($_) } reverse @_) {
 			# Remove element from its current parent
 			_remove_from_parent ($with_element);
 
@@ -1811,8 +1809,8 @@ package PPIx::Augment::Utils {
 		my ($code) = @_;
 
 		return $code->()
-			? ppi_false_dont_descent
-			: ppi_true
+			? ppi_exclude_all
+			: ppi_include
 			;
 	}
 
@@ -3652,12 +3650,7 @@ L</invoke (&)> block, when executed,
 		=> invoke { ... }
 		;
 
-Similar to C<ppix_find> but runs C<invoke> code for every found element.
-Current element is available via C<$_> (or C<current>)
-
-Returns number of found elements.
-
-=head2 ppix_refactor
+Otherwise returns C<ppi_exclude ()>.
 
 =head2 ppix_search
 
