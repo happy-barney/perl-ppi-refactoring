@@ -27,5 +27,55 @@
   - [X] Augmentation::Repair::PPI::Newline_Spaces
   - [X] Augmentation::Repair::PPI::Ternary_Operator_Colon
   - [X] Augmentation::Repair::PPI::V534_Octal_Number
+  - [ ] Augmentation::Interpolation
+  - [ ] Augmentation::Statement::Use
   - [ ] Augmentation::Variable_Argument
+
+* Refactorings
+  - [ ] Refactoring - require-explicit-import
+  - [ ] Refactoring - eliminate-unused-imported-symbols
+  - [ ] Refactoring - eliminate-unused-imports
+  - [ ] Refactoring - eliminate-unused-variables
+  - [ ] Refactoring - eliminate-single-use-variables
+  - [ ] Refactoring - eliminate-cached-properties
+  - [ ] Refactoring - eliminate-cached-variables
+  - [ ] Refactoring - enforce-explicit-imports
+  - [ ] Refactoring - organize imports
+  - [ ] Refactoring - organize functions
+  - [ ] Refactoring - organize pod
+  - [ ] Refactoring - pod-to-end
+  - [ ] Refactoring - signatures-attributes
+	- reposition signatures and attributes (based on destination perl version)
+  - [ ] Refactoring - replace-symbol
+	- example: JSON::true => Veure::Data::json_true
+
+* Custom refactorings
+
+** eliminate-cacheing-variables
+
+  - json_true
+  - json_false
+
+*** lib/Veure/Model/API/Chronicle/Chapters.pm
+*** lib/Veure/Model/API/Chronicle/Books.pm
+*** lib/Veure/Model/API/Email/Received.pm
+*** lib/Veure/Model/API/Email/Thread.pm
+*** lib/Veure/Model/API/Preferences.pm
+*** lib/Veure/Model/API/State/Indicators.pm
+*** t/tests/TestsFor/Veure/Controller/API/v1/Email.pm
+*** t/tests/TestsFor/Veure/Controller/API/v1/Item.pm
+
+** veure::json-bool-conditional
+
+** eliminate-unused-import
+
+  - export 'json_encode' via Veure::Util::Data
+  - JSON::MaybeXS
+
+** organize-imports
+
+  - use-qw-threshold 2
+  - sort-imports
+
+** organize functions
 
