@@ -24,21 +24,29 @@ subtest q (basic features) => sub {
 			expect_element (PPI::Token::Number:: => q (4)),
 		);
 
+	assume_ppi q (should evaluate PPI-style 'where' clause)
+		=> document => q (1;2;4)
+		=> where    => sub { $_[1]->isa (PPI::Token::Number::) }
+		=> expect   => expect_nodeset (
+			expect_element (PPI::Token::Number:: => q (1)),
+			expect_element (PPI::Token::Number:: => q (2)),
+			expect_element (PPI::Token::Number:: => q (4)),
+		);
+
+	assume_ppi q (should evaluate PPIx::Augment-style 'where' clause)
+		=> document => q (1;2;4)
+		=> where    => where { current->isa (PPI::Token::Number::) }
+		=> expect   => [
+			expect_element (PPI::Token::Number:: => q (1)),
+			expect_element (PPI::Token::Number:: => q (2)),
+			expect_element (PPI::Token::Number:: => q (4)),
+		];
+
 	assume_ppi q (should recognize 'first' clause)
 		=> document => q (1;2;4)
 		=> first    => sub { $_[1]->isa (PPI::Token::Number::) }
 		=> expect   => expect_nodeset (
 			expect_element (PPI::Token::Number:: => q (1))
-		);
-
-	assume_ppi q (should evaluate 'invoke' clause)
-		=> document => q (1;2;4)
-		=> where    => sub { $_[1]->isa (PPI::Token::Number::) }
-		=> invoke   => sub { $_[1]->set_content ($_[1]->content . q (0)) }
-		=> expect   => expect_nodeset (
-			expect_element (PPI::Token::Number:: => q (10)),
-			expect_element (PPI::Token::Number:: => q (20)),
-			expect_element (PPI::Token::Number:: => q (40)),
 		);
 };
 
