@@ -1301,6 +1301,10 @@ package PPIx::Augment::Utils {
 		return _return_list @insert;
 	}
 
+	sub remove                          :Exported(transformation) {
+		&element_remove;
+	}
+
 	sub invoke (&)                      :Exported(traversal) {
 		my ($code) = @_;
 

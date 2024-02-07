@@ -188,6 +188,7 @@ assume_pod_sections
 		q (head2 elements_wrap),
 		q (head2 insert_after),
 		q (head2 insert_before),
+		q (head2 replace),
 	],
 	q (head1 TRAVERSAL FUNCTIONS) => [
 		q (head2 invoke (&)),
