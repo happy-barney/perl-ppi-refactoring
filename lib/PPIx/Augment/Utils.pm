@@ -457,6 +457,14 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (content => &element) // q ();
 	}
 
+	sub context_namespace_element       :Exported(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		return ppix_find_parent $element
+			=> where { it_is $element, PPIx::Augment::Context::Package:: }
+			;
+	}
+
 	sub current ()                      :Exported(accessor) {
 		return $_;
 	}
@@ -1194,6 +1202,24 @@ package PPIx::Augment::Utils {
 
 	sub it_is_word_list                 :Exported(classification) {
 		return it_is &element, PPI::Token::QuoteLike::Words::, @_;
+	}
+
+	sub its                             :Exported(classification) {
+		my ($method, $where) = @_;
+
+		return ppi_false
+			unless it_is_element
+			;
+
+		my $element = current->$method;
+
+		return ppi_false
+			unless it_is_element
+			;
+
+		local $_ = $element;
+
+		$where->();
 	}
 
 	sub its_first_child (&)             :Exported(classification) {
@@ -2383,6 +2409,10 @@ Shortcut for calling L</it_is> with L<PPI::Token::HereDoc>.
 
 =head2 it_is_token_label
 
+    it_is_token_label $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Label>.
+
 =head2 it_is_token_magic
 
     it_is_token_magic $element?, @conditions?
@@ -2437,6 +2467,12 @@ Shortcut for calling L</it_is> with L<PPI::Token::Number::Octal>.
     it_is_token_number_version $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Token::Number::Version>.
+
+=head2 it_is_token_operator
+
+    it_is_token_operator $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Operator>.
 
 =head2 it_is_token_operator
 
@@ -2593,6 +2629,8 @@ Classify L</it_is_statement_include> which starts with C<use>.
 
 Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Words>.
 
+=head2 its
+
 =head2 its_first_child (&)
 
     where { its_first_child { ... } }
@@ -2616,6 +2654,8 @@ if exists.
 Similar to L</where (&)> except block is executed immediatelly with
 L</current element> set to L</parent> of L</current element>,
 if exists.
+
+=head2 its_parent (&)
 
 =head2 its_previous_sibling (&)
 
@@ -2677,17 +2717,52 @@ Alias for L</ppi_include ()>
 
 =head2 it_is
 
-    it_is q (PPI::Element);
-    it_is $maybe_element, q (PPI::Element);
-    it_is q (PPI::Element), ... conditions ...;
+    it_is $element?, $CLASS, @conditions?
 
-Basic classification, checks whether effective element is an instance of CLASS.
+    it_is (PPI::Token::, ...);
+    it_is ($element, PPI::Token::, ...);
 
-=head2 it_is_token_label
+Classify L</effective element> as an instance of C<$CLASS> matching
+optional C<@conditions>.
 
-    it_is_token_label $element?, @conditions?
+Condition types:
 
-Shortcut for calling L</it_is> with L<PPI::Token::Label>.
+=over
+
+=item undef
+
+Treated as "condition doesn't exist" (ie, returns L</ppi_include ()>).
+
+=item scalar
+
+Compares stringwise element's content with given value.
+
+=item regexp
+
+Applies regexp on element's content.
+
+=item coderef
+
+Calls it with element's content as a single argument.
+
+=item arrayref
+
+Applies every condition in array (merged using C<and>).
+
+=item hashref
+
+Hashref key is treated either as one of PPI::Augment::Utils's functions
+(if exists) or element's method (if exists).
+
+Each key-value pair is evaluated is condition applied on return value of
+function/method represented by key.
+
+    { parent => [
+        { isa => PPI::Statement::Package:: },
+        { name => qr ( ^ Test )x },
+    }
+
+=back
 
 =head2 it_is [$element], $CLASS, [@conditions]
 
@@ -3010,8 +3085,6 @@ L</where (&)> block, when executed
 =item has L</current element> populated with found element
 
 =back
-
-=head2 its_sprevious_sibling (&)
 
 =head2 ppi_false ()
 

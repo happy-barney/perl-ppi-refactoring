@@ -64,7 +64,7 @@ sub assume_ppix_augment_knows_augmentation {
 			unless $class;
 
 		it qq (PPIx::Augment should know about $class)
-			=> got    { [ PPIx::Augment::->augmentations ] }
+			=> got    { [ PPIx::Augment::->available_augmentations ] }
 			=> expect => expect_superbag ($class)
 			;
 	};
