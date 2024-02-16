@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_token_whitespace          :Exported(classification) {
+		return it_is &element, PPI::Token::Whitespace::, @_;
+	}
+
 	sub it_is_token_word                :Exported(classification) {
 		return it_is &element, PPI::Token::Word::, @_;
 	}
@@ -344,6 +348,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_token_whitespace
+
+    it_is_token_whitespace $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Whitespace>.
 
 =head2 it_is_token_word
 
