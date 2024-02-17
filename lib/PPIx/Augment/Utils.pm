@@ -973,6 +973,19 @@ package PPIx::Augment::Utils {
 		}
 	}
 
+	sub following_insignificant         :Exported(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		my @following_insignificant;
+
+		while (it_is_insignificant ($element->next_sibling)) {
+			push @following_insignificant, $element->next_sibling;
+			$element = $following_insignificant[-1];
+		}
+
+		return @following_insignificant;
+	}
+
 	sub it_is                           :Exported(classification) {
 		return _classification_conditions (
 			&element,
