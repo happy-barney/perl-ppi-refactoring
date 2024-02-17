@@ -986,6 +986,12 @@ package PPIx::Augment::Utils {
 		return @following_insignificant;
 	}
 
+	sub is_not                          :Exported(classification) {
+		my ($cond) = @_;
+
+		$cond ? ppi_false : ppi_true;
+	}
+
 	sub it_is                           :Exported(classification) {
 		return _classification_conditions (
 			&element,
