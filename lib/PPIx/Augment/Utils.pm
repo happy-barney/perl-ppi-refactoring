@@ -963,6 +963,16 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_include : ppi_exclude_all;
 	}
 
+	sub find_filename                   :Exported(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		while (1) {
+			return '' unless $element;
+			return $element->filename if $element->$_isa (PPI::Document::);
+			$element = $element->parent;
+		}
+	}
+
 	sub it_is                           :Exported(classification) {
 		return _classification_conditions (
 			&element,
