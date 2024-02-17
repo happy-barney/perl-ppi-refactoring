@@ -432,6 +432,16 @@ package PPIx::Augment::Utils {
 		return $rv;
 	}
 
+	sub find_filename                   :Exported {
+		my ($element) = _effective_arguments @_;
+
+		while (1) {
+			return q () unless $element;
+			return $element->filename if $element->$_isa (PPI::Document::);
+			$element = $element->parent;
+		}
+	}
+
 	sub move_next_insignificant         :Exported {
 		my ($from_element, $to_element) = @_;
 
