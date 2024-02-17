@@ -501,6 +501,23 @@ package PPIx::Augment::Utils {
 		return eval { _accessor_scalar (first_token => &element) } || no_element;
 	}
 
+	sub first_token                     :Exported(accessor) {
+		return _accessor_scalar (first_token => &element) || no_element;
+	}
+
+	sub following_insignificant         :Exported(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		my @following_insignificant;
+
+		while (it_is_insignificant ($element->next_sibling)) {
+			push @following_insignificant, $element->next_sibling;
+			$element = $following_insignificant[-1];
+		}
+
+		return @following_insignificant;
+	}
+
 	sub last_child                      :Exported(accessor) {
 		return _accessor_scalar_node (child => &element, -1) || no_element;
 	}
