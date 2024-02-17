@@ -485,15 +485,15 @@ package PPIx::Augment::Utils {
 
 		my $previous = $element->sprevious_sibling;
 
-		return ppi_false unless $previous;
+		return ppi_exclude unless $previous;
 
 		if ($element->content eq q (%)) {
-			return ppi_false if it_is_operator ($previous);
-			return ppi_false if it_is_token_word ($previous, qr/^(my|our|local|state)$/);
-			return ppi_true;
+			return ppi_exclude if it_is_operator ($previous);
+			return ppi_exclude if it_is_token_word ($previous, qr/^(my|our|local|state)$/);
+			return ppi_include;
 		}
 
-		return ppi_true;
+		return ppi_include;
 	}
 
 	sub operator_isnt_expected          :Exported {
