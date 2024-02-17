@@ -1299,6 +1299,27 @@ package PPIx::Augment::Utils {
 		return $node;
 	}
 
+	sub elements_wrap                   :Exported(transformation) {
+		my ($class, @elements) = @_;
+
+		my $parent   = $elements[0]->parent;
+		my $position = child_index ($elements[0]);
+
+		my $wrap = $class->new;
+		$wrap->{children} = \ @elements;
+
+		# reparent
+		$PPI::Singletons::_PARENT{Scalar::Util::refaddr $wrap} = $parent;
+
+		for my $child (@elements) {
+			$PPI::Singletons::_PARENT{Scalar::Util::refaddr $child} = $wrap;
+		}
+
+		splice @{$parent->{children}}, $position, scalar @elements, $wrap;
+
+		return $wrap;
+	}
+
 	sub insert_after                    :Exported(transformation) {
 		my $element = &element or return;
 		my @insert  = map { $_->clone } &_transformation_elements;
