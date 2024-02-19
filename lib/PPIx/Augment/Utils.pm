@@ -14,6 +14,7 @@ package PPIx::Augment::Utils {
 
 	use constant CLASS_INVOKE => q (PPIx::Augment::Utils::__::Invoke);
 	use constant CLASS_WHERE  => q (PPIx::Augment::Utils::__::Where);
+	our $REFACTOR_ENV = q (PPIX_APPLY_REFACTORING);
 
 	use PPIx::Augment::No_Element;
 
@@ -28,6 +29,7 @@ package PPIx::Augment::Utils {
 	sub ppi_exclude ();
 	sub ppi_exclude_all ();
 	sub ppi_include ();
+	sub ppix_find_parent;
 	sub where (&);
 
 	sub _accessor_children {
@@ -576,6 +578,19 @@ package PPIx::Augment::Utils {
 		return _accessor_children (schildren => &element, @_);
 	}
 
+	sub search_variable_scope           :Exported(accessor) {
+		my ($variable) = @_;
+
+		my @result;
+		my $node = $variable->parent->snext_sibling;
+		while ($node) {
+			push @result, $node;
+			$node = $node->snext_sibling;
+		}
+
+		return @result;
+	}
+
 	sub snext_sibling                   :Exported(accessor) {
 		return _accessor_scalar (snext_sibling => &element) || no_element;
 	}
@@ -610,6 +625,12 @@ package PPIx::Augment::Utils {
 
 	sub top_element                     :Exported(accessor) {
 		return _accessor_scalar (top => &element) || no_element;
+	}
+
+	sub top_element                     :Exported(accessor) {
+		my ($element) = _effective_arguments @_;
+
+		$element->top;
 	}
 
 	sub build_block                     :Exported(builder) {
@@ -839,6 +860,54 @@ package PPIx::Augment::Utils {
 			@_
 	}
 
+	sub create_statement                :Exported(builder) {
+		return element_create (PPI::Statement:: => @_);
+	}
+
+	sub create_statement_include        :Exported(builder) {
+		element_create (PPI::Statement::Include:: => @_);
+	}
+
+	sub create_structure                :Exported(builder) {
+		my ($class, $token, @content) = @_;
+
+		my $start  = create_token_structure ($token);
+		my $finish = create_token_structure ($token =~ tr/([{/)]}/r);
+
+		my $element = $class->new ($start);
+		element_add ($element, @content);
+		$element->{finish} = $finish;
+
+		return $element;
+	}
+
+	sub create_structure_block          :Exported(builder) {
+		return create_structure (PPI::Structure::Block::, q ('{'), @_);
+	}
+
+	sub create_token_semicolon          :Exported(builder) {
+		return create_token_structure (q (';'));
+	}
+
+	sub create_token_word_list          :Exported(builder) {
+		my ($content) = @_;
+		$content = q ("qw") . $content unless $content =~ m/^qw/;
+
+		my $token = PPI::Token::QuoteLike::Words->new (q ('qw'));
+		$token->set_content ($content);
+		$token->{sections} = [ { position => 2, size => length ($content) - 2 } ];
+
+		return $token;
+	}
+
+	sub element_create                  :Exported(builder) {
+		my ($class, @content) = @_;
+
+		my $element = $class->new;
+
+		element_add ($element, @content);
+	}
+
 	sub parse_tokens                    :Exported(builder) {
 		return
 			# when linked with document content is removed on document destruction
@@ -892,6 +961,30 @@ package PPIx::Augment::Utils {
 		return it_is_token_whitespace (@_, qq (\n));
 	}
 
+	sub it_is_followed_by_empty_line    :Exported(classification) {
+		my $element = &element;
+
+		return it_is_empty_line next_sibling;
+	}
+
+	sub it_is_insignificant             :Exported(classification) {
+		return it_is_element ([{ significant => sub { ! $_[0] } }], @_);
+	}
+
+	sub it_is_method_call               :Exported(classification) {
+		my ($element, @conditions) = _effective_arguments @_;
+
+		return ppi_false
+			unless 0
+			|| PPIx::Utils::is_method_call ($element)
+			|| it_is_token_symbol (\ [$element])
+			|| it_is_token_word (\ [$element])
+			|| it_is_token_cast (\ [$element], qq ('$'))
+			;
+
+		return _it_conditions ($element, @conditions);
+	}
+
 	sub it_is_node                      :Exported(classification) {
 		return it_is &element, PPI::Node::, @_;
 	}
@@ -911,6 +1004,18 @@ package PPIx::Augment::Utils {
 		return it_is_token_operator (&element, q (%), @_);
 	}
 
+	sub it_is_operator_arrow            :Exported(classification) {
+		it_is_token_operator &element, q (->), @_;
+	}
+
+	sub it_is_operator_colon            :Exported(classification) {
+		it_is_token_operator &element, q (:), @_;
+	}
+
+	sub it_is_operator_fat_arrow        :Exported(classification) {
+		it_is_token_operator &element, q (=>), @_;
+	}
+
 	sub it_is_package_declaration       :Exported(classification) {
 		my $element = &element;
 
@@ -925,6 +1030,26 @@ package PPIx::Augment::Utils {
 		return ppi_exclude unless it_is_statement_package ($element, @_);
 		return ppi_exclude unless it_is_structure_block (last_child $element);
 		return ppi_include;
+	}
+
+	sub it_is_preceeded_by_empty_line   :Exported(classification) {
+		my ($element) = _effective_arguments @_;
+
+		while ($element) {
+			my $previous_sibling = $element->previous_sibling;
+			last unless $previous_sibling;
+
+			if (it_is_token_new_line ($previous_sibling)) {
+				return ppi_true if it_is_token_new_line (\ [$previous_sibling->previous_sibling]);
+				last;
+			}
+
+			last unless it_is_insignificant (\ [$previous_sibling], qr/\s+/);
+
+			$element = $previous_sibling;
+		}
+
+		return ppi_false;
 	}
 
 	sub it_is_semicolon                 :Exported(classification) {
@@ -1075,6 +1200,14 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Token::HereDoc::, @_;
 	}
 
+	sub it_is_token_indentation         :Exported(classification) {
+		my ($element) = _effective_arguments @_;
+
+		return ppi_false unless it_is_token_whitespace (\ [$element]);
+		return ppi_false if it_is_token_new_line (\ [$element]);
+		return ppi_true;
+	}
+
 	sub it_is_token_label               :Exported(classification) {
 		return it_is &element, PPI::Token::Label::, @_;
 	}
@@ -1221,6 +1354,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Token::QuoteLike::Words::, @_;
 	}
 
+	sub it_is_use_statement             :Exported(classification) {
+		return it_is_statement_include &element, { type => q (use) }, @_;
+	}
+
 	sub its                             :Exported(classification) {
 		my ($method, $where) = @_;
 
@@ -1304,6 +1441,82 @@ package PPIx::Augment::Utils {
 		return $1;
 	}
 
+	sub element_add                     :Exported(transformation) {
+		my ($element, @content) = @_;
+
+		for (@content) {
+			next unless $_->$_isa (PPI::Element::);
+			my $add = $_;
+			if ($_->parent) {
+				$add = $_->clone;
+			}
+
+			$element->add_element ($add);
+		}
+
+		return $element;
+	}
+
+	sub element_insert_after            :Exported(transformation) {
+		my $element = shift;
+
+		return unless it_is_element ($element);
+
+		return
+			unless it_is_element ($element)
+			;
+
+		for my $with_element (grep { it_is_element ($_) } reverse @what) {
+			# Remove element from its current parent
+			_remove_from_parent ($with_element);
+
+			# skip PPI's restrictions
+			$element->__insert_after ($with_element);
+		}
+
+		return;
+	}
+
+	sub element_insert_before           :Exported(transformation) {
+		my ($element, @what) = @_;
+
+		return
+			unless it_is_element ($element)
+			;
+
+		for my $with_element (grep { it_is_element ($_) } @what) {
+			# Remove element from its current parent
+			_remove_from_parent ($with_element);
+
+			# skip PPI's restrictions
+			$element->__insert_before ($with_element);
+		}
+
+		return;
+	}
+
+	sub element_remove_statement        :Exported(transformation) {
+		my ($e) = @_;
+
+		$e->previous_sibling->remove if it_is_token_indentation (previous_sibling ($e));
+
+		if (! sprevious_sibling ($e) && it_is_followed_by_empty_line ($e)) {
+			$e->next_sibling->remove;
+		} elsif (! snext_sibling ($e) && it_is_preceeded_by_empty_line ($e)) {
+			$e->previous_sibling->remove;
+		} elsif (it_is_preceeded_by_empty_line ($e) && it_is_followed_by_empty_line ($e)) {
+			$e->previous_sibling->remove;
+		}
+
+		if (it_is_token_new_line (next_sibling ($e))) {
+			$e->next_sibling->remove;
+		} elsif (it_is_token_new_line (previous_sibling ($e))) {
+			$e->previous_sibling->remove;
+		}
+
+		$e->remove;
+	}
+
 	sub elements_remove                 :Exported(transformation) {
 		return map { $_->remove; $_ } &_transformation_elements;
 	}
@@ -1385,7 +1598,7 @@ package PPIx::Augment::Utils {
 		&element_remove;
 	}
 
-	sub dont_descend_if (&)             :Exported(tranversal) {
+	sub dont_descend_if (&)             :Exported(traversal) {
 		my ($code) = @_;
 
 		return $code->()
@@ -1398,6 +1611,38 @@ package PPIx::Augment::Utils {
 		my ($code) = @_;
 
 		return bless sub { local $_ = $_[1]; $code->(@_) }, CLASS_INVOKE;
+	}
+
+	sub ppix_process                    :Exported(traversal){
+		my ($element, @params) = @_;
+
+		my $where  = _process_where  (@params);
+		my $invoke = _process_invoke (@params);
+
+		return 0 unless $where && $invoke && $element->$_isa (PPI::Element::);
+		return scalar map { $invoke->() } ppix_find $element, $where;
+	}
+
+	sub ppix_refactor                   :Exported(traversal){
+		my ($element, @params) = @_;
+
+		my $where  = _process_where  (@params);
+		my $invoke = _process_invoke (@params);
+
+		return 0 unless $where && $invoke && $element->$_isa (PPI::Element::);
+
+		unless ($ENV{$REFACTOR_ENV}) {
+			my @found = ppix_find ($element, $where);
+			return unless @found;
+
+			for (@found) {
+				say STDERR find_filename , $_->line_number
+			}
+
+			return 1;
+		}
+
+		return ppix_transform ($element, $where, $invoke);
 	}
 
 	sub ppix_search                     :Exported(traversal) {
@@ -1533,8 +1778,7 @@ L</no element> otherwise.
 
 =head2 child_index
 
-    child_index;
-    child_index $element;
+Returns index of C<effective element> in its parent's children list.
 
 Returns index of L</effective element> in it's parent if possible,
 C<undef> otherwise.
@@ -1563,9 +1807,7 @@ Both can be negative.
 
 Returns C<content> of L</effective element>, empty string otherwise.
 
-=head2 current ()
-
-Returns L</current element>.
+=head2 current_content ()
 
 =head2 document
 
@@ -1605,6 +1847,16 @@ L<no_element> otherwise.
 Returns last child of L</effective element> if possible,
 L<no_element> otherwise.
 
+=head2 following_insignificant
+
+=head2 last_child
+
+    last_child;
+    last_child $node;
+
+Returns last child of L</effective element> if possible,
+L<no_element> otherwise.
+
 =head2 last_token
 
     last_token;
@@ -1620,8 +1872,10 @@ L</no element> otherwise.
     next_sibling;
     next_sibling $element;
 
-Returns next sibling of L</effective element> if possible,
-L</no element> otherwise.
+Returns next sibling of L</effective element> when it is an instance
+of L<PPI::Element>.
+
+Returns L</no element> otherwise.
 
 =head2 next_siblings
 
@@ -1736,13 +1990,12 @@ child to return.
 When called in scalar context, it returns corresponding arrayref
 (unlike raw L<PPI::Node> method)
 
+=head2 search_variable_scope
+
 =head2 snext_sibling
 
-    snext_sibling;
-    snext_sibling $element;
-
-Returns next significant sibling of L</effective element> if possible,
-L</no element> otherwise.
+Calls <PPI::Element>'s C<parent> method on L</effective element>
+or returns L</no element>.
 
 =head2 snext_token
 
@@ -1754,11 +2007,8 @@ L</no element> otherwise.
 
 =head2 sprevious_sibling
 
-    sprevious_sibling;
-    sprevious_sibling $element;
-
-Returns previous significant sibling of L</effective element> if possible,
-L</no element> otherwise.
+Calls <PPI::Element>'s C<sprevious_sibling> method on L</effective element>
+or returns L</no element>.
 
 =head2 sprevious_token
 
@@ -1775,6 +2025,13 @@ L</no element> otherwise.
 
 Returns top element (one without parent) of L</effective element>
 if possible, L</no_element ()> otherwise.
+
+=head2 top_element
+
+	my $top = top_element;
+	my $top = top_element $element;
+
+Finds top element of effective element.
 
 =head2 previous_sibling
 
@@ -1795,9 +2052,13 @@ or returns L</no element>.
 
 Returns L</current element>.
 
-=head2 current ()
+=head2 child INDEX
 
-Returns L</current element>.
+    child $index;
+    child $element, $index;
+
+Calls <PPI::Node>'s C<child> method on L</effective element>
+or returns L</no element>.
 
 =head2 child INDEX
 
@@ -1809,8 +2070,10 @@ or returns L</no element>.
 
 =head1 BUILDER FUNCTIONS
 
-Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
-usually taking decomposed values and merge them into corresponding element / node.
+Builder functions alone are exportable via C<:builder> tag.
+
+Helper functions hiding boring stuff of constructing new L<PPI> / L<PPIx::Augment>
+elements, usually taking decomposed values.
 
 =head2 build_block
 
@@ -2019,6 +2282,42 @@ Builds instance of L<PPI::Token::Whitespace>.
 
 Builds instance of L<PPI::Token::Word>.
 
+=head2 create_statement
+
+	create_statement @content;
+
+Creates new instance of L<PPI::Statement> and adds C<@content> as its children.
+When content element has parent, clones it.
+
+=head2 create_statement_include
+
+=head2 create_structure
+
+	create_structure $class, $start_token, @content;
+	create_structure 'PPI::Structure::Block', '{', ...;
+
+Creates new instance of C<$class> and adds C<@content> as its children.
+When content element has parent, clones it.
+
+=head2 create_structure_block
+
+	create_structure_block @content;
+
+Calls C<create_structure> with parameters required to build L<PPI::Structure::Block>
+
+When content element has parent, clones it.
+
+=head2 create_token_semicolon
+
+=head2 create_token_word_list
+
+=head2 element_create
+
+	element_create $class, @content;
+
+Creates new instance of C<$class> and add C<@content> as its children.
+When content element has parent, clones it.
+
 =head2 parse_tokens
 
     parse_tokens (qq (\n));
@@ -2027,6 +2326,58 @@ Builds instance of L<PPI::Token::Word>.
 Parse each argument and returns all tokens.
 
 =head2 build_token_regexp_literal
+
+=head2 create_token_structure ($)
+
+Builds L<PPI::Token::Structure> instance with provided content.
+
+Content must be defined and not empty.
+
+Builder doesn't validates content to actually match any structure token.
+
+=head2 create_token_operator ($)
+
+Builds L<PPI::Token::Operator> instance with provided content.
+
+Content must be defined and not empty.
+
+Builder doesn't validates content to actually match any operator.
+
+=head2 create_token_word ($)
+
+Builds L<PPI::Token::Word> instance with provided content.
+
+Content must be defined and not empty.
+
+Builder doesn't validates content to actually match a word.
+
+=head2 create_token_cast ($)
+
+Builds L<PPI::Token::Cast> instance with provided content.
+
+Content must be defined and not empty.
+
+Builder doesn't validates content to actually match any cast operator.
+
+=head2 create_token_number_octal ($)
+
+Builds L<PPI::Token::Number::Octal> instance with provided content.
+
+Content must be defined and not empty.
+
+Builder doesn't validates content to actually match octal number.
+
+=head2 create_token_new_line ()
+
+Builds L<PPI::Token::Whitespace> containing single new line.
+
+=head2 create_token_whitespace ($)
+
+Builds L<PPI::Token::Whitespace> instance with provided content.
+
+Content must be defined and not empty.
+
+Builder doesn't validates content to actually match a whitespace.
 
 =head1 CLASSIFICATION FUNCTIONS
 
@@ -2138,6 +2489,12 @@ Test that L</effective element> is a newline followed by newline.
 
 Tests whether I<effective element> is followed by L<empty line|/it_is_empty_line>.
 
+=head2 it_is_insignificant
+
+Test whether effective element is insignificant.
+
+=head2 it_is_method_call
+
 =head2 it_is_newline
 
     it_is_newline $element?
@@ -2185,6 +2542,10 @@ only package statement without package block.
 
 Shortcut for calling L</it_is_statement_include> matching
 only package statement with package block.
+
+=head2 it_is_preceeded_by_empty_line
+
+Test whether I<effective element> is preceeded by empty line
 
 =head2 it_is_semicolon
 
@@ -2433,6 +2794,8 @@ Shortcut for calling L</it_is> with L<PPI::Token::End>.
 
 Shortcut for calling L</it_is> with L<PPI::Token::HereDoc>.
 
+=head2 it_is_token_indentation
+
 =head2 it_is_token_label
 
     it_is_token_label $element?, @conditions?
@@ -2443,7 +2806,13 @@ Shortcut for calling L</it_is> with L<PPI::Token::Label>.
 
     it_is_token_magic $element?, @conditions?
 
-Shortcut for calling L</it_is> with L<PPI::Token::Magic>.
+    it_is_token_magic;
+    it_is_token_magic q ($$);
+    it_is_token_magic $element;
+    it_is_token_magic $element, q ($$);
+
+Classify L</effective element> as an instance of L<PPI::Token::Magic>
+matching optional C<@conditions>.
 
 =head2 it_is_token_number
 
@@ -2636,6 +3005,8 @@ Shortcut for calling L</it_is> with L<PPI::Token::Symbol>.
 
 Shortcut for calling L</it_is> with L<PPI::Token::Whitespace>.
 
+For C<@conditions> see L</it_is>.
+
 =head2 it_is_token_word
 
     it_is_token_word $element?, @conditions?
@@ -2654,6 +3025,8 @@ Classify L</it_is_statement_include> which starts with C<use>.
     it_is_word_list $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Words>.
+
+=head2 it_is_use_statement
 
 =head2 its
 
@@ -2790,6 +3163,47 @@ function/method represented by key.
 
 =back
 
+=head2 it_is_document
+
+Test whether I<effective element> is an instance of L<PPI::Document>.
+
+=head2 it_is_package_declaration
+
+=head2 it_is_package_definition
+
+=head2 it_is_statement
+
+Test whether I<effective element> is an instance of L<PPI::Statement>.
+
+=head2 it_is_statement_package
+
+Test whether I<effective element> is an instance of L<PPI::Statement::Package>.
+
+=head2 it_is_structure_block
+
+Test whether I<effective element> is an instance of L<PPI::Structure::Block>.
+
+=head2 it_is_token_label
+
+=head2 it_is_token_number
+
+Test whether I<effective element> is an instance of L<PPI::Token::Number>.
+
+=head2 it_is_token_whitespace
+
+    it_is_token_whitespace $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Whitespace>.
+
+=head2 it_is_word_list
+
+=head2 its_sprevious_sibling (&)
+
+When I<current element> has C<sprevious_sibling> then it evaluates given
+code with sibling as I<current_element> and returns its return value.
+
+Otherwise returns C<ppi_false ()>.
+
 =head2 it_is [$element], $CLASS, [@conditions]
 
 Every classification function accepts optional conditions.
@@ -2857,6 +3271,23 @@ Edits content of L</effective element> (must be C<PPI::Token>),
 removes what C<$regex> matches, returning removed string.
 
 Fallback return value is empty string.
+
+=head2 element_add
+
+	element_add $element, @content;
+
+Adds new children into C<$element>.
+When content element has parent, clones it.
+
+=head2 element_insert_after
+
+=head2 element_insert_before
+
+Inserts provided elements before it's first argument.
+
+Bypasses PPI's restrictions.
+
+=head2 element_remove_statement
 
 =head2 elements_remove
 
@@ -2935,9 +3366,37 @@ Before insertion it clones every new element with parent.
 
 =back
 
+=head2 element_insert_before
+
+=head2 elements_remove
+
+    elements_remove $element;
+    elements_remove [ $element1, $element2, ... ];
+
+Remove provided elements from their parents.
+
+=head2 element_remove
+
+    element_remove $element;
+    element_remove [ $element1, $element2, ... ];
+
+Removes provided element(s) from their parents.
+
+Function doesn't recognize neither L</effective element> nor L</current element>.
+
+Function returns list of removed elements.
+
+=head2 element_replace
+
+	element_replace [$e1, $e2], $new1, $new2;
+
+Replace elements (given as 1st argument) with another element(s).
+
 =head1 TRAVERSAL FUNCTIONS
 
 Helper functions to navigate through documents / elements.
+
+=head2 dont_descend_if (&)
 
 =head2 invoke (&)
 
@@ -2964,6 +3423,20 @@ L</invoke (&)> block, when executed,
 =item has L</current element> populated with found element
 
 =back
+
+=head2 ppix_process
+
+	my $number_of_processed_elements = ppix_process $document
+		=> where { ... }
+		=> invoke { ... }
+		;
+
+Similar to C<ppix_find> but runs C<invoke> code for every found element.
+Current element is available via C<$_> (or C<current>)
+
+Returns number of found elements.
+
+=head2 ppix_refactor
 
 =head2 ppix_search
 
@@ -3064,7 +3537,7 @@ current element so it will apply on replacement as well.
 Function tracks processed elements and prevents processing same
 element multiple times.
 
-Returns number of found elements.
+Returns number of processed elements.
 
 =head2 where (&)
 
@@ -3111,6 +3584,20 @@ L</where (&)> block, when executed
 =item has L</current element> populated with found element
 
 =back
+
+=head2 ppix_transform
+
+	ppix_transform $element
+		=> where { ... }
+		=> invoke { ... }
+		;
+
+Searches all children of C<$element> matching all I<where clauses> and invoking
+all I<invoke clauses> on each of them.
+
+After each I<invoke> it reevaluates whole tree again, ignoring already visited.
+
+Returns number of found elements.
 
 =head2 ppi_false ()
 
