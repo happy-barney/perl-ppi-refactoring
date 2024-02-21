@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_token_word                :Exported(classification) {
+		return it_is &element, PPI::Token::Word::, @_;
+	}
+
 	sub ppi_exclude ()                  :Exported(classification) {
 		return 0;
 	}
@@ -340,6 +344,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_token_word
+
+    it_is_token_word $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Word>.
 
 =head2 ppi_exclude ()
 
