@@ -13,6 +13,8 @@ package PPIx::Augment::Utils {
 	sub current ();
 	sub element;
 	sub it_is;
+	sub it_is_element;
+	sub it_is_node;
 	sub no_element ();
 	sub ppi_bool ($);
 	sub ppi_exclude ();
@@ -153,11 +155,281 @@ package PPIx::Augment::Utils {
 		);
 	}
 
+	sub it_is_document                  :Exported(classification) {
+		return it_is &element, PPI::Document::, @_;
+	}
+
+	sub it_is_element                   :Exported(classification) {
+		return it_is &element, PPI::Element::, @_;
+	}
+
+	sub it_is_node                      :Exported(classification) {
+		return it_is &element, PPI::Node::, @_;
+	}
+
 	sub it_is_not (&)                   :Exported(classification) {
 		my $code = shift;
 		my $result = Ref::Util::is_plain_coderef ($code) ? $code->() : $code;
 
 		return $result ? ppi_exclude : ppi_include;
+	}
+
+	sub it_is_significant               :Exported(classification) {
+		return it_is &element, PPI::Element::, { significant => undef };
+	}
+
+	sub it_is_statement                 :Exported(classification) {
+		return it_is &element, PPI::Statement::, @_;
+	}
+
+	sub it_is_statement_break           :Exported(classification) {
+		return it_is &element, PPI::Statement::Break::, @_;
+	}
+
+	sub it_is_statement_compound        :Exported(classification) {
+		return it_is &element, PPI::Statement::Compound::, @_;
+	}
+
+	sub it_is_statement_data            :Exported(classification) {
+		return it_is &element, PPI::Statement::Data::, @_;
+	}
+
+	sub it_is_statement_end             :Exported(classification) {
+		return it_is &element, PPI::Statement::End::, @_;
+	}
+
+	sub it_is_statement_expression      :Exported(classification) {
+		return it_is &element, PPI::Statement::Expression::, @_;
+	}
+
+	sub it_is_statement_given           :Exported(classification) {
+		return it_is &element, PPI::Statement::Given::, @_;
+	}
+
+	sub it_is_statement_include         :Exported(classification) {
+		return it_is &element, PPI::Statement::Include::, @_;
+	}
+
+	sub it_is_statement_null            :Exported(classification) {
+		return it_is &element, PPI::Statement::Null::, @_;
+	}
+
+	sub it_is_statement_package         :Exported(classification) {
+		return it_is &element, PPI::Statement::Package::, @_;
+	}
+
+	sub it_is_statement_scheduled       :Exported(classification) {
+		return it_is &element, PPI::Statement::Scheduled::, @_;
+	}
+
+	sub it_is_statement_sub             :Exported(classification) {
+		return it_is &element, PPI::Statement::Sub::, @_;
+	}
+
+	sub it_is_statement_variable        :Exported(classification) {
+		return it_is &element, PPI::Statement::Variable::, @_;
+	}
+
+	sub it_is_statement_when            :Exported(classification) {
+		return it_is &element, PPI::Statement::When::, @_;
+	}
+
+	sub it_is_structure_block           :Exported(classification) {
+		return it_is &element, PPI::Structure::Block::, @_;
+	}
+
+	sub it_is_structure_condition       :Exported(classification) {
+		return it_is &element, PPI::Structure::Condition::, @_;
+	}
+
+	sub it_is_structure_constructor     :Exported(classification) {
+		return it_is &element, PPI::Structure::Constructor::, @_;
+	}
+
+	sub it_is_structure_for             :Exported(classification) {
+		return it_is &element, PPI::Structure::For::, @_;
+	}
+
+	sub it_is_structure_given           :Exported(classification) {
+		return it_is &element, PPI::Structure::Given::, @_;
+	}
+
+	sub it_is_structure_list            :Exported(classification) {
+		return it_is &element, PPI::Structure::List::, @_;
+	}
+
+	sub it_is_structure_subscript       :Exported(classification) {
+		return it_is &element, PPI::Structure::Subscript::, @_;
+	}
+
+	sub it_is_structure_when            :Exported(classification) {
+		return it_is &element, PPI::Structure::When::, @_;
+	}
+
+	sub it_is_token                     :Exported(classification) {
+		return it_is &element, PPI::Token::, @_;
+	}
+
+	sub it_is_token_array_index         :Exported(classification) {
+		return it_is &element, PPI::Token::ArrayIndex::, @_;
+	}
+
+	sub it_is_token_attribute           :Exported(classification) {
+		return it_is &element, PPI::Token::Attribute::, @_;
+	}
+
+	sub it_is_token_cast                :Exported(classification) {
+		return it_is &element, PPI::Token::Cast::, @_;
+	}
+
+	sub it_is_token_comment             :Exported(classification) {
+		return it_is &element, PPI::Token::Comment::, @_;
+	}
+
+	sub it_is_token_data                :Exported(classification) {
+		return it_is &element, PPI::Token::Data::, @_;
+	}
+
+	sub it_is_token_end                 :Exported(classification) {
+		return it_is &element, PPI::Token::End::, @_;
+	}
+
+	sub it_is_token_heredoc             :Exported(classification) {
+		return it_is &element, PPI::Token::HereDoc::, @_;
+	}
+
+	sub it_is_token_label               :Exported(classification) {
+		return it_is &element, PPI::Token::Label::, @_;
+	}
+
+	sub it_is_token_magic               :Exported(classification) {
+		return it_is &element, PPI::Token::Magic::, @_;
+	}
+
+	sub it_is_token_number              :Exported(classification) {
+		return it_is &element, PPI::Token::Number::, @_;
+	}
+
+	sub it_is_token_number_binary       :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Binary::, @_;
+	}
+
+	sub it_is_token_number_exp          :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Exp::, @_;
+	}
+
+	sub it_is_token_number_float        :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Float::, @_;
+	}
+
+	sub it_is_token_number_hex          :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Hex::, @_;
+	}
+
+	sub it_is_token_number_octal        :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Octal::, @_;
+	}
+
+	sub it_is_token_number_version      :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Version::, @_;
+	}
+
+	sub it_is_token_operator            :Exported(classification) {
+		return it_is &element, PPI::Token::Operator::, @_;
+	}
+
+	sub it_is_token_pod                 :Exported(classification) {
+		return it_is &element, PPI::Token::Pod::, @_;
+	}
+
+	sub it_is_token_prototype           :Exported(classification) {
+		return it_is &element, PPI::Token::Prototype::, @_;
+	}
+
+	sub it_is_token_quote               :Exported(classification) {
+		return it_is &element, PPI::Token::Quote::, @_;
+	}
+
+	sub it_is_token_quote_double        :Exported(classification) {
+		return it_is &element, PPI::Token::Quote::Double::, @_;
+	}
+
+	sub it_is_token_quote_interpolate   :Exported(classification) {
+		return it_is &element, PPI::Token::Quote::Interpolate::, @_;
+	}
+
+	sub it_is_token_quote_literal       :Exported(classification) {
+		my $element = &element;
+
+		return ppi_exclude
+			if $element->DOES (PPI::Token::Prototype::)
+			;
+
+		return it_is $element, PPI::Token::Quote::Literal::, @_;
+	}
+
+	sub it_is_token_quote_single        :Exported(classification) {
+		return it_is &element, PPI::Token::Quote::Single::, @_;
+	}
+
+	sub it_is_token_quotelike           :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::, @_;
+	}
+
+	sub it_is_token_quotelike_backtick  :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::Backtick::, @_;
+	}
+
+	sub it_is_token_quotelike_command   :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::Command::, @_;
+	}
+
+	sub it_is_token_quotelike_readline  :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::Readline::, @_;
+	}
+
+	sub it_is_token_quotelike_regexp    :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::Regexp::, @_;
+	}
+
+	sub it_is_token_quotelike_words     :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::Words::, @_;
+	}
+
+	sub it_is_token_regexp              :Exported(classification) {
+		return it_is &element, PPI::Token::Regexp::, @_;
+	}
+
+	sub it_is_token_regexp_match        :Exported(classification) {
+		return it_is &element, PPI::Token::Regexp::Match::, @_;
+	}
+
+	sub it_is_token_regexp_substitute   :Exported(classification) {
+		return it_is &element, PPI::Token::Regexp::Substitute::, @_;
+	}
+
+	sub it_is_token_regexp_transliterate :Exported(classification) {
+		return it_is &element, PPI::Token::Regexp::Transliterate::, @_;
+	}
+
+	sub it_is_token_separator           :Exported(classification) {
+		return it_is &element, PPI::Token::Separator::, @_;
+	}
+
+	sub it_is_token_structure           :Exported(classification) {
+		return it_is &element, PPI::Token::Structure::, @_;
+	}
+
+	sub it_is_token_symbol              :Exported(classification) {
+		return it_is &element, PPI::Token::Symbol::, @_;
+	}
+
+	sub it_is_token_whitespace          :Exported(classification) {
+		return it_is &element, PPI::Token::Whitespace::, @_;
+	}
+
+	sub it_is_token_word                :Exported(classification) {
+		return it_is &element, PPI::Token::Word::, @_;
 	}
 
 	sub ppi_bool ($)                    :Exported(classification) {
@@ -381,12 +653,439 @@ Applies conditions as L</it conditions> with
 
 =back
 
+=head2 it_is_document
+
+    it_is_document $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Document>.
+
+=head2 it_is_element
+
+    it_is_element $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_node
+
+    it_is_node $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Node>.
+
 =head2 it_is_not (&)
 
     it_is_not { ... }
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+FEatu
+
+=head2 it_is_significant
+
+    it_is_significant $element?, @conditions?;
+
+Shortcut for calling L</it_is_element> with additional condition
+to check whether element is significant.
+
+=head2 it_is_statement
+
+    it_is_statement $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement>.
+
+=head2 it_is_statement_break
+
+    it_is_statement_break $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Break>.
+
+=head2 it_is_statement_compound
+
+    it_is_statement_compound $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Compound>.
+
+=head2 it_is_statement_data
+
+    it_is_statement_data $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Data>.
+
+=head2 it_is_statement_end
+
+    it_is_statement_end $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::End>.
+
+=head2 it_is_statement_expression
+
+    it_is_statement_expression $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Expression>.
+
+=head2 it_is_statement_given
+
+    it_is_statement_given $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Given>.
+
+=head2 it_is_statement_include
+
+    it_is_statement_include $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Include>.
+
+=head2 it_is_statement_null
+
+    it_is_statement_null $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Null>.
+
+=head2 it_is_statement_package
+
+    it_is_statement_package $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Package>.
+
+Matches
+
+    package Foo;
+    package Foo { ... }
+
+=head2 it_is_statement_scheduled
+
+    it_is_statement_scheduled $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Scheduled>.
+
+Matches
+
+    BEGIN { ... }
+    CHECK { ... }
+    UNITCHECK { ... }
+    INIT { ... }
+    END { ... }
+
+=head2 it_is_statement_sub
+
+    it_is_statement_sub $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Sub>.
+
+=head2 it_is_statement_variable
+
+Shortcut for calling L</it_is> with L<PPI::Statement::When>.
+
+Matches for example:
+
+    my $foo;
+    my $foo = 1;
+    our ($foo, $bar);
+    local $foo;
+    state $foo;
+
+=head2 it_is_statement_when
+
+    it_is_statement_when $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::When>.
+
+Matches
+
+    when (...) { ... }
+    default { ... }
+
+=head2 it_is_structure_block
+
+    it_is_structure_block $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::Block>.
+
+=head2 it_is_structure_condition
+
+    it_is_structure_condition $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::Condition>.
+
+=head2 it_is_structure_constructor
+
+    it_is_structure_constructor $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::Constructor>.
+
+=head2 it_is_structure_for
+
+    it_is_structure_for $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::For>.
+
+=head2 it_is_structure_given
+
+    it_is_structure_given $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::Given>.
+
+=head2 it_is_structure_list
+
+    it_is_structure_list $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::List>.
+
+=head2 it_is_structure_subscript
+
+    it_is_structure_subscript $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::Subscript>.
+
+=head2 it_is_structure_when
+
+    it_is_structure_when $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::When>.
+
+=head2 it_is_token
+
+    it_is_token $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token>.
+
+=head2 it_is_token_array_index
+
+    it_is_token_array_index $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::ArrayIndex>.
+
+=head2 it_is_token_attribute
+
+    it_is_token_attribute $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Attribute>.
+
+=head2 it_is_token_cast
+
+    it_is_token_cast $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Cast>.
+
+=head2 it_is_token_comment
+
+    it_is_token_comment $element?, @it_is_conditions?
+
+Classify L</effective element> as L<PPI::Token::Comment>.
+
+=head2 it_is_token_data
+
+    it_is_token_data $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Data>.
+
+=head2 it_is_token_end
+
+    it_is_token_end $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::End>.
+
+=head2 it_is_token_heredoc
+
+    it_is_token_heredoc $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::HereDoc>.
+
+=head2 it_is_token_label
+
+    it_is_token_label $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Label>.
+
+=head2 it_is_token_magic
+
+    it_is_token_magic $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Magic>.
+
+=head2 it_is_token_number
+
+    it_is_token_number $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number>.
+
+=head2 it_is_token_number_binary
+
+    it_is_token_number_binary $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Binary>.
+
+=head2 it_is_token_number_exp
+
+    it_is_token_number_exp $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Exp>.
+
+=head2 it_is_token_number_float
+
+    it_is_token_number_float $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Float>.
+
+=head2 it_is_token_number_hex
+
+    it_is_token_number_hex $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Hex>.
+
+=head2 it_is_token_number_octal
+
+    it_is_token_number_octal $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Octal>.
+
+=head2 it_is_token_number_version
+
+    it_is_token_number_version $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Version>.
+
+=head2 it_is_token_operator
+
+    it_is_token_operator $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Operator>.
+
+=head2 it_is_token_pod
+
+    it_is_token_pod $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Pod>.
+
+=head2 it_is_token_prototype
+
+    it_is_token_prototype $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Prototype>.
+
+=head2 it_is_token_quote
+
+    it_is_token_quote $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote>.
+
+=head2 it_is_token_quote_double
+
+    it_is_token_quote_double $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote::Double>.
+
+=head2 it_is_token_quote_interpolate
+
+    it_is_token_quote_interpolate $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote::Interpolate>.
+
+=head2 it_is_token_quote_literal
+
+    it_is_token_quote_literal $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote::Literal>,
+but also excluding L<PPI::Token::Prototype>.
+
+=head2 it_is_token_quote_single
+
+    it_is_token_quote_single $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote::Single>.
+
+=head2 it_is_token_quotelike
+
+    it_is_token_quotelike $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike>.
+
+=head2 it_is_token_quotelike_backtick
+
+    it_is_token_quotelike_regex $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Backtick>.
+
+=head2 it_is_token_quotelike_command
+
+    it_is_token_quotelike_regex $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Command>.
+
+=head2 it_is_token_quotelike_readline
+
+    it_is_token_quotelike_regex $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Readline>.
+
+=head2 it_is_token_quotelike_regexp
+
+    it_is_token_quotelike_regex $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Regexp>.
+
+=head2 it_is_token_quotelike_words
+
+    it_is_token_quotelike_words $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Words>.
+
+=head2 it_is_token_regexp
+
+=head2 it_is_token_regexp_match
+
+    it_is_token_regexp_match $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Regexp::Match>.
+
+=head2 it_is_token_regexp_substitute
+
+    it_is_token_regexp_substitute $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Regexp::Substitute>.
+
+=head2 it_is_token_regexp_transliterate
+
+    it_is_token_regexp_transliterate $element?, @it_conditions?
+
+Shortcut for
+
+    it_is $element?, PPI::Token::Regexp::Transliterate::, @it_conditions?
+
+Matches instances of L<PPI::Token::Regexp::Transliterate>
+
+    tr (...) (...);
+    y  (...) (...);
+
+=head2 it_is_token_separator
+
+    it_is_token_separator $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Separator>.
+
+=head2 it_is_token_structure
+
+    it_is_token_structure $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Structure>.
+
+=head2 it_is_token_symbol
+
+    it_is_token_symbol $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Symbol>.
+
+=head2 it_is_token_whitespace
+
+    it_is_token_whitespace $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Whitespace>.
+
+=head2 it_is_token_word
+
+    it_is_token_word $element?, @conditions?
+
+Classify L</effective element> as L<PPI::Token::Word>.
+See L</it_is> for description of C<@conditions>.
 
 =head2 ppi_bool ($)
 
