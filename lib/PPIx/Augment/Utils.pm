@@ -942,12 +942,20 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Statement::Sub::, @_;
 	}
 
+	sub it_is_statement_unknown         :Exported(classification) {
+		return it_is &element, PPI::Statement::Unknown::, @_;
+	}
+
 	sub it_is_statement_variable        :Exported(classification) {
 		return it_is &element, PPI::Statement::Variable::, @_;
 	}
 
 	sub it_is_statement_when            :Exported(classification) {
 		return it_is &element, PPI::Statement::When::, @_;
+	}
+
+	sub it_is_structure                 :Exported(classification) {
+		return it_is &element, PPI::Structure::, @_;
 	}
 
 	sub it_is_structure_block           :Exported(classification) {
@@ -1000,6 +1008,10 @@ package PPIx::Augment::Utils {
 
 	sub it_is_token_attribute           :Exported(classification) {
 		return it_is &element, PPI::Token::Attribute::, @_;
+	}
+
+	sub it_is_token_bom                 :Exported(classification) {
+		return it_is &element, PPI::Token::BOM::, @_;
 	}
 
 	sub it_is_token_cast                :Exported(classification) {
@@ -1833,14 +1845,14 @@ Builds instance of L<PPI::Token::Whitespace>.
 
 Builds instance of L<PPI::Token::Word>.
 
-=head2 build_token_regexp_literal
-
 =head2 parse_tokens
 
     parse_tokens (qq (\n));
     parse_tokens (q (0), q (1 == 2));
 
 Parse each argument and returns all tokens.
+
+=head2 build_token_regexp_literal
 
 =head1 CLASSIFICATION FUNCTIONS
 
@@ -2098,6 +2110,8 @@ Matches
 
 Shortcut for calling L</it_is> with L<PPI::Statement::Sub>.
 
+=head2 it_is_statement_unknown
+
 =head2 it_is_statement_variable
 
 Shortcut for calling L</it_is> with L<PPI::Statement::When>.
@@ -2120,6 +2134,8 @@ Matches
 
     when (...) { ... }
     default { ... }
+
+=head2 it_is_structure
 
 =head2 it_is_structure_block
 
@@ -2210,6 +2226,8 @@ Shortcut for calling L</it_is> with L<PPI::Token::ArrayIndex>.
     it_is_token_attribute $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Token::Attribute>.
+
+=head2 it_is_token_bom
 
 =head2 it_is_token_cast
 
@@ -2380,14 +2398,6 @@ Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Readline>.
     it_is_token_quotelike_regex $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Regexp>.
-
-=head2 it_is_token_quote_double
-
-=head2 it_is_token_quote_interpolate
-
-=head2 it_is_token_quote_literal
-
-=head2 it_is_token_quote_single
 
 =head2 it_is_token_quotelike_words
 
