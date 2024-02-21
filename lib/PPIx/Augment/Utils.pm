@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_token_word                :Exported(classification) {
+		return it_is &element, PPI::Token::Word::, @_;
+	}
+
 	sub ppi_bool ($)                    :Exported(classification) {
 		return $_[0] ? ppi_include : ppi_exclude;
 	}
@@ -387,6 +391,13 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_token_word
+
+    it_is_token_word $element?, @conditions?
+
+Classify L</effective element> as L<PPI::Token::Word>.
+See L</it_is> for description of C<@conditions>.
 
 =head2 ppi_bool ($)
 
