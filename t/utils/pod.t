@@ -32,6 +32,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_not (&)),
+		q (head2 it_is_token_label),
 		q (head2 it_is_token_magic),
 		q (head2 it_is_token_number),
 		q (head2 it_is_token_number_binary),
