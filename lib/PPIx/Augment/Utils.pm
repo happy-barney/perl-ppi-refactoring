@@ -129,6 +129,34 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_token_number              :Exported(classification) {
+		return it_is &element, PPI::Token::Number::, @_;
+	}
+
+	sub it_is_token_number_binary       :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Binary::, @_;
+	}
+
+	sub it_is_token_number_exp          :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Exp::, @_;
+	}
+
+	sub it_is_token_number_float        :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Float::, @_;
+	}
+
+	sub it_is_token_number_hex          :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Hex::, @_;
+	}
+
+	sub it_is_token_number_octal        :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Octal::, @_;
+	}
+
+	sub it_is_token_number_version      :Exported(classification) {
+		return it_is &element, PPI::Token::Number::Version::, @_;
+	}
+
 	sub it_is_token_operator            :Exported(classification) {
 		return it_is &element, PPI::Token::Operator::, @_;
 	}
@@ -432,6 +460,48 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_token_number
+
+    it_is_token_number $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number>.
+
+=head2 it_is_token_number_binary
+
+    it_is_token_number_binary $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Binary>.
+
+=head2 it_is_token_number_exp
+
+    it_is_token_number_exp $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Exp>.
+
+=head2 it_is_token_number_float
+
+    it_is_token_number_float $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Float>.
+
+=head2 it_is_token_number_hex
+
+    it_is_token_number_hex $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Hex>.
+
+=head2 it_is_token_number_octal
+
+    it_is_token_number_octal $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Octal>.
+
+=head2 it_is_token_number_version
+
+    it_is_token_number_version $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Number::Version>.
 
 =head2 it_is_token_operator
 
