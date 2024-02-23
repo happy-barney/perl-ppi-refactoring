@@ -3,6 +3,8 @@
 
 requires "Attribute::Handlers" => "0";
 requires "Exporter::Tiny" => "0";
+requires "MCE" => "0";
+requires "MCE::Queue" => "0";
 requires "Module::Find" => "0";
 requires "Module::Load" => "0";
 requires "PPI" => "v1.278.0";
@@ -14,10 +16,14 @@ requires "PPI::Structure::List" => "0";
 requires "PPI::Token" => "0";
 requires "PPI::Token::Number" => "0";
 requires "PPI::Token::Number::Octal" => "0";
+requires "Path::Iterator::Rule" => "0";
+requires "Path::Tiny" => "0";
 requires "Perl::Critic::Document" => "0";
+requires "PerlX::Maybe" => "0";
 requires "Ref::Util" => "0";
 requires "Safe::Isa" => "0";
 requires "Scalar::Util" => "0";
+requires "Time::HiRes" => "0";
 requires "constant" => "0";
 requires "mro" => "0";
 requires "namespace::clean" => "0";
