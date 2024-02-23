@@ -14,6 +14,7 @@ package PPIx::Augment::Utils {
 	sub element;
 	sub it_is;
 	sub it_is_element;
+	sub it_is_node;
 	sub no_element ();
 	sub ppi_exclude ();
 	sub ppi_exclude_all ();
@@ -127,6 +128,10 @@ package PPIx::Augment::Utils {
 
 	sub it_is_element                   :Exported(classification) {
 		return it_is &element, PPI::Element::, @_;
+	}
+
+	sub it_is_node                      :Exported(classification) {
+		return it_is &element, PPI::Node::, @_;
 	}
 
 	sub it_is_significant               :Exported(classification) {
@@ -592,6 +597,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_node
+
+    it_is_node $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Node>.
 
 =head2 it_is_significant
 
