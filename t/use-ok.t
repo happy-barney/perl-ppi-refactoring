@@ -12,6 +12,7 @@ use_ok q (PPIx::Augment::Augmentation::Repair::PPI::Magic_Cast);
 use_ok q (PPIx::Augment::Augmentation::Repair::PPI::Newline_Spaces);
 use_ok q (PPIx::Augment::Augmentation::Repair::PPI::Ternary_Operator_Colon);
 use_ok q (PPIx::Augment::Augmentation::Repair::PPI::V534_Octal_Number);
+use_ok q (PPIx::Augment::Context::Package);
 use_ok q (PPIx::Augment::Document);
 use_ok q (PPIx::Augment::Element);
 use_ok q (PPIx::Augment::No_Element);
