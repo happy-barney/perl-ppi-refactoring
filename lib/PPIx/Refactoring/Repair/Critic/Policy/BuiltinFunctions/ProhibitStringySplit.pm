@@ -15,7 +15,6 @@ package PPIx::Refactoring::Repair::Critic::Policy::BuiltinFunctions::ProhibitStr
 		my ($self) = @_;
 
 		invoke {
-			::diag (q (split: ) . current);
 			its_snext_sibling {
 				if (it_is_structure_list) {
 					$_ = current->child (0)->first_element;
