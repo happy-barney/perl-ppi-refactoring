@@ -357,6 +357,12 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_operator ($)        :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Operator:: => sub { exists $PPI::Singletons::OPERATOR{$_} } },
+			@_
+	}
+
 	sub build_token_prototype ($)       :Exported(builder) {
 		return _build_token_quoted (
 			PPI::Token::Prototype::,
@@ -1064,6 +1070,12 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_operator ($)
+
+    build_token_operator q (->);
+
+Builds instance of L<PPI::Token::Operator>.
 
 =head2 build_token_prototype ($)
 
