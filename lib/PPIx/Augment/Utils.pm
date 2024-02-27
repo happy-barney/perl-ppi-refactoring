@@ -357,6 +357,12 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_number_decimal ($)  :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Number:: => qr (^ [-]? (?= [0-9] ) (?! 0 [_]* [0-9]) [0-9_]+ $)x },
+			@_
+	}
+
 	sub build_token_number_float ($)    :Exported(builder) {
 		return _build_token
 			{ PPI::Token::Number::Exp::   => qr (^ [-]? (?= [.]? [0-9] ) [0-9]* [.] [0-9]* [eE] [-+] [0-9]+ $)x },
@@ -1095,6 +1101,13 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_number_decimal ($)
+
+    build_token_number_decimal q (0);
+    build_token_number_decimal q (-1);
+
+Builds instance of L<PPI::Token::Number> (represents decimal numbers).
 
 =head2 build_token_number_float ($)
 
