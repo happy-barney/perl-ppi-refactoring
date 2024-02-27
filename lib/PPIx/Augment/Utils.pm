@@ -357,6 +357,13 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_cast ($)            :Exported(builder) {
+		state $cast_operators = [ split qr ( ), q (% @ $ $# %* @* $* $#*) ];
+		return _build_token
+			{ PPI::Token::Cast:: , sub { scalar grep { $_[1] eq $_ } @$cast_operators } },
+			@_
+	}
+
 	sub build_token_comment ($)         :Exported(builder) {
 		return _build_token
 			{ PPI::Token::Comment::, qr (^#) },
@@ -1117,6 +1124,13 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_cast ($)
+
+    build_token_cast q ($);
+    build_token_cast q (@);
+
+Builds instance of L<PPI::Token::Cast>.
 
 =head2 build_token_comment ($)
 
