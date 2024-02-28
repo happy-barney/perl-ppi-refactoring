@@ -7,9 +7,10 @@ use Test::Warnings qw (:no_end_test had_no_warnings);
 
 use_ok q (PPIx::Augment);
 use_ok q (PPIx::Augment::Augmentation);
+use_ok q (PPIx::Augment::Augmentation::Repair::PPI::Comment);
 use_ok q (PPIx::Augment::Augmentation::Repair::PPI::Magic_Cast);
 use_ok q (PPIx::Augment::Augmentation::Repair::PPI::Newline_Spaces);
-use_ok q (PPIx::Augment::Augmentation::Repair::PPI::Comment);
+use_ok q (PPIx::Augment::Augmentation::Repair::PPI::V534_Octal_Number);
 use_ok q (PPIx::Augment::Document);
 use_ok q (PPIx::Augment::Element);
 use_ok q (PPIx::Augment::No_Element);
