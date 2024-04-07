@@ -32,6 +32,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_not (&)),
+		q (head2 it_is_token_symbol),
 		q (head2 it_is_token_whitespace),
 		q (head2 it_is_token_word),
 		q (head2 ppi_bool ($)),
