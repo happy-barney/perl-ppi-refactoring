@@ -608,6 +608,11 @@ package PPIx::Augment::Utils {
 		return _build_element (PPI::Statement::Include::, @_);
 	}
 
+	sub build_token ($)                 :Exported(builder) {
+		my $document = PPI::Document->new (\ $_[0]);
+		return $document->first_element->first_element->clone;
+	}
+
 	sub build_token_cast ($)            :Exported(builder) {
 		state $cast_operators = [ split qr ( ), q (% @ $ $# %* @* $* $#*) ];
 		return _build_token
@@ -1651,6 +1656,8 @@ Builds token representing semicolon.
 
 =head2 build_statement_include
 
+=head2 build_token ($)
+
 =head2 build_token_cast ($)
 
     build_token_cast q ($);
@@ -1816,6 +1823,8 @@ Builds instance of L<PPI::Token::Whitespace>.
     build_token_word q (foo);
 
 Builds instance of L<PPI::Token::Word>.
+
+=head2 build_token_regexp_literal
 
 =head1 CLASSIFICATION FUNCTIONS
 
@@ -2355,6 +2364,14 @@ Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Readline>.
     it_is_token_quotelike_regex $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Regexp>.
+
+=head2 it_is_token_quote_double
+
+=head2 it_is_token_quote_interpolate
+
+=head2 it_is_token_quote_literal
+
+=head2 it_is_token_quote_single
 
 =head2 it_is_token_quotelike_words
 
