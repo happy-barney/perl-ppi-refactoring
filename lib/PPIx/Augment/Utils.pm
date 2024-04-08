@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_statement_variable        :Exported(classification) {
+		return it_is &element, PPI::Statement::Variable::, @_;
+	}
+
 	sub it_is_statement_when            :Exported(classification) {
 		return it_is &element, PPI::Statement::When::, @_;
 	}
@@ -589,6 +593,18 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_statement_variable
+
+Shortcut for calling L</it_is> with L<PPI::Statement::When>.
+
+Matches for example:
+
+    my $foo;
+    my $foo = 1;
+    our ($foo, $bar);
+    local $foo;
+    state $foo;
 
 =head2 it_is_statement_when
 
