@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_statement_when            :Exported(classification) {
+		return it_is &element, PPI::Statement::When::, @_;
+	}
+
 	sub it_is_structure_block           :Exported(classification) {
 		return it_is &element, PPI::Structure::Block::, @_;
 	}
@@ -532,6 +536,17 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_statement_when
+
+    it_is_statement_when $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::When>.
+
+Matches
+
+    when (...) { ... }
+    default { ... }
 
 =head2 it_is_structure_block
 
