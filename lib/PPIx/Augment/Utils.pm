@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_statement_scheduled       :Exported(classification) {
+		return it_is &element, PPI::Statement::Scheduled::, @_;
+	}
+
 	sub it_is_statement_sub             :Exported(classification) {
 		return it_is &element, PPI::Statement::Sub::, @_;
 	}
@@ -544,6 +548,20 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_statement_scheduled
+
+    it_is_statement_scheduled $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Scheduled>.
+
+Matches
+
+    BEGIN { ... }
+    CHECK { ... }
+    UNITCHECK { ... }
+    INIT { ... }
+    END { ... }
 
 =head2 it_is_statement_sub
 
