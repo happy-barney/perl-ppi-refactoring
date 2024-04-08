@@ -32,6 +32,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_not (&)),
+		q (head2 it_is_statement_sub),
 		q (head2 it_is_statement_variable),
 		q (head2 it_is_statement_when),
 		q (head2 it_is_structure_block),
