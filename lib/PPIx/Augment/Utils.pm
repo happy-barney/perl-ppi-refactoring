@@ -12,6 +12,7 @@ package PPIx::Augment::Utils {
 
 	sub current ();
 	sub element;
+	sub it_is;
 	sub no_element ();
 	sub ppi_exclude ();
 	sub ppi_exclude_all ();
@@ -113,6 +114,14 @@ package PPIx::Augment::Utils {
 		my ($code) = @_;
 
 		return $code->() || ppi_exclude_all;
+	}
+
+	sub it_is                           :Exported(classification) {
+		return _classification_conditions (
+			&element,
+			{ isa => shift },
+			@_
+		);
 	}
 
 	sub ppi_exclude ()                  :Exported(classification) {
@@ -271,6 +280,55 @@ When you need L</ppi_exclude_all ()> use one of patterns:
 
 Executes provided code as classification but converts L</ppi_exclude ()>
 to L</ppi_exclude_all ()>.
+
+=head2 it_is
+
+    it_is $element?, $CLASS, @conditions?
+
+    it_is (PPI::Token::, ...);
+    it_is ($element, PPI::Token::, ...);
+
+Classify L</effective element> as an instance of C<$CLASS> matching
+optional C<@conditions>.
+
+Condition types:
+
+=over
+
+=item undef
+
+Treated as "condition doesn't exist" (ie, returns L</ppi_include ()>).
+
+=item scalar
+
+Compares stringwise element's content with given value.
+
+=item regexp
+
+Applies regexp on element's content.
+
+=item coderef
+
+Calls it with element's content as a single argument.
+
+=item arrayref
+
+Applies every condition in array (merged using C<and>).
+
+=item hashref
+
+Hashref key is treated either as one of PPI::Augment::Utils's functions
+(if exists) or element's method (if exists).
+
+Each key-value pair is evaluated is condition applied on return value of
+function/method represented by key.
+
+    { parent => [
+        { isa => PPI::Statement::Package:: },
+        { name => qr ( ^ Test )x },
+    }
+
+=back
 
 =head2 ppi_exclude ()
 
