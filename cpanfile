@@ -3,6 +3,7 @@
 
 requires "Attribute::Handlers" => "0";
 requires "Exporter::Tiny" => "0";
+requires "PPI" => "v1.278.0";
 requires "Ref::Util" => "0";
 requires "parent" => "0";
 requires "perl" => "5.014";
@@ -16,7 +17,6 @@ on 'build' => sub {
 on 'test' => sub {
   requires "Carp::Always" => "0";
   requires "Context::Singleton" => "0";
-  requires "PPI" => "v1.277.0";
   requires "Path::Tiny" => "0";
   requires "Safe::Isa" => "0";
   requires "Scalar::Util" => "0";
