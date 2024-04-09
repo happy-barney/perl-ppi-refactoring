@@ -26,7 +26,24 @@ sub ppi_document;
 sub ppi_dump;
 sub tests_root;
 
+my $SINGLETON_CLASSIFICATION = q (arrange-ppixa-classification);
 my $SINGLETON_DOCUMENT       = q (arrange-ppixa-document);
+
+sub _assume_ppi_build_classification {
+	my (%args) = @_;
+
+	my ($classification, @args) = _build_argument_function (
+		$args{caller} // caller,
+		$args{classification},
+		$SINGLETON_CLASSIFICATION,
+	);
+
+	return
+		unless $classification
+		;
+
+	return sub { $classification->(@_, @args, @{ $args{conditions} // $args{with} // [] }) };
+}
 
 sub _assume_ppi_build_found {
 	my (%args) = @_;
@@ -74,13 +91,17 @@ sub _assume_ppi_build_where {
 		return sub { state $i = 0; $where_first->(@_) && ($i++ > 0 ? undef : 1) };
 	}
 
-	return $args{where};
+	return $args{where} // do {
+		if (my $classification = _assume_ppi_build_classification (%args)) {
+			return sub { local $_ = $_[1]; $classification->() };
+		}
+	};
 }
 
 sub _build_argument_function {
-	my ($caller, $value, $singleton) = @_;
+	my ($caller, $function, $singleton) = @_;
 
-	my $function //= deduce_undef ($singleton) // return;
+	$function //= deduce_undef ($singleton) // return;
 
 	my @args;
 	($function, @args) = @$function
@@ -250,8 +271,21 @@ sub ppi_dump {
 		;
 }
 
+sub testing_classification (&) {
+	proclaim $SINGLETON_CLASSIFICATION => shift;
+}
+
 sub tests_root {
 	return Path::Tiny::->new (__FILE__)->parent;
+}
+
+sub where (&) {
+	my ($code) = @_;
+
+	return sub {
+		local $_ = $_[1];
+		&$code;
+	};
 }
 
 1;
