@@ -13,6 +13,9 @@ package PPIx::Augment::Utils {
 	sub current ();
 	sub element;
 	sub no_element ();
+	sub ppi_exclude ();
+	sub ppi_exclude_all ();
+	sub ppi_include ();
 
 	sub current ()                      :Exported(accessor) {
 		return $_;
@@ -29,6 +32,36 @@ package PPIx::Augment::Utils {
 
 	sub no_element ()                   :Exported(accessor) {
 		return PPIx::Augment::No_Element::->new;
+	}
+
+	sub exclude_all (&)                 :Exported(classification) {
+		my ($code) = @_;
+
+		return $code->() || ppi_exclude_all;
+	}
+
+	sub ppi_exclude ()                  :Exported(classification) {
+		return 0;
+	}
+
+	sub ppi_exclude_all ()              :Exported(classification) {
+		return undef;
+	}
+
+	sub ppi_include ()                  :Exported(classification) {
+		return 1;
+	}
+
+	sub ppix_exclude ()                 :Exported(classification) {
+		goto & ppi_exclude;
+	}
+
+	sub ppix_exclude_all ()             :Exported(classification) {
+		goto & ppi_exclude_all;
+	}
+
+	sub ppix_include ()                 :Exported(classification) {
+		goto & ppi_include;
 	}
 
 	1;
@@ -151,6 +184,47 @@ usually taking decomposed values and merge them into corresponding element / nod
 Helper functions to identify instance of L<PPI::Element>.
 
 Unless specified otherwise, all functions work with L</effective element>.
+
+Classification functions do not return L</ppi_exclude_all>
+unless specified otherwise.
+When you need L</ppi_exclude_all ()> use one of patterns:
+
+    return classification || ppi_exclude_all;
+    return exclude_all { classification };
+
+=head2 exclude_all (&)
+
+Executes provided code as classification but converts L</ppi_exclude ()>
+to L</ppi_exclude_all ()>.
+
+=head2 ppi_exclude ()
+
+Handy named constant representing value L<PPI> considers as
+I<do not include this element but continue with children>.
+
+Evaluates as boolean false.
+
+=head2 ppi_exclude_all ()
+
+Handy named constant representing value L<PPI> considers as
+I<do not include this element and do not continue with children>.
+
+=head2 ppi_include ()
+
+Handy named constant representing value L<PPI> considers as
+L<include this element and continue search with children>.
+
+=head2 ppix_exclude ()
+
+Alias for L</ppi_exclude ()>
+
+=head2 ppix_exclude_all ()
+
+Alias for L</ppi_exclude_all ()>
+
+=head2 ppix_include ()
+
+Alias for L</ppi_include ()>
 
 =head1 TRANSFORMATION FUNCTIONS
 
