@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_statement_data            :Exported(classification) {
+		return it_is &element, PPI::Statement::Data::, @_;
+	}
+
 	sub it_is_statement_end             :Exported(classification) {
 		return it_is &element, PPI::Statement::End::, @_;
 	}
@@ -626,6 +630,12 @@ Applies conditions as L</it conditions> with
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
 FEatu
+
+=head2 it_is_statement_data
+
+    it_is_statement_data $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Data>.
 
 =head2 it_is_statement_end
 
