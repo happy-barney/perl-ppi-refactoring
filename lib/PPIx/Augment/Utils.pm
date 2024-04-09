@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_statement_data            :Exported(classification) {
+		return it_is &element, PPI::Statement::Data::, @_;
+	}
+
 	sub it_is_statement_end             :Exported(classification) {
 		return it_is &element, PPI::Statement::End::, @_;
 	}
@@ -572,6 +576,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_statement_data
+
+    it_is_statement_data $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Data>.
 
 =head2 it_is_statement_end
 
