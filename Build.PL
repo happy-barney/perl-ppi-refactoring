@@ -27,16 +27,34 @@ my %module_build_args = (
     "warnings" => 0
   },
   "test_requires" => {
+    "Carp::Always" => 0,
+    "Context::Singleton" => 0,
+    "PPI" => "v1.277.0",
+    "Path::Tiny" => 0,
+    "Ref::Util" => 0,
+    "Safe::Isa" => 0,
+    "Scalar::Util" => 0,
     "Test::More" => 0,
-    "Test::Warnings" => 0
+    "Test::Warnings" => 0,
+    "Test::YAFT" => 0,
+    "require::relative" => 0
   }
 );
 
 
 my %fallback_build_requires = (
+  "Carp::Always" => 0,
+  "Context::Singleton" => 0,
   "Module::Build" => "0.28",
+  "PPI" => "v1.277.0",
+  "Path::Tiny" => 0,
+  "Ref::Util" => 0,
+  "Safe::Isa" => 0,
+  "Scalar::Util" => 0,
   "Test::More" => 0,
-  "Test::Warnings" => 0
+  "Test::Warnings" => 0,
+  "Test::YAFT" => 0,
+  "require::relative" => 0
 );
 
 
