@@ -18,6 +18,101 @@ package PPIx::Augment::Utils {
 	sub ppi_exclude_all ();
 	sub ppi_include ();
 
+	sub _classification_condition {
+		my ($context, $value, @conditions) = @_;
+
+		while (@conditions) {
+			my $condition = shift @conditions;
+
+			if (Ref::Util::is_plain_arrayref ($condition)) {
+				push @conditions, @$condition;
+				next;
+			}
+
+			local @_ = ($context, $value, $condition);
+			return ppi_exclude
+				unless undef
+				// &_classify_using_accessor
+				// &_classify_using_content_compare
+				// &_classify_using_content_match
+				// &_classify_using_where
+				;
+		}
+
+		return ppi_include;
+	}
+
+	sub _classification_conditions {
+		my ($element, @conditions) = @_;
+
+		return ppi_exclude
+			unless $element
+			;
+
+		return _classification_condition (undef, $element, @conditions);
+	}
+
+	sub _classify_using_accessor {
+		my ($context, $value, $condition) = @_;
+
+		return
+			unless Ref::Util::is_plain_hashref ($condition)
+			;
+
+		while (my ($method, $condition) = each %$condition) {
+			return ppi_bool ($value->isa ($condition))
+				if $method eq q (isa)
+				;
+
+			my $accessor = undef
+				// __PACKAGE__->can ($method)
+				// $value->can ($method)
+				// return ppi_exclude
+				;
+
+			return ppi_exclude
+				unless _classification_condition ($value, $accessor->($value), $condition)
+				;
+		}
+
+		return ppi_include;
+	}
+
+	sub _classify_using_content_compare {
+		my ($context, $value, $condition) = @_;
+
+		return
+			if ref $condition
+			;
+
+		return !! $value
+			unless defined $condition
+			;
+
+		return $value eq $condition;
+	}
+
+	sub _classify_using_content_match {
+		my ($context, $value, $condition) = @_;
+
+		return
+			unless Ref::Util::is_regexpref ($condition)
+			;
+
+		return !! scalar $value =~ $condition;
+	}
+
+	sub _classify_using_where {
+		my ($context, $value, $condition) = @_;
+
+		return
+			unless Ref::Util::is_plain_coderef ($condition)
+			;
+
+		local $_ = $value;
+		return !! $condition->($context, $value);
+	}
+
 	sub current ()                      :Exported(accessor) {
 		return $_;
 	}
