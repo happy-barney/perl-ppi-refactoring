@@ -32,6 +32,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_not (&)),
+		q (head2 it_is_statement),
 		q (head2 it_is_statement_break),
 		q (head2 it_is_statement_compound),
 		q (head2 it_is_statement_data),
