@@ -1,0 +1,78 @@
+
+use v5.14;
+use warnings;
+
+use Path::Tiny qw ();
+
+use Test::Load::Helper;
+
+note <<'';
+	Poor man's protection against rebase errors
+
+sub assume_pod_sections;
+
+assume_pod_sections
+	distribution_root->child (q (lib/PPIx/Augment/Utils.pm)),
+	q (encoding utf-8),
+	q (head1 NAME),
+	q (head1 DESCRIPTION),
+	q (head1 GLOSSARY) => [
+		q (item current element),
+		q (item effective element),
+		q (item no element),
+	],
+	q (head1 ACCESSOR FUNCTIONS) => [
+	],
+	q (head1 BUILDER FUNCTIONS) => [
+	],
+	q (head1 CLASSIFICATION FUNCTIONS) => [
+	],
+	q (head1 TRANSFORMATION FUNCTIONS) => [
+	],
+	q (head1 TRAVERSAL FUNCTIONS) => [
+	],
+	q (head1 AUTHOR),
+	q (head1 COPYRIGHT AND LICENCE),
+	;
+
+done_testing;
+
+sub assume_pod_sections {
+	my $file = shift;
+	my @sections = map { Ref::Util::is_plain_arrayref ($_) ? sort { $a cmp $b } @$_ : $_ } @_;
+
+	my %mandatory_command = map +($_ => 1), qw (
+		encoding
+		head1
+		head2
+	);
+
+	for my $line (Path::Tiny::->new ($file)->lines) {
+		next
+			unless $line =~ m (^ = (?<command>\w+) \s* (?<section>.+) $)x
+			;
+
+		my ($command, $section) = ($+{command}, $+{section});
+		if (@sections && ($sections[0] eq $section || $sections[0] eq qq ($command $section))) {
+			pass qq (section $sections[0] should exist in given order);
+			shift @sections;
+			next;
+		}
+
+		next
+			unless exists $mandatory_command{$command}
+			;
+
+		return fail qq (Section '=$command $section' isn't expected but exists)
+			=> diag => sub { @sections ? qq (head expectation: $sections[0]) : qq (at the end of expectations) };
+	}
+
+	if (@sections) {
+		fail qq (Sections should exists in given order)
+			=> diag => sub { map qq ( - $_\n), @sections }
+			;
+	}
+}
+
+1;
+
