@@ -6,6 +6,37 @@ package PPIx::Augment::Utils {
 	use parent q (PPIx::Augment::Utils::Exporter);
 
 	use PPI v1.278;
+	use Scalar::Util qw ();
+
+	use PPIx::Augment::No_Element;
+
+	sub current ();
+	sub element;
+	sub no_element ();
+
+	sub current ()                      :Exported(accessor) {
+		return $_;
+	}
+
+	sub element                         :Exported(accessor) {
+		return current
+			unless Scalar::Util::blessed ($_[0])
+			;
+
+		return shift
+			if $_[0]->isa (PPI::Element::)
+			;
+
+		return shift
+			if $_[0]->isa (PPIx::Augment::No_Element::)
+			;
+
+		return current;
+	}
+
+	sub no_element ()                   :Exported(accessor) {
+		return PPIx::Augment::No_Element::->new;
+	}
 
 	1;
 }
@@ -79,7 +110,15 @@ L</current element> otherwise.
 
 False value return by element accessor when there is no such element.
 
-Value is compatible with L<PPI> - empty string.
+Value is instance of class which
+
+=over
+
+=item evaluates as false
+
+=item mimics PPI elements returning safe false values
+
+=back
 
 =back
 
@@ -91,6 +130,23 @@ either whether they are accessible via direct method or have to be populated.
 All accessor functions recognize C</no element> and return corresponding value.
 
 Unless specified otherwise, all functions work with L</effective element>.
+
+=head2 current ()
+
+Returns L</current element>.
+
+=head2 element
+
+Returns L</effective element>.
+
+Assumed usage eg in classification function:
+
+    # Using this syntax so shift will actually modify our arguments
+    my $element = &element;
+
+=head2 no_element ()
+
+Returns value representing L<PPI> meaning "there is no element".
 
 =head1 BUILDER FUNCTIONS
 
