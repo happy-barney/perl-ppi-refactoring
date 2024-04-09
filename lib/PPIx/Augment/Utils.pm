@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_statement_package         :Exported(classification) {
+		return it_is &element, PPI::Statement::Package::, @_;
+	}
+
 	sub it_is_statement_scheduled       :Exported(classification) {
 		return it_is &element, PPI::Statement::Scheduled::, @_;
 	}
@@ -601,6 +605,17 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_statement_package
+
+    it_is_statement_package $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Statement::Package>.
+
+Matches
+
+    package Foo;
+    package Foo { ... }
 
 =head2 it_is_statement_scheduled
 
