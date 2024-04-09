@@ -29,6 +29,15 @@ assume_pod_sections
 	q (head1 BUILDER FUNCTIONS) => [
 	],
 	q (head1 CLASSIFICATION FUNCTIONS) => [
+		q (head2 exclude_all (&)),
+		q (head2 it_is_not (&)),
+		q (head2 ppi_bool ($)),
+		q (head2 ppi_exclude ()),
+		q (head2 ppi_exclude_all ()),
+		q (head2 ppi_include ()),
+		q (head2 ppix_exclude ()),
+		q (head2 ppix_exclude_all ()),
+		q (head2 ppix_include ()),
 	],
 	q (head1 TRANSFORMATION FUNCTIONS) => [
 	],
