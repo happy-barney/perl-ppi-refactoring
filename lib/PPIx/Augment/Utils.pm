@@ -17,6 +17,81 @@ package PPIx::Augment::Utils {
 	sub ppi_exclude_all ();
 	sub ppi_include ();
 
+	sub _classification_condition {
+		my ($element, $method, $condition) = @_;
+
+		return ppi_include
+			unless defined $condition
+			;
+
+		return $element->isa ($condition)
+			if $method eq q (isa)
+			;
+
+		$method = __PACKAGE__->can ($method)
+			// $element->can ($method)
+			// return ppi_exclude
+			;
+
+		my $value = $element->$method;
+
+		return _classification_conditions ($value, $condition)
+			if Ref::Util::is_plain_hashref ($condition)
+			;
+
+		return _compare_value ($value, $condition);
+	}
+
+	sub _classification_conditions {
+		my ($element, @conditions) = @_;
+
+		return ppi_exclude
+			unless $element
+			;
+
+		while (my $condition = shift @conditions) {
+			$condition = { content => $condition }
+				unless Ref::Util::is_plain_hashref ($condition)
+				;
+
+			unshift @conditions, map +{ $_ => $condition->{$_ } }, keys %$condition
+				and next
+				if keys %$condition > 1
+				;
+
+			my ($method, $method_condition) = %$condition;
+
+			unshift @conditions, map +{ $method => $_ }, @$method_condition
+				and next
+				if Ref::Util::is_plain_arrayref ($method_condition)
+				;
+
+			return ppi_exclude
+				unless _classification_condition ($element, $method, $method_condition)
+				;
+		}
+
+		return ppi_include;
+	}
+
+	sub _compare_value {
+		my ($value, $condition) = @_;
+
+		return 1
+			unless defined $condition
+			;
+
+		return scalar $value =~ $condition
+			if Ref::Util::is_regexpref ($condition)
+			;
+
+		return $condition->($value)
+			if Ref::Util::is_coderef ($condition)
+			;
+
+		return $value eq $condition;
+	}
+
 	sub current ()                      :Exported(accessor) {
 		return $_;
 	}
