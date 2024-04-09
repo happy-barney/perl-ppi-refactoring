@@ -14,6 +14,7 @@ use Scalar::Util;
 use Test::YAFT qw (:all), it => { -as => q (assume) };
 
 use PPIx::Augment;
+use PPIx::Augment::Utils;
 
 sub _build_argument_function;
 sub deduce_undef;
