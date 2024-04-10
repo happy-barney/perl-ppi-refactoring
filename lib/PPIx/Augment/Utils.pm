@@ -160,6 +160,16 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_token_quote_literal       :Exported(classification) {
+		my $element = &element;
+
+		return ppi_exclude
+			if $element->DOES (PPI::Token::Prototype::)
+			;
+
+		return it_is $element, PPI::Token::Quote::Literal::, @_;
+	}
+
 	sub it_is_token_quote_single        :Exported(classification) {
 		return it_is &element, PPI::Token::Quote::Single::, @_;
 	}
@@ -451,6 +461,13 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_token_quote_literal
+
+    it_is_token_quote_literal $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote::Literal>,
+but also excluding L<PPI::Token::Prototype>.
 
 =head2 it_is_token_quote_single
 
