@@ -155,6 +155,10 @@ package PPIx::Augment::Utils {
 		);
 	}
 
+	sub it_is_document                  :Exported(classification) {
+		return it_is &element, PPI::Document::, @_;
+	}
+
 	sub it_is_element                   :Exported(classification) {
 		return it_is &element, PPI::Element::, @_;
 	}
@@ -648,6 +652,12 @@ Applies conditions as L</it conditions> with
     local current value   = accessor (current value);
 
 =back
+
+=head2 it_is_document
+
+    it_is_document $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Document>.
 
 =head2 it_is_element
 
