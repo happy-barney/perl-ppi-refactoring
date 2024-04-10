@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_token_quote_literal       :Exported(classification) {
+		return it_is &element, PPI::Token::Quote::Literal::, @_;
+	}
+
 	sub it_is_token_quote_single        :Exported(classification) {
 		return it_is &element, PPI::Token::Quote::Single::, @_;
 	}
@@ -404,6 +408,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_token_quote_literal
+
+    it_is_token_quote_literal $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote::Literal>.
 
 =head2 it_is_token_quote_single
 
