@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_token_quotelike_backtick  :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::Backtick::, @_;
+	}
+
 	sub it_is_token_quotelike_command   :Exported(classification) {
 		return it_is &element, PPI::Token::QuoteLike::Command::, @_;
 	}
@@ -392,6 +396,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_token_quotelike_backtick
+
+    it_is_token_quotelike_regex $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Backtick>.
 
 =head2 it_is_token_quotelike_command
 
