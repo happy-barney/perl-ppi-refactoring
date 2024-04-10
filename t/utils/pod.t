@@ -32,6 +32,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_not (&)),
+		q (head2 it_is_structure_condition),
 		q (head2 it_is_structure_constructor),
 		q (head2 it_is_structure_for),
 		q (head2 it_is_structure_given),
