@@ -32,6 +32,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_not (&)),
+		q (head2 it_is_structure_when),
 		q (head2 it_is_token),
 		q (head2 it_is_token_array_index),
 		q (head2 it_is_token_attribute),
