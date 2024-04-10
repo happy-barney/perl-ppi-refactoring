@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_token_regexp_transliterate :Exported(classification) {
+		return it_is &element, PPI::Token::Regexp::Transliterate::, @_;
+	}
+
 	sub it_is_token_separator           :Exported(classification) {
 		return it_is &element, PPI::Token::Separator::, @_;
 	}
@@ -407,6 +411,19 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_token_regexp_transliterate
+
+    it_is_token_regexp_transliterate $element?, @it_conditions?
+
+Shortcut for
+
+    it_is $element?, PPI::Token::Regexp::Transliterate::, @it_conditions?
+
+Matches instances of L<PPI::Token::Regexp::Transliterate>
+
+    tr (...) (...);
+    y  (...) (...);
 
 =head2 it_is_token_separator
 
