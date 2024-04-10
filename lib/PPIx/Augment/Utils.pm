@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_token_quote_interpolate   :Exported(classification) {
+		return it_is &element, PPI::Token::Quote::Interpolate::, @_;
+	}
+
 	sub it_is_token_quote_literal       :Exported(classification) {
 		my $element = &element;
 
@@ -461,6 +465,12 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_token_quote_interpolate
+
+    it_is_token_quote_interpolate $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Quote::Interpolate>.
 
 =head2 it_is_token_quote_literal
 
