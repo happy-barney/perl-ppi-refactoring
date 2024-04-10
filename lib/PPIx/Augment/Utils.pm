@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_token_separator           :Exported(classification) {
+		return it_is &element, PPI::Token::Separator::, @_;
+	}
+
 	sub it_is_token_structure           :Exported(classification) {
 		return it_is &element, PPI::Token::Structure::, @_;
 	}
@@ -356,6 +360,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_token_separator
+
+    it_is_token_separator $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Separator>.
 
 =head2 it_is_token_structure
 
