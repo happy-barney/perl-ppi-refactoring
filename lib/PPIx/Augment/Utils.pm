@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_structure_condition       :Exported(classification) {
+		return it_is &element, PPI::Structure::Condition::, @_;
+	}
+
 	sub it_is_structure_constructor     :Exported(classification) {
 		return it_is &element, PPI::Structure::Constructor::, @_;
 	}
@@ -524,6 +528,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_structure_condition
+
+    it_is_structure_condition $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Structure::Condition>.
 
 =head2 it_is_structure_constructor
 
