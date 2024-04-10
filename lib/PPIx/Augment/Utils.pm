@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_token_operator            :Exported(classification) {
+		return it_is &element, PPI::Token::Operator::, @_;
+	}
+
 	sub it_is_token_pod                 :Exported(classification) {
 		return it_is &element, PPI::Token::Pod::, @_;
 	}
@@ -428,6 +432,12 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_token_operator
+
+    it_is_token_operator $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Operator>.
 
 =head2 it_is_token_pod
 

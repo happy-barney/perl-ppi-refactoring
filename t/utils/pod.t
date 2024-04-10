@@ -31,6 +31,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_element),
+		q (head2 it_is_token_operator),
 		q (head2 it_is_token_pod),
 		q (head2 it_is_token_prototype),
 		q (head2 it_is_token_quote),
