@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_token_separator           :Exported(classification) {
+		return it_is &element, PPI::Token::Separator::, @_;
+	}
+
 	sub it_is_token_structure           :Exported(classification) {
 		return it_is &element, PPI::Token::Structure::, @_;
 	}
@@ -403,6 +407,12 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_token_separator
+
+    it_is_token_separator $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::Separator>.
 
 =head2 it_is_token_structure
 
