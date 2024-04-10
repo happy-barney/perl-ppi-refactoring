@@ -32,6 +32,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_not (&)),
+		q (head2 it_is_token_quote_single),
 		q (head2 it_is_token_quotelike),
 		q (head2 it_is_token_quotelike_backtick),
 		q (head2 it_is_token_quotelike_command),
