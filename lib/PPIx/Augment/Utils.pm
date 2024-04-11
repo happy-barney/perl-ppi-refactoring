@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_token_end                 :Exported(classification) {
+		return it_is &element, PPI::Token::End::, @_;
+	}
+
 	sub it_is_token_heredoc             :Exported(classification) {
 		return it_is &element, PPI::Token::HereDoc::, @_;
 	}
@@ -525,6 +529,12 @@ Applies conditions as L</it conditions> with
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 it_is_token_end
+
+    it_is_token_end $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::End>.
 
 =head2 it_is_token_heredoc
 
