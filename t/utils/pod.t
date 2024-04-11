@@ -31,6 +31,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_element),
+		q (head2 it_is_token_attribute),
 		q (head2 it_is_token_cast),
 		q (head2 it_is_token_comment),
 		q (head2 it_is_token_data),
