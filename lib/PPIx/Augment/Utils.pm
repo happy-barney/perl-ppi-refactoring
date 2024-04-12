@@ -20,6 +20,29 @@ package PPIx::Augment::Utils {
 	sub ppi_exclude_all ();
 	sub ppi_include ();
 
+	sub _accessor_list {
+		my ($method, $element, @args) = @_;
+
+		return unless $element;
+		return unless $element->can ($method);
+		return $element->$method (@args);
+	}
+
+	sub _accessor_list_node {
+		my ($method, $element, @args) = @_;
+
+		return unless it_is_node $element;
+		return $element->$method (@args);
+	}
+
+	sub _accessor_scalar {
+		return scalar &_accessor_list;
+	}
+
+	sub _accessor_scalar_node {
+		return scalar &_accessor_list_node;
+	}
+
 	sub _classification_condition {
 		my ($element, $method, $condition) = @_;
 
