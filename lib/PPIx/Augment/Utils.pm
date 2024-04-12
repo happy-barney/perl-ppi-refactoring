@@ -78,6 +78,64 @@ package PPIx::Augment::Utils {
 		return $value;
 	}
 
+	sub _build_element {
+		my ($class, @children) = @_;
+		my @constructor = Ref::Util::is_plain_arrayref ($children[0])
+			? @{ shift @children }
+			: ()
+			;
+
+		@constructor = grep defined, @constructor;
+		if ($class->isa (PPI::Token::)) {
+			return undef
+				unless @constructor = grep length, @constructor
+				;
+		}
+
+		my $element = $class->new (@constructor)
+			// return undef
+			;
+
+		if ($class->isa (PPI::Node::)) {
+			for my $child (@children) {
+				next unless it_is_element ($child);
+
+				$element->add_element ($child->clone);
+			}
+		}
+
+		return $element;
+	}
+
+	sub _build_token {
+		my @class_map;
+		push @class_map, shift
+			while ref $_[0]
+			;
+
+		my $content = shift;
+
+		return undef unless defined $content;
+		return undef unless length $content;
+
+		for my $map_entry (@class_map) {
+			unless (Ref::Util::is_plain_hashref ($map_entry)) {
+				return undef
+					unless _compare_value ($content, $map_entry)
+					;
+				next;
+			}
+
+			for my $class (keys %$map_entry) {
+				next unless $class->isa (PPI::Token::);
+				next unless _compare_value ($content, $map_entry->{$class});
+				return $class->new ($content);
+			}
+		}
+
+		return undef;
+	}
+
 	sub _classification_condition {
 		my ($context, $value, @conditions) = @_;
 
@@ -171,6 +229,15 @@ package PPIx::Augment::Utils {
 
 		local $_ = $value;
 		return !! $condition->($context, $value);
+	}
+
+	sub _element_key {
+		return & Scalar::Util::refaddr;
+	}
+
+	sub _link_parent_child {
+		my ($parent, $child) = @_;
+		Scalar::Util::weaken ($PPI::Singletons::_PARENT{_element_key $child} = $parent);
 	}
 
 	sub child                           :Exported(accessor) {
