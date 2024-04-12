@@ -152,6 +152,10 @@ package PPIx::Augment::Utils {
 		return $value eq $condition;
 	}
 
+	sub content                         :Exported(accessor) {
+		return _accessor_scalar (content => &element) // q ();
+	}
+
 	sub current ()                      :Exported(accessor) {
 		return $_;
 	}
@@ -615,6 +619,13 @@ either whether they are accessible via direct method or have to be populated.
 All accessor functions recognize C</no element> and return corresponding value.
 
 Unless specified otherwise, all functions work with L</effective element>.
+
+=head2 content
+
+    content;
+    content $element;
+
+Returns C<content> of L</effective element>, empty string otherwise.
 
 =head2 current ()
 
