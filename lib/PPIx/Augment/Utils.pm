@@ -300,6 +300,12 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (sprevious_sibling => &element) || no_element;
 	}
 
+	sub build_token_whitespace ($)      :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Whitespace:: => qr (^\s+$) },
+			@_
+	}
+
 	sub build_token_word ($)            :Exported(builder) {
 		return _build_token
 			{ PPI::Token::Word:: => qr (^ (?! \d) \w+ $)x },
@@ -864,6 +870,12 @@ L</no element> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_whitespace ($)
+
+    build_token_whitespace q ( );
+
+Builds instance of L<PPI::Token::Whitespace>.
 
 =head2 build_token_word ($)
 

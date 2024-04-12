@@ -43,6 +43,7 @@ assume_pod_sections
 		q (head2 sprevious_sibling),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
+		q (head2 build_token_whitespace ($)),
 		q (head2 build_token_word ($)),
 	],
 	q (head1 CLASSIFICATION FUNCTIONS) => [
