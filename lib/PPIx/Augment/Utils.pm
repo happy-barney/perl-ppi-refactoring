@@ -165,6 +165,10 @@ package PPIx::Augment::Utils {
 		return current;
 	}
 
+	sub next_token                      :Exported(accessor) {
+		return _accessor_scalar (next_token => &element) || no_element;
+	}
+
 	sub no_element ()                   :Exported(accessor) {
 		return PPIx::Augment::No_Element::->new;
 	}
@@ -604,6 +608,14 @@ Assumed usage eg in classification function:
 
     # Using this syntax so shift will actually modify our arguments
     my $element = &element;
+
+=head2 next_token
+
+    next_token;
+    next_token $element;
+
+Returns next token of L</effective element> if possible,
+L</no element> otherwise.
 
 =head2 no_element ()
 
