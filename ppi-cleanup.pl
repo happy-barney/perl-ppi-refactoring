@@ -600,6 +600,7 @@ sub remove_unused_private_functions {
 		_create_element
 		_element_key
 		_its
+		_link_parent_child
 		_transformation_elements
 	);
 
