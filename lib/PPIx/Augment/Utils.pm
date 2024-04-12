@@ -121,14 +121,14 @@ package PPIx::Augment::Utils {
 		for my $map_entry (@class_map) {
 			unless (Ref::Util::is_plain_hashref ($map_entry)) {
 				return undef
-					unless _compare_value ($content, $map_entry)
+					unless _classification_condition (undef, $content, $map_entry)
 					;
 				next;
 			}
 
 			for my $class (keys %$map_entry) {
 				next unless $class->isa (PPI::Token::);
-				next unless _compare_value ($content, $map_entry->{$class});
+				next unless _classification_condition (undef, $content, $map_entry->{$class});
 				return $class->new ($content);
 			}
 		}
@@ -330,6 +330,12 @@ package PPIx::Augment::Utils {
 
 	sub top_element                     :Exported(accessor) {
 		return _accessor_scalar (top => &element) || no_element;
+	}
+
+	sub build_token_word ($)            :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Word:: => qr (^ (?! \d) \w+ $)x },
+			@_
 	}
 
 	sub exclude_all (&)                 :Exported(classification) {
@@ -916,6 +922,12 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_word ($)
+
+    build_token_word q (foo);
+
+Builds instance of L<PPI::Token::Word>.
 
 =head1 CLASSIFICATION FUNCTIONS
 
