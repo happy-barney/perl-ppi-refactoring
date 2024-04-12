@@ -332,6 +332,13 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_structure ($)       :Exported(builder) {
+		state $token_structure = [ qw < ( ) { } [ ] ; > ];
+		return _build_token
+			{ PPI::Token::Structure:: => sub { scalar grep { $_[1] eq $_ } @$token_structure } },
+			@_
+	}
+
 	sub build_token_whitespace ($)      :Exported(builder) {
 		return _build_token
 			{ PPI::Token::Whitespace:: => qr (^\s+$) },
@@ -928,6 +935,12 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_structure ($)
+
+    build_token_structure q ( );
+
+Builds instance of L<PPI::Token::Structure>.
 
 =head2 build_token_whitespace ($)
 
