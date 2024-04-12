@@ -197,6 +197,10 @@ package PPIx::Augment::Utils {
 		return PPIx::Augment::No_Element::->new;
 	}
 
+	sub previous_sibling                :Exported(accessor) {
+		return _accessor_scalar (previous_sibling => &element) || no_element;
+	}
+
 	sub previous_token                  :Exported(accessor) {
 		return _accessor_scalar (previous_token => &element) || no_element;
 	}
@@ -650,6 +654,14 @@ Assumed usage eg in classification function:
 =head2 no_element ()
 
 Returns value representing L<PPI> meaning "there is no element".
+
+=head2 previous_sibling
+
+    previous_sibling;
+    previous_sibling $element;
+
+Returns previous sibling of L</effective element> if possible,
+L</no element> otherwise.
 
 =head2 previous_token
 
