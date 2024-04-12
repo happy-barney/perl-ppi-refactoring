@@ -26,8 +26,25 @@ sub ppi_document;
 sub ppi_dump;
 sub tests_root;
 
+my $SINGLETON_ACCESSOR       = q (arrange-ppixa-accessor);
 my $SINGLETON_CLASSIFICATION = q (arrange-ppixa-classification);
 my $SINGLETON_DOCUMENT       = q (arrange-ppixa-document);
+
+sub _assume_ppi_build_accessor {
+	my (%args) = @_;
+
+	my ($accessor, @args) = _build_argument_function (
+		$args{caller} // caller,
+		$args{accessor},
+		$SINGLETON_ACCESSOR,
+	);
+
+	return
+		unless $accessor
+		;
+
+	return sub { $accessor->(@_, @args) };
+}
 
 sub _assume_ppi_build_classification {
 	my (%args) = @_;
@@ -267,12 +284,25 @@ sub ppi_dump {
 		;
 }
 
+sub testing_accessor (&) {
+	proclaim $SINGLETON_ACCESSOR => shift;
+}
+
 sub testing_classification (&) {
 	proclaim $SINGLETON_CLASSIFICATION => shift;
 }
 
 sub tests_root {
 	return Path::Tiny::->new (__FILE__)->parent;
+}
+
+sub where (&) {
+	my ($code) = @_;
+
+	return sub {
+		local $_ = $_[1];
+		&$code;
+	};
 }
 
 1;
