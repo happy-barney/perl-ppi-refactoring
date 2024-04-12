@@ -121,19 +121,44 @@ package PPIx::Augment::Utils {
 		for my $map_entry (@class_map) {
 			unless (Ref::Util::is_plain_hashref ($map_entry)) {
 				return undef
-					unless _compare_value ($content, $map_entry)
+					unless _classification_condition (undef, $content, $map_entry)
 					;
 				next;
 			}
 
 			for my $class (keys %$map_entry) {
 				next unless $class->isa (PPI::Token::);
-				next unless _compare_value ($content, $map_entry->{$class});
+				next unless _classification_condition (undef, $content, $map_entry->{$class});
 				return $class->new ($content);
 			}
 		}
 
 		return undef;
+	}
+
+	sub _build_token_quoted {
+		my ($class, $re_validate, $content) = @_;
+
+		return
+			unless defined $content
+			&& defined $re_validate
+			&& $content =~ m (^($re_validate))x
+			;
+
+		my $init = $1;
+		my $token = $class->new ($init)
+			// return no_element
+			;
+
+		$class->_fill (bless {
+			class       => $class,
+			line        => $content,
+			line_cursor => length $init,
+			line_length => length $content,
+			token       => $token,
+		}, PPI::Tokenizer::);
+
+		return $token;
 	}
 
 	sub _classification_condition {
@@ -330,6 +355,189 @@ package PPIx::Augment::Utils {
 
 	sub top_element                     :Exported(accessor) {
 		return _accessor_scalar (top => &element) || no_element;
+	}
+
+	sub build_token_cast ($)            :Exported(builder) {
+		state $cast_operators = [ split qr ( ), q (% @ $ $# %* @* $* $#*) ];
+		return _build_token
+			{ PPI::Token::Cast:: , sub { scalar grep { $_[1] eq $_ } @$cast_operators } },
+			@_
+	}
+
+	sub build_token_comment ($)         :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Comment::, qr (^#) },
+			@_
+	}
+
+	sub build_token_number ($)          :Exported(builder) {
+		return undef
+			// &build_token_number_decimal
+			// &build_token_number_float
+			// &build_token_number_hex
+			// &build_token_number_octal
+			// &build_token_number_version
+			;
+	}
+
+	sub build_token_number_decimal ($)  :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Number:: => qr (^ [-]? (?= [0-9] ) (?! 0 [_]* [0-9]) [0-9_]+ $)x },
+			@_
+	}
+
+	sub build_token_number_float ($)    :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Number::Exp::   => qr (^ [-]? (?= [.0-9] ) [0-9]* [.]? [0-9]* [eE] [-+]? [0-9]+ $)x },
+			{ PPI::Token::Number::Float:: => qr (^ [-]? (?= [.]? [0-9] ) [0-9]* [.] [0-9]* $)x },
+			@_
+	}
+
+	sub build_token_number_hex ($)      :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Number::Hex:: => qr (^ [-]? 0 [xX] [[:xdigit:]_]+ $)x },
+			@_
+	}
+
+	sub build_token_number_octal ($)    :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Number::Octal:: => qr (^ [-]? 0 [oO]? (?= _* [0-7]) [0-7_]+ $)x },
+			@_
+	}
+
+	sub build_token_number_version ($)  :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Number::Version:: => qr (^ v \d)x },
+			@_
+	}
+
+	sub build_token_operator ($)        :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Operator:: => sub { exists $PPI::Singletons::OPERATOR{$_} } },
+			@_
+	}
+
+	sub build_token_prototype ($)       :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Prototype::,
+			qr <[(]>,
+			@_
+		);
+	}
+
+	sub build_token_quote_double ($)    :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Quote::Double::,
+			qr (^["]),
+			@_
+		);
+	}
+
+	sub build_token_quote_interpolate ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Quote::Interpolate::,
+			qr (^qq\b),
+			@_
+		);
+	}
+
+	sub build_token_quote_literal ($)   :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Quote::Literal::,
+			qr (^q\b),
+			@_
+		);
+	}
+
+	sub build_token_quote_single ($)    :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Quote::Single::,
+			qr (^[']),
+			@_
+		);
+	}
+
+	sub build_token_quotelike_backtick ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::QuoteLike::Backtick::,
+			qr (^[`]),
+			@_
+		);
+	}
+
+	sub build_token_quotelike_command ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::QuoteLike::Command::,
+			qr (^qx),
+			@_
+		);
+	}
+
+	sub build_token_quotelike_readline ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::QuoteLike::Readline::,
+			qr (^<),
+			@_
+		);
+	}
+
+	sub build_token_quotelike_regexp ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::QuoteLike::Regexp::,
+			qr (^qr),
+			@_
+		);
+	}
+
+	sub build_token_quotelike_words ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::QuoteLike::Words::,
+			qr (^qw),
+			@_
+		);
+	}
+
+	sub build_token_regexp_match ($)    :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Regexp::Match::,
+			qr (^[m/]),
+			@_
+		);
+	}
+
+	sub build_token_regexp_substitute ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Regexp::Substitute::,
+			qr (^s),
+			@_
+		);
+	}
+
+	sub build_token_regexp_transliterate ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Regexp::Transliterate::,
+			qr (^ (?: (?:tr) | (?:y) ) )x,
+			@_
+		);
+	}
+
+	sub build_token_structure ($)       :Exported(builder) {
+		state $token_structure = [ qw < ( ) { } [ ] ; > ];
+		return _build_token
+			{ PPI::Token::Structure:: => sub { scalar grep { $_[1] eq $_ } @$token_structure } },
+			@_
+	}
+
+	sub build_token_whitespace ($)      :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Whitespace:: => qr (^\s+$) },
+			@_
+	}
+
+	sub build_token_word ($)            :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Word:: => qr (^ (?! \d) \w+ $)x },
+			@_
 	}
 
 	sub exclude_all (&)                 :Exported(classification) {
@@ -917,6 +1125,172 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merging them into the corresponding element / node.
+
+=head2 build_token_cast ($)
+
+    build_token_cast q ($);
+    build_token_cast q (@);
+
+Builds instance of L<PPI::Token::Cast>.
+
+=head2 build_token_comment ($)
+
+    build_token_comment q (# foo);
+
+Builds instance of L<PPI::Token::Comment>.
+
+=head2 build_token_number ($)
+
+    build_token_number q (0);
+    build_token_number q (0x1);
+    build_token_number q (1.1);
+    build_token_number q (1e1);
+
+Determines type of number and returns corresponding instance.
+Effectively a combination of all C<build_token_number_*> builders.
+
+=head2 build_token_number_decimal ($)
+
+    build_token_number_decimal q (0);
+    build_token_number_decimal q (-1);
+
+Builds instance of L<PPI::Token::Number> (represents decimal numbers).
+
+=head2 build_token_number_float ($)
+
+    build_token_number_float (q (0x123));
+
+Builds instance of L<PPI::Token::Number::Float> or L<PPI::Token::Number::Exp>.
+
+=head2 build_token_number_hex ($)
+
+    build_token_number_hex (q (0x123));
+
+Builds instance of L<PPI::Token::Number::Hex>.
+
+=head2 build_token_number_octal ($)
+
+    build_token_number_octal (q (0123));
+
+Builds instance of L<PPI::Token::Number::Octal>.
+
+=head2 build_token_number_version ($)
+
+    build_token_number_version q (v5.14);
+
+=head2 build_token_operator ($)
+
+    build_token_operator q (->);
+
+Builds instance of L<PPI::Token::Operator>.
+
+=head2 build_token_prototype ($)
+
+    build_token_prototype q (($))
+
+Returns instance of L<PPI::Token::Prototype> from given string.
+
+=head2 build_token_quote_double ($)
+
+    build_token_quote_double q ("foo")
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Quote::Double>.
+
+=head2 build_token_quote_interpolate ($)
+
+    build_token_quote_interpolate q (qq (foo))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Quote::Interpolate>.
+
+=head2 build_token_quote_literal ($)
+
+    build_token_quote_literal q (q (foo))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Quote::Literal>.
+
+=head2 build_token_quote_single ($)
+
+    build_token_quote_single q ('foo')
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Quote::Single>.
+
+=head2 build_token_quotelike_backtick ($)
+
+    build_token_quotelike_backtick q (`foo`)
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::QuoteLike::Backtick>.
+
+=head2 build_token_quotelike_command ($)
+
+    build_token_quotelike_command q (qx (foo bar))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::QuoteLike::Command>.
+
+=head2 build_token_quotelike_readline ($)
+
+    build_token_quotelike_readline q (<abc>)
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::QuoteLike::Readline>.
+
+=head2 build_token_quotelike_regexp ($)
+
+    build_token_quotelike_regexp q (qr (abc))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::QuoteLike::Regexp>.
+
+=head2 build_token_quotelike_words ($)
+
+    build_token_quotelike_words q (qw (abc ABC))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::QuoteLike::Words>.
+
+=head2 build_token_regexp_match ($)
+
+    build_token_regexp_match q (m (abc))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Regexp::Match>.
+
+=head2 build_token_regexp_substitute ($)
+
+    build_token_regexp_substitute q (s (abc) (ABC)gr)
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Regexp::Substitute>.
+
+=head2 build_token_regexp_transliterate ($)
+
+    build_token_regexp_transliterate q (tr [abc] [ABC]r)
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Regexp::Transliterate>.
+
+=head2 build_token_structure ($)
+
+    build_token_structure q ( );
+
+Builds instance of L<PPI::Token::Structure>.
+
+=head2 build_token_whitespace ($)
+
+    build_token_whitespace q ( );
+
+Builds instance of L<PPI::Token::Whitespace>.
+
+=head2 build_token_word ($)
+
+    build_token_word q (foo);
+
+Builds instance of L<PPI::Token::Word>.
 
 =head1 CLASSIFICATION FUNCTIONS
 
