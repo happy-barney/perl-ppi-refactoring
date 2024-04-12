@@ -300,6 +300,12 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (sprevious_sibling => &element) || no_element;
 	}
 
+	sub build_token_word ($)            :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Word:: => qr (^ (?! \d) \w+ $)x },
+			@_
+	}
+
 	sub exclude_all (&)                 :Exported(classification) {
 		my ($code) = @_;
 
@@ -858,6 +864,12 @@ L</no element> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_word ($)
+
+    build_token_word q (foo);
+
+Builds instance of L<PPI::Token::Word>.
 
 =head1 CLASSIFICATION FUNCTIONS
 

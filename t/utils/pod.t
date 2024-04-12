@@ -42,7 +42,9 @@ assume_pod_sections
 		q (head2 snext_sibling),
 		q (head2 sprevious_sibling),
 	],
-	q (head1 BUILDER FUNCTIONS),
+	q (head1 BUILDER FUNCTIONS) => [
+		q (head2 build_token_word ($)),
+	],
 	q (head1 CLASSIFICATION FUNCTIONS) => [
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
