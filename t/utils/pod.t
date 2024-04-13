@@ -24,6 +24,7 @@ assume_pod_sections
 	q (head1 ACCESSOR FUNCTIONS) => [
 		q (head2 current ()),
 		q (head2 element),
+		q (head2 first_token),
 		q (head2 last_child),
 		q (head2 last_token),
 		q (head2 next_sibling),
