@@ -1452,11 +1452,11 @@ Assumed usage eg in classification function:
 
 =head2 first_child
 
-    first_element;
-    first_element $node;
+    first_child;
+    first_child $element;
 
-Returns C<first_element> of L</effective element> if possible,
-L<no_element> otherwise.
+Returns first child of L<PPI::Node> if possible,
+L</no element> otherwise.
 
 =head2 first_token
 
@@ -1480,6 +1480,7 @@ L<no_element> otherwise.
     last_token $element;
 
 Returns C<last_token> of L</effective element> if possible,
+L</no element> otherwise.
 
 =head2 next_sibling
 

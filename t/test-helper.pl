@@ -343,7 +343,7 @@ sub ppi_document {
 sub ppi_dump {
 	diag (PPI::Dumper::->new ($_)->string =~ s ((?<= [#])) (    )xr)
 		for
-		map { ppi_document ($_) }
+		map { it_is_element ($_) ? $_ : ppi_document ($_)}
 		map { Ref::Util::is_plain_arrayref ($_) ? @$_ : $_ }
 		@_
 		;
