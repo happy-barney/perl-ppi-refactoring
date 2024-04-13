@@ -22,6 +22,7 @@ assume_pod_sections
 		q (item no element),
 	],
 	q (head1 ACCESSOR FUNCTIONS) => [
+		q (head2 child),
 		q (head2 children),
 		q (head2 content),
 		q (head2 current ()),
