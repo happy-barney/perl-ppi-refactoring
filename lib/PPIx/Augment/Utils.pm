@@ -169,6 +169,10 @@ package PPIx::Augment::Utils {
 		return PPIx::Augment::No_Element::->new;
 	}
 
+	sub schild                          :Exported(accessor) {
+		return _accessor_scalar_node (schild => &element, @_) || no_element;
+	}
+
 	sub schildren                       :Exported(accessor) {
 		return _accessor_children (schildren => &element, @_);
 	}
@@ -592,6 +596,14 @@ Assumed usage eg in classification function:
 =head2 no_element ()
 
 Returns value representing L<PPI> meaning "there is no element".
+
+=head2 schild
+
+    schild 1;
+    schild $node, -1;
+
+Returns significant child of L</effective element> if possible,
+L</no element> otherwise.
 
 =head2 schildren
 
