@@ -165,6 +165,10 @@ package PPIx::Augment::Utils {
 		return current;
 	}
 
+	sub first_child                     :Exported(accessor) {
+		return _accessor_scalar_node (child => &element, 0) || no_element;
+	}
+
 	sub first_token                     :Exported(accessor) {
 		return eval { _accessor_scalar (first_token => &element) } || no_element;
 	}
@@ -624,6 +628,14 @@ Assumed usage eg in classification function:
 
     # Using this syntax so shift will actually modify our arguments
     my $element = &element;
+
+=head2 first_child
+
+    first_element;
+    first_element $node;
+
+Returns C<first_element> of L</effective element> if possible,
+L<no_element> otherwise.
 
 =head2 first_token
 
