@@ -173,6 +173,10 @@ package PPIx::Augment::Utils {
 		return !! $condition->($context, $value);
 	}
 
+	sub child                           :Exported(accessor) {
+		return _accessor_scalar_node (child => &element, @_) || no_element;
+	}
+
 	sub children                        :Exported(accessor) {
 		return _accessor_children children => &element, @_;
 	}
@@ -673,6 +677,14 @@ either whether they are accessible via direct method or have to be populated.
 All accessor functions recognize C</no element> and return corresponding value.
 
 Unless specified otherwise, all functions work with L</effective element>.
+
+=head2 child
+
+    child 1;
+    child $node, -1;
+
+Returns child of L</effective element> if possible,
+L</no element> otherwise.
 
 =head2 children
 
