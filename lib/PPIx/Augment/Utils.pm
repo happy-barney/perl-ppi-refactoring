@@ -152,6 +152,10 @@ package PPIx::Augment::Utils {
 		return $value eq $condition;
 	}
 
+	sub children                        :Exported(accessor) {
+		return _accessor_children children => &element, @_;
+	}
+
 	sub content                         :Exported(accessor) {
 		return _accessor_scalar (content => &element) // q ();
 	}
@@ -619,6 +623,21 @@ either whether they are accessible via direct method or have to be populated.
 All accessor functions recognize C</no element> and return corresponding value.
 
 Unless specified otherwise, all functions work with L</effective element>.
+
+=head2 children
+
+    children;
+    children 0, -1;
+    children -3, -2;
+    children $element;
+
+Returns C<content> of L</effective element>, empty list otherwise.
+
+If called with additional numeric arguments, first is treated as index
+of first child to return, second (-1 unless specified) as index of last
+child to return.
+
+Both can be negative.
 
 =head2 content
 
