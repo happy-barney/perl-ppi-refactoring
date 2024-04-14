@@ -363,6 +363,10 @@ package PPIx::Augment::Utils {
 		return $block;
 	}
 
+	sub build_semicolon ()              :Exported(builder) {
+		return build_token_structure (q (;));
+	}
+
 	sub build_token_cast ($)            :Exported(builder) {
 		state $cast_operators = [ split qr ( ), q (% @ $ $# %* @* $* $#*) ];
 		return _build_token
@@ -1066,6 +1070,12 @@ usually taking decomposed values and merge them into corresponding element / nod
 
 Builds instance of L<PPI::Structure::Block> representing closed block
 containing provided C<@content>.
+
+=head2 build_semicolon ()
+
+    build_semicolon;
+
+Builds token representing semicolon.
 
 =head2 build_token_cast ($)
 
