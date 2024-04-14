@@ -420,6 +420,10 @@ package PPIx::Augment::Utils {
 		return $block;
 	}
 
+	sub build_newline ()                :Exported(builder) {
+		build_token_whitespace (qq (\n));
+	}
+
 	sub build_semicolon ()              :Exported(builder) {
 		return build_token_structure (q (;));
 	}
@@ -1307,6 +1311,12 @@ usually taking decomposed values and merge them into corresponding element / nod
 
 Builds instance of L<PPI::Structure::Block> representing closed block
 containing provided C<@content>.
+
+=head2 build_newline ()
+
+    build_newline;
+
+Builds instance of L<PPI::Token::Whitespace> initialized with single newline.
 
 =head2 build_semicolon ()
 
