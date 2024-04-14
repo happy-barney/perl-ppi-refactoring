@@ -140,6 +140,7 @@ assume_pod_sections
 		q (head2 it_is_token_whitespace),
 		q (head2 it_is_token_word),
 		q (head2 it_is_use_statement),
+		q (head2 its_sprevious_sibling (&)),
 		q (head2 ppi_exclude ()),
 		q (head2 ppi_exclude_all ()),
 		q (head2 ppi_include ()),
