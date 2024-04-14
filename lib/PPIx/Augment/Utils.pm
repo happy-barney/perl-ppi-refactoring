@@ -1027,6 +1027,10 @@ package PPIx::Augment::Utils {
 		return it_is_statement_include &element, { type => q (use) }, @_;
 	}
 
+	sub its_sprevious_sibling (&)       :Exported(classification) {
+		return _its sprevious_sibling => @_;
+	}
+
 	sub ppi_bool ($)                    :Exported(classification) {
 		return $_[0] ? ppi_include : ppi_exclude;
 	}
@@ -2220,6 +2224,14 @@ See L</it_is> for description of C<@conditions>.
     it_is_use_statement $element?, @conditions?
 
 Classify L</it_is_statement_include> which starts with C<use>.
+
+=head2 its_sprevious_sibling (&)
+
+	where { its_sprevious_sibling { ... } }
+
+Similar to L</where (&)> except block is executed immediatelly with
+L</current element> set to L<sprevious_sibling> of L</current element>
+if exists.
 
 =head2 ppi_bool ($)
 
