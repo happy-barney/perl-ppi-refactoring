@@ -436,6 +436,10 @@ package PPIx::Augment::Utils {
 		return $block;
 	}
 
+	sub build_comma ()                  :Exported(builder) {
+		build_token_operator (q (,));
+	}
+
 	sub build_newline ()                :Exported(builder) {
 		build_token_whitespace (qq (\n));
 	}
@@ -1360,6 +1364,12 @@ usually taking decomposed values and merging them into the corresponding element
 
 Builds instance of L<PPI::Structure::Block> representing closed block
 containing provided C<@content>.
+
+=head2 build_comma ()
+
+    build_comma;
+
+Builds instance of L<PPI::Token::Operator> initialized with comma.
 
 =head2 build_newline ()
 
