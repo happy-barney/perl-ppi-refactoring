@@ -1150,6 +1150,13 @@ usually taking decomposed values and merging them into the corresponding element
 Builds instance of L<PPI::Structure::Block> representing closed block
 containing provided C<@content>.
 
+=head2 build_block
+
+    build_block (@content);
+
+Builds instance of L<PPI::Structure::Block> representing closed block
+containing provided C<@content>.
+
 =head2 build_statement_include
 
 =head2 build_token_cast ($)
