@@ -405,6 +405,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Node::, @_;
 	}
 
+	sub it_is_semicolon                 :Exported(classification) {
+		return it_is_token_structure (&element, q (;), @_);
+	}
+
 	sub it_is_significant               :Exported(classification) {
 		return it_is &element, PPI::Element::, { significant => sub { !! $_[0] } };
 	}
@@ -1099,6 +1103,12 @@ Shortcut for calling L</it_is> with L<PPI::Element>.
     it_is_node $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Node>.
+
+=head2 it_is_semicolon
+
+    it_is_semicolon $element?, @conditions?;
+
+Shortcut for calling L<it_is_token_structure> with C<q (;)>.
 
 =head2 it_is_significant
 

@@ -61,6 +61,7 @@ assume_pod_sections
 		q (head2 it_is_document),
 		q (head2 it_is_element),
 		q (head2 it_is_node),
+		q (head2 it_is_semicolon),
 		q (head2 it_is_significant),
 		q (head2 it_is_statement),
 		q (head2 it_is_statement_break),
