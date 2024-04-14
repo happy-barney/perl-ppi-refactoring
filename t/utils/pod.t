@@ -43,6 +43,7 @@ assume_pod_sections
 		q (head2 sprevious_sibling),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
+		q (head2 build_block),
 		q (head2 build_token_cast ($)),
 		q (head2 build_token_number ($)),
 		q (head2 build_token_number_decimal ($)),
