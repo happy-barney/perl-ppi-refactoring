@@ -82,6 +82,7 @@ assume_pod_sections
 	q (head1 CLASSIFICATION FUNCTIONS) => [
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
+		q (head2 it_is_comma),
 		q (head2 it_is_document),
 		q (head2 it_is_empty_line),
 		q (head2 it_is_followed_by_empty_line),
