@@ -426,14 +426,22 @@ package PPIx::Augment::Utils {
 	sub build_block                     :Exported(builder) {
 		my $block = _build_element (
 			PPI::Structure::Block::,
-			[ build_token_structure (q({)) ],
+			[ build_brace_open () ],
 			@_,
 		);
 
-		$block->{finish} = build_token_structure (q (}));
+		$block->{finish} = build_brace_close ();
 		_link_parent_child ($block, $block->{finish});
 
 		return $block;
+	}
+
+	sub build_brace_close ()            :Exported(builder) {
+		return build_token_structure (q (}));
+	}
+
+	sub build_brace_open ()             :Exported(builder) {
+		return build_token_structure (q ({));
 	}
 
 	sub build_comma ()                  :Exported(builder) {
@@ -1364,6 +1372,18 @@ usually taking decomposed values and merging them into the corresponding element
 
 Builds instance of L<PPI::Structure::Block> representing closed block
 containing provided C<@content>.
+
+=head2 build_brace_close ()
+
+    build_brace_close;
+
+Builds instance of L<PPI::Token::Structure> initialized with right brace (C<}>).
+
+=head2 build_brace_open ()
+
+    build_brace_open;
+
+Builds instance of L<PPI::Token::Structure> initialized with left brace (C<{>).
 
 =head2 build_comma ()
 
