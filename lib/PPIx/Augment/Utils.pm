@@ -357,6 +357,19 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_block                     :Exported(builder) {
+		my $block = _build_element (
+			PPI::Structure::Block::,
+			[ build_token_structure (q({)) ],
+			@_,
+		);
+
+		$block->{finish} = build_token_structure (q (}));
+		_link_parent_child ($block, $block->{finish});
+
+		return $block;
+	}
+
 	sub build_statement_include         :Exported(builder) {
 		return _build_element (PPI::Statement::Include::, @_);
 	}
@@ -1129,6 +1142,13 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merging them into the corresponding element / node.
+
+=head2 build_block
+
+    build_block (@content);
+
+Builds instance of L<PPI::Structure::Block> representing closed block
+containing provided C<@content>.
 
 =head2 build_statement_include
 
