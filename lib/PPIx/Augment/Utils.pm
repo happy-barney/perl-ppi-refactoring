@@ -393,6 +393,10 @@ package PPIx::Augment::Utils {
 		);
 	}
 
+	sub it_is_comma                     :Exported(classification) {
+		return it_is_token_operator (&element, q (,), @_);
+	}
+
 	sub it_is_document                  :Exported(classification) {
 		return it_is &element, PPI::Document::, @_;
 	}
@@ -1105,6 +1109,13 @@ function/method represented by key.
     }
 
 =back
+
+=head2 it_is_comma
+
+    it_is_comma;
+    it_is_comma $element;
+
+Shortcut for calling L</it_is_token_operator> with C<q (,)>.
 
 =head2 it_is_document
 
