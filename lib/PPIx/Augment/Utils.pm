@@ -312,6 +312,18 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (sprevious_sibling => &element) || no_element;
 	}
 
+	sub sprevious_token                 :Exported(accessor) {
+		my $element = &element;
+
+		while ($element = previous_token ($element)) {
+			return $element
+				if $element->significant
+				;
+		}
+
+		return no_element;
+	}
+
 	sub build_block                     :Exported(builder) {
 		my $block = _build_element (
 			PPI::Structure::Block::,
@@ -983,6 +995,14 @@ L</no element> otherwise.
     sprevious_sibling $element;
 
 Returns previous significant sibling of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 sprevious_token
+
+    sprevious_token;
+    sprevious_token $element;
+
+Returns previous significant token of L</effective element> if possible,
 L</no element> otherwise.
 
 =head1 BUILDER FUNCTIONS

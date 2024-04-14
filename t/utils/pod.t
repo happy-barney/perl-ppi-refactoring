@@ -42,6 +42,7 @@ assume_pod_sections
 		q (head2 schildren),
 		q (head2 snext_sibling),
 		q (head2 sprevious_sibling),
+		q (head2 sprevious_token),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
 		q (head2 build_block),
