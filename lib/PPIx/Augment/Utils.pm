@@ -214,6 +214,21 @@ package PPIx::Augment::Utils {
 		return & Scalar::Util::refaddr;
 	}
 
+	sub _its {
+		my ($accessor, $where) = @_;
+
+		$accessor = __PACKAGE__->can ($accessor)
+			unless Ref::Util::is_plain_coderef ($accessor)
+			;
+
+		return ppi_exclude
+			unless $accessor
+			&& (local $_ = $accessor->())
+			;
+
+		$where->();
+	}
+
 	sub _link_parent_child {
 		my ($parent, $child) = @_;
 		Scalar::Util::weaken ($PPI::Singletons::_PARENT{_element_key $child} = $parent);
