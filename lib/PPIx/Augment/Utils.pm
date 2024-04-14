@@ -657,6 +657,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Token::Word::, @_;
 	}
 
+	sub it_is_use_statement             :Exported(classification) {
+		return it_is_statement_include &element, { type => q (use) }, @_;
+	}
+
 	sub ppi_exclude ()                  :Exported(classification) {
 		return 0;
 	}
@@ -1490,6 +1494,13 @@ Shortcut for calling L</it_is> with L<PPI::Token::Whitespace>.
     it_is_token_word $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Token::Word>.
+
+=head2 it_is_use_statement
+
+    it_is_use_statement $element?, @conditions?
+
+Shortcut for calling L</it_is_statement_include> matching only
+C<use> statements.
 
 =head2 ppi_exclude ()
 
