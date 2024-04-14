@@ -405,6 +405,14 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Node::, @_;
 	}
 
+	sub it_is_package_definition        :Exported(classification) {
+		my $element = &element;
+
+		return ppi_exclude unless it_is_statement_package ($element, @_);
+		return ppi_exclude unless it_is_structure_block (last_child $element);
+		return ppi_include;
+	}
+
 	sub it_is_semicolon                 :Exported(classification) {
 		return it_is_token_structure (&element, q (;), @_);
 	}
@@ -1103,6 +1111,13 @@ Shortcut for calling L</it_is> with L<PPI::Element>.
     it_is_node $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Node>.
+
+=head2 it_is_package_definition
+
+    it_is_package_definition $element?, @conditions?;
+
+Shortcut for calling L</it_is_statement_include> matching
+only package statement with package block.
 
 =head2 it_is_semicolon
 
