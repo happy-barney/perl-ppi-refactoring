@@ -1,0 +1,4 @@
+#!/bin/bash
+
+perl "$(dirname "$(dirname "$(realpath "$0")")")"/ppi-cleanup.pl \
+	 $PWD/lib/PPIx/Augment/Utils.pm \
