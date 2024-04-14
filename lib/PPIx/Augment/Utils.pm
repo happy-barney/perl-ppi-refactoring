@@ -129,6 +129,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_significant               :Exported(classification) {
+		return it_is &element, PPI::Element::, { significant => sub { !! $_[0] } };
+	}
+
 	sub it_is_statement                 :Exported(classification) {
 		return it_is &element, PPI::Statement::, @_;
 	}
@@ -588,6 +592,13 @@ function/method represented by key.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_significant
+
+    it_is_significant $element?, @conditions?;
+
+Shortcut for calling L</it_is_element> with additional condition
+to check whether element is significant.
 
 =head2 it_is_statement
 
