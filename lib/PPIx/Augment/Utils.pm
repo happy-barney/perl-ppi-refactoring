@@ -160,6 +160,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_significant               :Exported(classification) {
+		return it_is &element, PPI::Element::, { significant => undef };
+	}
+
 	sub it_is_statement                 :Exported(classification) {
 		return it_is &element, PPI::Statement::, @_;
 	}
@@ -642,6 +646,13 @@ Applies conditions as L</it conditions> with
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
 FEatu
+
+=head2 it_is_significant
+
+    it_is_significant $element?, @conditions?;
+
+Shortcut for calling L</it_is_element> with additional condition
+to check whether element is significant.
 
 =head2 it_is_statement
 
