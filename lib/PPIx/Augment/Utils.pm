@@ -774,6 +774,10 @@ package PPIx::Augment::Utils {
 		return it_is_statement_include &element, { type => q (use) }, @_;
 	}
 
+	sub its_previous_sibling (&)        :Exported(classification) {
+		return _its previous_sibling => @_;
+	}
+
 	sub its_snext_sibling (&)           :Exported(classification) {
 		return _its snext_sibling => @_;
 	}
@@ -1726,6 +1730,14 @@ Shortcut for calling L</it_is> with L<PPI::Token::Word>.
 
 Shortcut for calling L</it_is_statement_include> matching only
 C<use> statements.
+
+=head2 its_previous_sibling (&)
+
+	where { its_previous_sibling { ... } }
+
+Similar to L</where (&)> except block is executed immediatelly with
+L</current element> set to L<previous_sibling> of L</current element>
+if exists.
 
 =head2 its_snext_sibling (&)
 
