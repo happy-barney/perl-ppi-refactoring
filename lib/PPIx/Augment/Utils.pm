@@ -8,6 +8,8 @@ package PPIx::Augment::Utils {
 	use PPI v1.278;
 	use Scalar::Util qw ();
 
+	use PPIx::Augment::No_Element;
+
 	sub current ();
 	sub element;
 	sub no_element ();
@@ -26,7 +28,7 @@ package PPIx::Augment::Utils {
 	}
 
 	sub no_element ()                   :Exported(accessor) {
-		return q ();
+		return PPIx::Augment::No_Element::->new;
 	}
 
 	1;
@@ -101,7 +103,15 @@ L</current element> otherwise.
 
 False value return by element accessor when there is no such element.
 
-Value is compatible with L<PPI> - empty string.
+Value is instance of class which
+
+=over
+
+=item evaluates as false
+
+=item mimics PPI elements returning safe false values
+
+=back
 
 =back
 
