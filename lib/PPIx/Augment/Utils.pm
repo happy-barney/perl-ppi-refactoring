@@ -649,6 +649,10 @@ package PPIx::Augment::Utils {
 		return $result ? ppi_exclude : ppi_include;
 	}
 
+	sub it_is_semicolon                 :Exported(classification) {
+		return it_is_token_structure (&element, q (;), @_);
+	}
+
 	sub it_is_significant               :Exported(classification) {
 		return it_is &element, PPI::Element::, { significant => undef };
 	}
@@ -1550,7 +1554,12 @@ Shortcut for calling L</it_is> with L<PPI::Node>.
 
 Executes provided code as a classification but negates its return value,
 returning L</ppi_include ()> or L</ppi_exclude ()>.
-FEatu
+
+=head2 it_is_semicolon
+
+    it_is_semicolon $element?, @conditions?;
+
+Shortcut for calling L<it_is_token_structure> with C<q (;)>.
 
 =head2 it_is_significant
 
