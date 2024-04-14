@@ -269,6 +269,18 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar_node (child => &element, @_) || no_element;
 	}
 
+	sub child_index                     :Exported(accessor) {
+		my $element = &element;
+
+		my @children = children (parent ($element));
+		for my $index (0 .. $#children) {
+			next unless $children[$index] == $element;
+			return $index;
+		}
+
+		return undef;
+	}
+
 	sub children                        :Exported(accessor) {
 		return _accessor_children children => &element, @_;
 	}
@@ -978,6 +990,14 @@ Unless specified otherwise, all functions work with L</effective element>.
 
 Returns child of L</effective element> if possible,
 L</no element> otherwise.
+
+=head2 child_index
+
+    child_index;
+    child_index $element;
+
+Returns index of L</effective element> in it's parent if possible,
+C<undef> otherwise.
 
 =head2 children
 
