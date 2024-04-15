@@ -25,6 +25,7 @@ assume_pod_sections
 		q (head2 current ()),
 		q (head2 element),
 		q (head2 no_element ()),
+		q (head2 schildren),
 		q (head2 snext_sibling),
 		q (head2 sprevious_sibling),
 	],
