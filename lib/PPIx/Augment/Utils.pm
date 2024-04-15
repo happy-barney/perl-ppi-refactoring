@@ -322,6 +322,48 @@ package PPIx::Augment::Utils {
 		return @found;
 	}
 
+	sub _traverse_transform {
+		my ($element, $where, $invoke, $start, $step) = @_;
+
+		return -1
+			unless $where
+			&& $invoke
+			&& $element->$_isa (PPI::Node::)
+			;
+
+		my $rv = 0;
+		my @queue = ([ $element, $start ]);
+		my %reflog;
+
+		while (@queue) {
+			my ($current, $index) = @{ shift @queue };
+			next unless $current;
+			my $parent = $current->parent;
+
+			if ($parent) {
+				my $next_index = $index + $step;
+				unshift @queue, [ $parent->child ($next_index), $next_index ]
+			}
+
+			next if $reflog{Scalar::Util::refaddr ($current)}++;
+
+			local $_ = $current;
+			if ($where->($element, $current)) {
+				$rv++;
+				$invoke->($element, $current);
+				if ($parent) {
+					$current = $parent->child ($index);
+					unshift @queue, [ $current, $index ];
+				}
+			}
+
+			unshift @queue, [ $current->child ($start), $start ]
+				if $current->$_isa (PPI::Node::);
+		}
+
+		return $rv;
+	}
+
 	sub child                           :Exported(accessor) {
 		return _accessor_scalar_node (child => &element, @_) || no_element;
 	}
@@ -949,6 +991,10 @@ package PPIx::Augment::Utils {
 
 	sub ppix_search_parent              :Exported(traversal) {
 		return _traverse_search (&_build_args_traversal, \ &parent);
+	}
+
+	sub ppix_transform                  :Exported(traversal) {
+		return _traverse_transform (&_build_args_traversal, 0, 1);
 	}
 
 	sub where (&)                       :Exported(traversal) {
@@ -2068,14 +2114,26 @@ while C<search> represents function which returns empty result instead.
 =head2 ppix_search_parent
 
 	my @elements = ppix_search_parent $element
+
+Similar to L</ppix_search> but investigates parents of starting element
+insteads.
+
+=head2 ppix_transform
+
+	ppix_transform $document
 		=> where  { ... condition 1 ... }
 		=> where  { ... condition 2 ... }
 		=> invoke { ... }
 		=> invoke { ... }
 		;
 
-Similar to L</ppix_search> but investigates parents of starting element
-insteads.
+Similar to L</ppix_search> but expects that L</invoke (&)> will modify
+current element so it will apply on replacement as well.
+
+Function tracks processed elements and prevents processing same
+element multiple times.
+
+Returns number of found elements.
 
 =head2 where (&)
 
