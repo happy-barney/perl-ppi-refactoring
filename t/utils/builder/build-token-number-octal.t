@@ -43,7 +43,7 @@ assume_builder q (should accept '-' sign)
 
 assume_builder q (should accept v5.34 octal number)
 	=> content => [ q (0o_1) ]
-	=> expect  => expect_element (PPI::Token::Number::Octal:: => q (0o_1))
+	=> expect  => expect_element (PPIx::Augment::Token::Number::Octal::v534::=> q (0o_1))
 	;
 
 assume_builder q (shouldn't allow '_' before v5.34 'o')

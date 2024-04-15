@@ -10,6 +10,8 @@ package PPIx::Augment::Utils {
 	use Scalar::Util qw ();
 	use Safe::Isa qw ($_isa);
 
+	use PPIx::Augment::Token::Number::Octal::v534;
+
 	use constant CLASS_INVOKE => q (PPIx::Augment::Utils::__::Invoke);
 	use constant CLASS_WHERE  => q (PPIx::Augment::Utils::__::Where);
 
@@ -650,7 +652,9 @@ package PPIx::Augment::Utils {
 
 	sub build_token_number_octal ($)    :Exported(builder) {
 		return _build_token
-			{ PPI::Token::Number::Octal:: => qr (^ [-]? 0 [oO]? (?= _* [0-7]) [0-7_]+ $)x },
+			qr (^ [-]? 0 [oO]? (?= _* [0-7]) [0-7_]+ $)x,
+			{ PPIx::Augment::Token::Number::Octal::v534:: => qr (^ 0 [oO] )x },
+			{ PPI::Token::Number::Octal::                 => undef },
 			@_
 	}
 

@@ -57,6 +57,7 @@ use_ok q (PPIx::Augment::Token::Number::Exp);
 use_ok q (PPIx::Augment::Token::Number::Float);
 use_ok q (PPIx::Augment::Token::Number::Hex);
 use_ok q (PPIx::Augment::Token::Number::Octal);
+use_ok q (PPIx::Augment::Token::Number::Octal::v534);
 use_ok q (PPIx::Augment::Token::Number::Version);
 use_ok q (PPIx::Augment::Token::Operator);
 use_ok q (PPIx::Augment::Token::Pod);
