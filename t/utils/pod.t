@@ -167,6 +167,7 @@ assume_pod_sections
 		q (head2 it_is_token_whitespace),
 		q (head2 it_is_token_word),
 		q (head2 it_is_use_statement),
+		q (head2 its_next_sibling (&)),
 		q (head2 its_parent (&)),
 		q (head2 its_previous_sibling (&)),
 		q (head2 its_snext_sibling (&)),
