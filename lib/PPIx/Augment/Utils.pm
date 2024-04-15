@@ -89,6 +89,54 @@ package PPIx::Augment::Utils {
 		return map { Ref::Util::is_plain_arrayref ($_) ? @$_ : $_ } @_;
 	}
 
+	sub _build_args_invoke {
+		return undef
+			unless my @list = grep $_->$_isa (CLASS_INVOKE), @_
+			;
+
+		return sub {
+			for my $callback (@list) {
+				$callback->(@_);
+			}
+			return 1;
+		};
+	}
+
+	sub _build_args_traversal {
+		my $element = &element;
+
+		if ($_[0] && ! ref $_[0]) {
+			my $code = __PACKAGE__->can ($_[0]);
+			$code //= (scalar caller (1))->can ($_[0]);
+
+			if ($code) {
+				shift;
+				$element = $code->();
+			}
+		}
+
+		return ($element, &_build_args_where, &_build_args_invoke);
+	}
+
+	sub _build_args_where {
+		return undef
+			unless my @list = map {
+				$_->$_isa (CLASS_WHERE) ? $_ : &where ($_)
+			} grep {
+				$_->$_isa (CLASS_WHERE) || Ref::Util::is_plain_coderef ($_)
+			} @_;
+
+		return sub {
+			my $result = ppi_include;
+
+			for my $callback (@list) {
+				last unless $result &&= $callback->(@_);
+			}
+
+			return $result;
+		};
+	}
+
 	sub _build_element {
 		my ($class, @children) = @_;
 		my @constructor = Ref::Util::is_plain_arrayref ($children[0])
@@ -301,6 +349,40 @@ package PPIx::Augment::Utils {
 			grep { it_is_element }
 			_arrayref_expand (shift)
 			;
+	}
+
+	sub _traverse_search {
+		my ($start, $where, $invoke, $traversal) = @_;
+
+		my $return_first = defined wantarray && ! wantarray;
+
+		unless ($where && $start->$_isa (PPI::Element::)) {
+			return no_element if $return_first;
+			return;
+		}
+
+		my @found;
+		# traverse should never use starting element
+		my @queue = $start->$traversal;
+		while (my $element = shift @queue) {
+			local $_ = $element;
+
+			next
+				unless defined (my $rv = $where->($start, $element))
+				;
+
+			if ($rv) {
+				$invoke->($start, $element) if $invoke;
+				return $element if $return_first;
+				push @found, $element;
+			}
+
+			unshift @queue, grep $_, $element->$traversal;
+		}
+
+		# can happen only if @found is empty
+		return no_element if $return_first;
+		return @found;
 	}
 
 	sub child                           :Exported(accessor) {
@@ -1175,6 +1257,13 @@ package PPIx::Augment::Utils {
 		my ($code) = @_;
 
 		return bless sub { local $_ = $_[1]; $code->(@_) }, CLASS_INVOKE;
+	}
+
+	sub ppix_search                     :Exported(traversal) {
+		return _traverse_search (
+			&_build_args_traversal,
+			sub { _accessor_list_node (elements => &element) },
+		);
 	}
 
 	sub where (&)                       :Exported(traversal) {
@@ -2556,6 +2645,60 @@ L</invoke (&)> block, when executed,
     $invoke_block->($document, $element);
 
 =item has L</current element> populated with found element
+
+=back
+
+=head2 ppix_search
+
+	my @elements = ppix_search $document
+		=> where  { ... condition 1 ... }
+		=> where  { ... condition 2 ... }
+		=> invoke { ... }
+		=> invoke { ... }
+		;
+
+Extended version of L<PPI>'s find indented to be easier to use.
+
+=over
+
+=item *
+
+in list context it returns a list of found elements (instead of arrayref)
+
+=item *
+
+in scalar context it returns only first found element
+
+=item *
+
+it supports only C<sub> / L</where (&)> conditions
+
+=item *
+
+it supports multiple conditions (combined using logical C<and>)
+
+=item *
+
+it supports invokation if custom code on found elements (see L</invoke (&)>)
+
+=item *
+
+it populates L</current element> before calling condition / invoke
+
+=back
+
+Default condition, when none is specified, is to exclude all elements.
+
+=over
+
+=item why C<search> instead of C<find>
+
+English meaning:
+
+    search = try to find
+
+C<find> represents functions which throws an C<NOT FOUND> exception
+while C<search> represents function which returns empty result instead.
 
 =back
 
