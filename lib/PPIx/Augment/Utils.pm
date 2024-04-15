@@ -405,6 +405,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Node::, @_;
 	}
 
+	sub it_is_operator_modulus          :Exported(classification) {
+		return it_is_token_operator (&element, q (%), @_);
+	}
+
 	sub it_is_package_declaration       :Exported(classification) {
 		my $element = &element;
 
@@ -1119,6 +1123,13 @@ Shortcut for calling L</it_is> with L<PPI::Element>.
     it_is_node $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Node>.
+
+=head2 it_is_operator_modulus
+
+    it_is_operator_modulus $element?, @conditions?.
+
+Shortcut for calling L</it_is_token_operator> with content
+condition C<%>.
 
 =head2 it_is_package_declaration
 
