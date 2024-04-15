@@ -29,7 +29,7 @@ sub assume_transformation {
 
 		assume $title
 			=> got    {
-				if (my @found = @{ $document->find ($where) || []}) {
+				if (my @found = ppix_search $document, $where) {
 					local $_ = $found[0];
 					$transformation->(@args, $arguments->(@found));
 				}
