@@ -157,7 +157,10 @@ assume_pod_sections
 		q (head2 elements_replace),
 		q (head2 insert_before),
 	],
-	q (head1 TRAVERSAL FUNCTIONS),
+	q (head1 TRAVERSAL FUNCTIONS) => [
+		q (head2 invoke (&)),
+		q (head2 where (&)),
+	],
 	q (head1 AUTHOR),
 	q (head1 COPYRIGHT AND LICENCE),
 	;
