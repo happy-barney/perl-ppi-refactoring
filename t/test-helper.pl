@@ -308,14 +308,5 @@ sub tests_root {
 	return Path::Tiny::->new (__FILE__)->parent;
 }
 
-sub where (&) {
-	my ($code) = @_;
-
-	return sub {
-		local $_ = $_[1];
-		&$code;
-	};
-}
-
 1;
 
