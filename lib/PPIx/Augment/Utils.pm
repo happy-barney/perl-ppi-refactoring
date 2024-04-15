@@ -835,6 +835,20 @@ package PPIx::Augment::Utils {
 		return;
 	}
 
+	sub elements_replace                :Exported(transformation) {
+		my @elements    = &_transformation_elements;
+		my @replacement = &_transformation_elements;
+
+		return
+			if child_index (my $head = $elements[0]) < 0
+			;
+
+		insert_before ($head, \ @replacement);
+		elements_remove (\ @elements);
+
+		return;
+	}
+
 	sub insert_before                   :Exported(transformation) {
 		my $element = &element or return;
 
@@ -1844,6 +1858,19 @@ Helper functions to modify L</effective element>.
 Removes provided element(s) from their parents.
 
 Function doesn't recognize neither L</effective element> nor L</current element>.
+
+=head2 elements_replace
+
+    elements_replace current, [ ... ];
+    elements_replace $element, [ ... ];
+    elements_replace [ current, next_sibling ], [ next_sibling, current ];
+
+Safely replace provided element(s) with new content.
+
+Function will clone replacement elements.
+
+Replaced elements doesn't need to be in sequence, helper simply
+replaces first element with new content and removes rest.
 
 =head2 insert_before
 
