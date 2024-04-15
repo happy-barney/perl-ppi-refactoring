@@ -276,6 +276,13 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (next_sibling => &element) || no_element;
 	}
 
+	sub next_siblings                   :Exported(accessor) {
+		my $element = &element;
+		my $child_index = child_index ($element);
+
+		return children (parent ($element), $child_index + 1, -1);
+	}
+
 	sub next_token                      :Exported(accessor) {
 		return _accessor_scalar (next_token => &element) || no_element;
 	}
@@ -938,6 +945,14 @@ Returns C<last_token> of L</effective element> if possible,
 
 Returns next sibling of L</effective element> if possible,
 L</no element> otherwise.
+
+=head2 next_siblings
+
+    next_siblings;
+    next_siblings $element?;
+
+Returns next siblings of L</effective element> if possible,
+empty list otherwise.
 
 =head2 next_token
 
