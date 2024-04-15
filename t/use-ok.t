@@ -10,6 +10,7 @@ use_ok q (PPIx::Augment::Element);
 use_ok q (PPIx::Augment::No_Element);
 use_ok q (PPIx::Augment::Token);
 use_ok q (PPIx::Augment::Token::Number);
+use_ok q (PPIx::Augment::Token::Number::Octal);
 use_ok q (PPIx::Augment::Utils);
 use_ok q (PPIx::Augment::Utils::Exporter);
 
