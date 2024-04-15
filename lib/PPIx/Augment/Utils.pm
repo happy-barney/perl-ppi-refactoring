@@ -21,6 +21,30 @@ package PPIx::Augment::Utils {
 	sub ppi_exclude_all ();
 	sub ppi_include ();
 
+	sub _accessor_children {
+		my ($method, $element, $first, $last) = @_;
+
+		return
+			unless it_is_node $element
+			;
+
+		my @all = $element->$method;
+
+		$first = _array_index (scalar @all, $first // 0);
+		$last  = _array_index (scalar @all, $last // -1);
+
+		$first = $last
+			if $first > $last
+			;
+
+		my @children = @all[$first .. $last];
+
+		return wantarray
+			? @children
+			: \ @children
+			;
+	}
+
 	sub _accessor_list {
 		my ($method, $element, @args) = @_;
 
@@ -42,6 +66,16 @@ package PPIx::Augment::Utils {
 
 	sub _accessor_scalar_node {
 		return scalar &_accessor_list_node;
+	}
+
+	sub _array_index {
+		my ($count, $value) = @_;
+
+		$value = -1 unless $value < $count;
+		$value += $count if $value < 0;
+		$value = 0 if $value < 0;
+
+		return $value;
 	}
 
 	sub _classification_condition {
@@ -161,6 +195,10 @@ package PPIx::Augment::Utils {
 
 	sub no_element ()                   :Exported(accessor) {
 		return PPIx::Augment::No_Element::->new;
+	}
+
+	sub schildren                       :Exported(accessor) {
+		return _accessor_children (schildren => &element, @_);
 	}
 
 	sub snext_sibling                   :Exported(accessor) {
@@ -604,6 +642,23 @@ Assumed usage eg in classification function:
 =head2 no_element ()
 
 Returns value representing L<PPI> meaning "there is no element".
+
+=head2 schildren
+
+    schildren;
+    schildren 0, -1;
+    schildren -3, -2;
+    schildren $element;
+
+Returns significant C<children> of L</effective element> if possible,
+empty list otherwise.
+
+When called with additional numeric arguments, first is treated as index
+of first child to return, second (-1 unless specified) as index of last
+child to return.
+
+When called in scalar context, it returns corresponding arrayref
+(unlike raw L<PPI::Node> method)
 
 =head2 snext_sibling
 
