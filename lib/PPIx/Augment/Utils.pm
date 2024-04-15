@@ -829,6 +829,12 @@ package PPIx::Augment::Utils {
 		goto & ppi_include;
 	}
 
+	sub elements_remove                 :Exported(transformation) {
+		$_->remove for &_transformation_elements;
+
+		return;
+	}
+
 	sub insert_before                   :Exported(transformation) {
 		my $element = &element or return;
 
@@ -1829,6 +1835,15 @@ Alias for L</ppi_include ()>
 =head1 TRANSFORMATION FUNCTIONS
 
 Helper functions to modify L</effective element>.
+
+=head2 elements_remove
+
+    elements_remove $element;
+    elements_remove [ $element1, $element2, ... ];
+
+Removes provided element(s) from their parents.
+
+Function doesn't recognize neither L</effective element> nor L</current element>.
 
 =head2 insert_before
 
