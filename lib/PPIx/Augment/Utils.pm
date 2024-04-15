@@ -357,6 +357,12 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_comment ($)         :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Comment::, qr (^#) },
+			@_
+	}
+
 	sub build_token_number ($)          :Exported(builder) {
 		return undef
 			// &build_token_number_decimal
@@ -1111,6 +1117,12 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_comment ($)
+
+    build_token_comment q (# foo);
+
+Builds instance of L<PPI::Token::Comment>.
 
 =head2 build_token_number ($)
 
