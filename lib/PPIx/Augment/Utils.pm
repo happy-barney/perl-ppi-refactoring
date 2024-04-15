@@ -78,6 +78,10 @@ package PPIx::Augment::Utils {
 		return $value;
 	}
 
+	sub _arrayref_expand {
+		return map { Ref::Util::is_plain_arrayref ($_) ? @$_ : $_ } @_;
+	}
+
 	sub _build_element {
 		my ($class, @children) = @_;
 		my @constructor = Ref::Util::is_plain_arrayref ($children[0])
@@ -278,6 +282,13 @@ package PPIx::Augment::Utils {
 	sub _link_parent_child {
 		my ($parent, $child) = @_;
 		Scalar::Util::weaken ($PPI::Singletons::_PARENT{_element_key $child} = $parent);
+	}
+
+	sub _transformation_elements {
+		return
+			grep { it_is_element }
+			_arrayref_expand (shift)
+			;
 	}
 
 	sub child                           :Exported(accessor) {
