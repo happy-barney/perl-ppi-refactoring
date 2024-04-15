@@ -33,6 +33,7 @@ assume_pod_sections
 		q (head2 last_child),
 		q (head2 last_token),
 		q (head2 next_sibling),
+		q (head2 next_siblings),
 		q (head2 next_token),
 		q (head2 no_element ()),
 		q (head2 parent),
