@@ -829,6 +829,14 @@ package PPIx::Augment::Utils {
 		goto & ppi_include;
 	}
 
+	sub insert_before                   :Exported(transformation) {
+		my $element = &element or return;
+
+		$element->__insert_before (map { $_->clone } &_transformation_elements);
+
+		return;
+	}
+
 	1;
 }
 
@@ -1821,6 +1829,15 @@ Alias for L</ppi_include ()>
 =head1 TRANSFORMATION FUNCTIONS
 
 Helper functions to modify L</effective element>.
+
+=head2 insert_before
+
+    insert_before [ new elements ... ];
+    insert_before $element, [ new elements ... ];
+
+Inserts new elements before L</effective argument>.
+
+Before insertion it clones every new element with parent.
 
 =head1 TRAVERSAL FUNCTIONS
 

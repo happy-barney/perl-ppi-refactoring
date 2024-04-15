@@ -152,7 +152,9 @@ assume_pod_sections
 		q (head2 ppix_exclude_all ()),
 		q (head2 ppix_include ()),
 	],
-	q (head1 TRANSFORMATION FUNCTIONS),
+	q (head1 TRANSFORMATION FUNCTIONS) => [
+		q (head2 insert_before),
+	],
 	q (head1 TRAVERSAL FUNCTIONS),
 	q (head1 AUTHOR),
 	q (head1 COPYRIGHT AND LICENCE),
