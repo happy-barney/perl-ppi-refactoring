@@ -1266,6 +1266,10 @@ package PPIx::Augment::Utils {
 		);
 	}
 
+	sub ppix_search_parent              :Exported(traversal) {
+		return _traverse_search (&_build_args_traversal, \ &parent);
+	}
+
 	sub where (&)                       :Exported(traversal) {
 		my ($code) = @_;
 
@@ -2701,6 +2705,18 @@ C<find> represents functions which throws an C<NOT FOUND> exception
 while C<search> represents function which returns empty result instead.
 
 =back
+
+=head2 ppix_search_parent
+
+	my @elements = ppix_search_parent $element
+		=> where  { ... condition 1 ... }
+		=> where  { ... condition 2 ... }
+		=> invoke { ... }
+		=> invoke { ... }
+		;
+
+Similar to L</ppix_search> but investigates parents of starting element
+insteads.
 
 =head2 where (&)
 
