@@ -192,6 +192,7 @@ assume_pod_sections
 		q (head2 ppix_search),
 		q (head2 ppix_search_following_sibling),
 		q (head2 ppix_search_parent),
+		q (head2 ppix_transform),
 		q (head2 where (&)),
 	],
 	q (head1 AUTHOR),
