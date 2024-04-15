@@ -6,6 +6,7 @@ use Test::More;
 use Test::Warnings qw ( :no_end_test had_no_warnings );
 
 use_ok q (PPIx::Augment);
+use_ok q (PPIx::Augment::Element);
 use_ok q (PPIx::Augment::No_Element);
 use_ok q (PPIx::Augment::Utils);
 use_ok q (PPIx::Augment::Utils::Exporter);
