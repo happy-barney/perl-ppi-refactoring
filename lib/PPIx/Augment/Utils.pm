@@ -292,6 +292,13 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (previous_sibling => &element) || no_element;
 	}
 
+	sub previous_siblings               :Exported(accessor) {
+		my $element = &element;
+		my $child_index = child_index ($element);
+
+		return children (parent ($element), 0, $child_index - 1);
+	}
+
 	sub previous_token                  :Exported(accessor) {
 		return _accessor_scalar (previous_token => &element) || no_element;
 	}
@@ -959,6 +966,14 @@ L</no element> otherwise.
 
 Returns previous sibling of L</effective element> if possible,
 L</no element> otherwise.
+
+=head2 previous_siblings
+
+    previous_siblings;
+    previous_siblings $element?;
+
+Returns previous siblings of L</effective element> if possible,
+empty list otherwise.
 
 =head2 previous_token
 
