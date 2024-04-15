@@ -37,6 +37,7 @@ assume_pod_sections
 		q (head2 no_element ()),
 		q (head2 parent),
 		q (head2 previous_sibling),
+		q (head2 previous_siblings),
 		q (head2 previous_token),
 		q (head2 schild),
 		q (head2 schildren),
