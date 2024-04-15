@@ -70,7 +70,7 @@ sub _assume_ppi_build_found {
 		;
 
 	if (my $where = _assume_ppi_build_where (%args)) {
-		$found = $got->find ($where) || [];
+		$found = [ ppix_search $got, $where ];
 
 		for my $invoke (grep $_, $args{invoke}) {
 			for my $element (@$found) {
