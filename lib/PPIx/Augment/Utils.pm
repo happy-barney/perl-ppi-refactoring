@@ -284,6 +284,11 @@ package PPIx::Augment::Utils {
 		Scalar::Util::weaken ($PPI::Singletons::_PARENT{_element_key $child} = $parent);
 	}
 
+	sub _return_list {
+		return @_ if wantarray;
+		return $_[0];
+	}
+
 	sub _transformation_elements {
 		return
 			grep { it_is_element }
@@ -1088,6 +1093,15 @@ package PPIx::Augment::Utils {
 
 	sub ppix_include ()                 :Exported(classification) {
 		goto & ppi_include;
+	}
+
+	sub insert_after                    :Exported(transformation) {
+		my $element = &element or return;
+		my @insert  = map { $_->clone } &_transformation_elements;
+
+		$element->__insert_after (@insert);
+
+		return _return_list @insert;
 	}
 
 	1;
@@ -2348,6 +2362,25 @@ Alias for L</ppi_include ()>
 =head1 TRANSFORMATION FUNCTIONS
 
 Helper functions to modify L</effective element>.
+
+=head2 insert_after
+
+    insert_after [ ... new elements ... ];
+    insert_after $element, [ ... new elements ... ];
+
+Inserts new elements after L</effective argument>.
+
+Before insertion it clones every new element with parent.
+
+Returns
+
+=over
+
+=item in list context all inserted elements
+
+=item in scalar context first inserted element
+
+=back
 
 =head1 TRAVERSAL FUNCTIONS
 

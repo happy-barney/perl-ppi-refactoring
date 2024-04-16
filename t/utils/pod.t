@@ -182,6 +182,7 @@ assume_pod_sections
 		q (head2 ppix_include ()),
 	],
 	q (head1 TRANSFORMATION FUNCTIONS) => [
+		q (head2 insert_after),
 	],
 	q (head1 TRAVERSAL FUNCTIONS) => [
 	],
