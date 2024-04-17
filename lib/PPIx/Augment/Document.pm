@@ -26,6 +26,20 @@ package PPIx::Augment::Document {
 		return %required;
 	}
 
+	use Ref::Util;
+
+	sub _build_requires_map {
+		my (@augmentations) = @_;
+
+		my %required;
+		while (my $augmentation = shift @augmentations) {
+			next if $required{$augmentation};
+			push @augmentations, @{ $required{$augmentation} = [ $augmentation->requires ] };
+		}
+
+		return %required;
+	}
+
 	sub new {
 		my ($class, $source, @args) = @_;
 
@@ -104,6 +118,12 @@ PPIx::Augment::Document - Augmented PPI class
 =head1 DESCRIPTION
 
 Augmented counterpart to L<PPI::Document>.
+
+=head1 METHODS
+
+=head2 augment
+
+    $document->augment (@augmentations);
 
 =head1 METHODS
 
