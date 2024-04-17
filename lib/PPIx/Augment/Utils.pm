@@ -638,6 +638,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_newline                   :Exported(classification) {
+		return it_is_token_whitespace (@_, qq (\n));
+	}
+
 	sub it_is_node                      :Exported(classification) {
 		return it_is &element, PPI::Node::, @_;
 	}
@@ -1572,6 +1576,14 @@ Shortcut for calling L</it_is> with L<PPI::Document>.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_newline
+
+    it_is_newline $element?
+
+Shortcut for
+
+    it_is_token_whitespace $element?, q (\n)
 
 =head2 it_is_node
 
