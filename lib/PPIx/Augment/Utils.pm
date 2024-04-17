@@ -1095,6 +1095,19 @@ package PPIx::Augment::Utils {
 		goto & ppi_include;
 	}
 
+	sub content_remove                  :Exported(transformation) {
+		my $element = &element;
+		my ($regex) = @_;
+
+		return q ()
+			unless it_is_token $element
+			;
+
+		$element->set_content ($element->content =~ s (($regex)) ()r);
+
+		return $1;
+	}
+
 	sub elements_remove                 :Exported(transformation) {
 		return map { $_->remove; $_ } &_transformation_elements;
 	}
@@ -2409,6 +2422,16 @@ Alias for L</ppi_include ()>
 =head1 TRANSFORMATION FUNCTIONS
 
 Helper functions to modify L</effective element>.
+
+=head2 content_remove
+
+    content_remove $regex;
+    content_remove $token, $regex;
+
+Edits content of L</effective element> (must be C<PPI::Token>),
+removes what C<$regex> matches, returning removed string.
+
+Fallback return value is empty string.
 
 =head2 elements_remove
 
