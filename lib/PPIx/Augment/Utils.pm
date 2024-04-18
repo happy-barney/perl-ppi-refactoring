@@ -638,6 +638,11 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Element::, @_;
 	}
 
+	sub it_is_empty_line                :Exported(classification) {
+		my $element = &element;
+		return it_is_newline ($element) && previous_token ($element) =~ qr (\n$);
+	}
+
 	sub it_is_newline                   :Exported(classification) {
 		return it_is_token_whitespace (@_, qq (\n));
 	}
@@ -1576,6 +1581,13 @@ Shortcut for calling L</it_is> with L<PPI::Document>.
     it_is_element $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Element>.
+
+=head2 it_is_empty_line
+
+    it_is_empty_line;
+    it_is_empty_line $element;
+
+Test that L</effective element> is a newline followed by newline.
 
 =head2 it_is_newline
 
