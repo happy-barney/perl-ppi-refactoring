@@ -83,6 +83,7 @@ assume_pod_sections
 		q (head2 exclude_all (&)),
 		q (head2 it_is),
 		q (head2 it_is_document),
+		q (head2 it_is_empty_line),
 		q (head2 it_is_element),
 		q (head2 it_is_newline),
 		q (head2 it_is_node),
