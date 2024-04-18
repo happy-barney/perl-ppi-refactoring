@@ -789,6 +789,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Token::Number::Binary::, @_;
 	}
 
+	sub it_is_token_number_decimal      :Exported(classification) {
+		return it_is_token_number (&element, qr (^ -? (?! 0 \d) \d+ $)x, @_);
+	}
+
 	sub it_is_token_number_exp          :Exported(classification) {
 		return it_is &element, PPI::Token::Number::Exp::, @_;
 	}
@@ -1774,6 +1778,13 @@ Shortcut for calling L</it_is> with L<PPI::Token::Number>.
     it_is_token_number_binary $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Token::Number::Binary>.
+
+=head2 it_is_token_number_decimal
+
+    it_is_token_number_decimal $element?, @conditions?;
+
+Test L</effective element> that it is L<PPI::Token::Number>
+containing only decimal integer value (ie it is not Number subclass)
 
 =head2 it_is_token_number_exp
 

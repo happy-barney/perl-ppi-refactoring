@@ -121,6 +121,7 @@ assume_pod_sections
 		q (head2 it_is_token_magic),
 		q (head2 it_is_token_number),
 		q (head2 it_is_token_number_binary),
+		q (head2 it_is_token_number_decimal),
 		q (head2 it_is_token_number_exp),
 		q (head2 it_is_token_number_float),
 		q (head2 it_is_token_number_hex),
