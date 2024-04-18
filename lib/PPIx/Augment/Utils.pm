@@ -643,6 +643,14 @@ package PPIx::Augment::Utils {
 		return it_is_newline ($element) && previous_token ($element) =~ qr (\n$);
 	}
 
+	sub it_is_followed_by_empty_line    :Exported(classification) {
+		# Tests for sequence:
+		#    next token (1) is new line
+		#    next token (2) is empty line
+
+		return it_is_empty_line (next_token (&next_token));
+	}
+
 	sub it_is_newline                   :Exported(classification) {
 		return it_is_token_whitespace (@_, qq (\n));
 	}
@@ -1581,6 +1589,12 @@ Shortcut for calling L</it_is> with L<PPI::Element>.
     it_is_empty_line $element;
 
 Test that L</effective element> is a newline followed by newline.
+
+=head2 it_is_followed_by_empty_line
+
+    it_is_followed_by_empty_line $element?
+
+Tests whether I<effective element> is followed by L<empty line|/it_is_empty_line>.
 
 =head2 it_is_newline
 
