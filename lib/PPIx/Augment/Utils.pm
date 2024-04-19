@@ -13,6 +13,7 @@ package PPIx::Augment::Utils {
 	sub current ();
 	sub element;
 	sub it_is;
+	sub it_is_element;
 	sub it_is_node;
 	sub no_element ();
 	sub ppi_bool ($);
@@ -152,6 +153,10 @@ package PPIx::Augment::Utils {
 			{ isa => shift },
 			@_
 		);
+	}
+
+	sub it_is_element                   :Exported(classification) {
+		return it_is &element, PPI::Element::, @_;
 	}
 
 	sub it_is_node                      :Exported(classification) {
@@ -643,6 +648,12 @@ Applies conditions as L</it conditions> with
     local current value   = accessor (current value);
 
 =back
+
+=head2 it_is_element
+
+    it_is_element $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Element>.
 
 =head2 it_is_node
 
