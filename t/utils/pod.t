@@ -30,6 +30,7 @@ assume_pod_sections
 	],
 	q (head1 CLASSIFICATION FUNCTIONS) => [
 		q (head2 exclude_all (&)),
+		q (head2 it_is),
 		q (head2 it_is_not (&)),
 		q (head2 ppi_bool ($)),
 		q (head2 ppi_exclude ()),
