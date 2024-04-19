@@ -12,6 +12,7 @@ package PPIx::Augment::Utils {
 
 	sub current ();
 	sub element;
+	sub it_is;
 	sub no_element ();
 	sub ppi_bool ($);
 	sub ppi_exclude ();
@@ -142,6 +143,14 @@ package PPIx::Augment::Utils {
 		my $result = Ref::Util::is_plain_coderef ($code) ? $code->() : $code;
 
 		return $result ? ppi_include : ppi_exclude_all;
+	}
+
+	sub it_is                           :Exported(classification) {
+		return _classification_conditions (
+			&element,
+			{ isa => shift },
+			@_
+		);
 	}
 
 	sub it_is_not (&)                   :Exported(classification) {
@@ -314,6 +323,64 @@ When you need to return L</ppix_exclude_all ()> use one of patterns:
 
 Executes provided code as a classification and converts returned value
 L</ppi_exclude ()> to L</ppi_exclude_all ()>.
+
+=head2 it_is
+
+    it_is $element?, CLASS, @conditions?
+
+Classify L</effective element> as an instance of C<CLASS>,
+matching optional C<@conditions>.
+
+=head3 it conditions
+
+Before executing conditions sets
+
+    current value   = effective element
+    current context = undef
+
+=over
+
+=item undef
+
+Evaluates as C<current value> in boolean context.
+
+=item scalar
+
+Stringwise compare C<current value> and condition value.
+
+=item regexp
+
+Match C<current value> and condition regexp/
+
+=item coderef
+
+Called as
+
+    local $_ = current value;
+    $coderef->(current context, $current value);
+
+=item arrayref
+
+Evaluates conditions using logical C<and> (and lazy evaluation)
+
+=item hashref
+
+Hashref key is treated either as one of PPI::Augment::Utils's functions
+(if exists) or element's method (if exists).
+
+    it_is $element, PPI::Token::Word:: {
+        parent => [
+            { isa  => PPI::Statement::Package:: },
+            { name => qr ( ^ Test \b )x },
+        ]
+    }
+
+Applies conditions as L</it conditions> with
+
+    local current context = current value;
+    local current value   = accessor (current value);
+
+=back
 
 =head2 it_is_not (&)
 
