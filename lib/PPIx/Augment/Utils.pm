@@ -1150,6 +1150,10 @@ package PPIx::Augment::Utils {
 		return it_is_statement_include &element, { type => q (use) }, @_;
 	}
 
+	sub it_is_word_list                 :Exported(classification) {
+		return it_is &element, PPI::Token::QuoteLike::Words::, @_;
+	}
+
 	sub its_first_child (&)             :Exported(classification) {
 		return _its first_child => @_;
 	}
@@ -2420,6 +2424,12 @@ See L</it_is> for description of C<@conditions>.
     it_is_use_statement $element?, @conditions?
 
 Classify L</it_is_statement_include> which starts with C<use>.
+
+=head2 it_is_word_list
+
+    it_is_word_list $element?, @conditions?
+
+Shortcut for calling L</it_is> with L<PPI::Token::QuoteLike::Words>.
 
 =head2 its_first_child (&)
 
