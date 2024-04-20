@@ -683,6 +683,10 @@ package PPIx::Augment::Utils {
 		return it_is &element, PPI::Structure::When::, @_;
 	}
 
+	sub it_is_sub_definition            :Exported(classification) {
+		return it_is_statement_sub &element, { last_child => sub { it_is_structure_block () } }, @_;
+	}
+
 	sub it_is_token                     :Exported(classification) {
 		return it_is &element, PPI::Token::, @_;
 	}
@@ -1591,6 +1595,18 @@ Shortcut for calling L</it_is> with L<PPI::Structure::Subscript>.
     it_is_structure_when $element?, @conditions?
 
 Shortcut for calling L</it_is> with L<PPI::Structure::When>.
+
+=head2 it_is_sub_definition
+
+    it_is_sub_definition $element?, @it_conditions?.
+
+Classify L</effective element> as an instance of L<PPI::Statement::Sub>
+with sub body.
+
+Matches
+
+    my sub foo { ... }
+    sub foo { ... }
 
 =head2 it_is_token
 
