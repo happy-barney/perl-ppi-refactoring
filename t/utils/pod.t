@@ -109,6 +109,7 @@ assume_pod_sections
 		q (head2 it_is_structure_list),
 		q (head2 it_is_structure_subscript),
 		q (head2 it_is_structure_when),
+		q (head2 it_is_sub_declaration),
 		q (head2 it_is_sub_definition),
 		q (head2 it_is_token),
 		q (head2 it_is_token_array_index),
