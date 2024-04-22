@@ -14,6 +14,7 @@ package PPIx::Augment::Utils {
 	use constant CLASS_WHERE  => q (PPIx::Augment::Utils::__::Where);
 
 	use PPIx::Augment::No_Element;
+	use PPIx::Augment::Structure::Signature;
 
 	sub current ();
 	sub element;
@@ -1053,7 +1054,13 @@ package PPIx::Augment::Utils {
 	}
 
 	sub it_is_token_prototype           :Exported(classification) {
-		return it_is &element, PPI::Token::Prototype::, @_;
+		my $element = &element;
+
+		return ppi_exclude
+			if it_is $element, PPIx::Augment::Structure::Signature::
+			;
+
+		return it_is $element, PPI::Token::Prototype::, @_;
 	}
 
 	sub it_is_token_quote               :Exported(classification) {
