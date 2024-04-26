@@ -3,11 +3,13 @@ use v5.14;
 use warnings;
 
 use Test::More;
-use Test::Warnings qw ( :no_end_test had_no_warnings );
+use Test::Warnings qw (:no_end_test had_no_warnings);
 
 use_ok q (PPIx::Augment);
+use_ok q (PPIx::Augment::Augmentation);
 use_ok q (PPIx::Augment::DOM::Element);
 use_ok q (PPIx::Augment::DOM::No_Element);
+use_ok q (PPIx::Augment::Document);
 use_ok q (PPIx::Augment::Internals);
 use_ok q (PPIx::Augment::Internals::Exporter);
 use_ok q (PPIx::Augment::Utils);
