@@ -10,10 +10,42 @@ PPIx::Augment - Augment structure of PPI document
 
 version 1.0.0
 
+=head1 SYNOPSIS
+
+    my $document = PPIx::Augment::->augment ($file);
+    my $document = PPIx::Augment::->augment (\ $source);
+    my $document = PPIx::Augment::->augment ($file, (
+        Augmentation::Class::
+        Augmentation::Another::Class::
+    ));
+
 =head1 DESCRIPTION
 
 L<PPIx::Augment> extends L<PPI> data model with focus to simplify
 automated source code processing (especially refactoring).
+
+=head1 METHODS
+
+=head2 augment
+
+    PPIx::Augment::->augment ($source, @augmentations?);
+
+Create new L<PPIx::Augment::Document> with provided augmentations applied.
+
+=over
+
+=item C<$source>
+
+Source as L<PPI::Document> understands.
+
+=item C<@augmentations>
+
+List of augmentations to apply.
+
+When no augmentations is provided, applies all augmentations provided by
+L</available_augmentations> method.
+
+=back
 
 =head1 AUTHOR
 
