@@ -107,8 +107,6 @@ Augmented counterpart to L<PPI::Document>.
 
 =head1 METHODS
 
-=head1 METHODS
-
 =head2 augment
 
     $document->augment (@augmentations);
