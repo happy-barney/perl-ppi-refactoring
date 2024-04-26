@@ -33,6 +33,7 @@ my %module_build_args = (
     "Scalar::Util" => 0,
     "constant" => 0,
     "mro" => 0,
+    "namespace::clean" => 0,
     "overload" => 0,
     "parent" => 0,
     "perl" => "5.014",
