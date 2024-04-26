@@ -2,7 +2,7 @@
 use v5.14;
 use warnings;
 
-package PPIx::Augment::Node {
+package PPIx::Augment::DOM::Node {
 	use parent qw (
 		PPIx::Augment::DOM::Element
 		PPI::Node
@@ -10,7 +10,7 @@ package PPIx::Augment::Node {
 
 	use mro q (c3);
 
-	use PPI::Node v1.278;
+	use PPI v1.278;
 
 	1;
 };
@@ -23,7 +23,7 @@ __END__
 
 =head1 NAME
 
-PPIx::Augment::Node - Augmented PPI class
+PPIx::Augment::DOM::Node - Augmented PPI class
 
 =head1 INHERITANCE
 
@@ -39,7 +39,7 @@ Branislav Zahradník <barney@cpan.org>
 
 =head1 COPYRIGHT AND LICENCE
 
-This module is part of L<PPIx::Augment> distribution.
+This module is part of the L<PPIx::Augment> distribution.
+It may be modified and/or distributed under the same terms as the distribution itself.
 
 =cut
-
