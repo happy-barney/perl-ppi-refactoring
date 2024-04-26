@@ -18,6 +18,7 @@ use PPIx::Augment::DOM::No_Element;
 use PPIx::Augment::Utils;
 
 sub _build_argument_function;
+sub assume_ppi;
 sub deduce_undef;
 sub distribution_root;
 sub fixture_path;
@@ -27,6 +28,7 @@ sub ppi_dump;
 sub tests_root;
 
 my $SINGLETON_ACCESSOR       = q (arrange-ppixa-accessor);
+my $SINGLETON_AUGMETATION    = q (arrange-ppixa-augmentation);
 my $SINGLETON_CLASSIFICATION = q (arrange-ppixa-classification);
 my $SINGLETON_DOCUMENT       = q (arrange-ppixa-document);
 
@@ -136,6 +138,61 @@ sub arrange_document (&) {
 	proclaim $SINGLETON_DOCUMENT => shift->();
 }
 
+sub assume_augmentation {
+	my ($title, %args) = @_;
+
+	$args{caller} //= caller;
+
+	Test::YAFT::test_frame {
+		subtest $title => sub {
+			my $document = _assume_ppi_build_got (%args);
+			my $expect_document = $args{expect_document};
+			my $expect_analyze  = $args{expect_analyze};
+			my $expect_augment  = $args{expect_augment};
+			my $expect_result   = $args{expect_result};
+			my $augmentation    = $args{augmentation}
+				// deduce_undef ($SINGLETON_AUGMETATION)
+				// die q (assume_augmentation (): 'augmentation' is required)
+				;
+
+			assume_ppi q (PPI document structure before applying augmentation)
+				=> got    => $document
+				=> expect => $expect_document
+				if defined $expect_document
+				;
+
+			assume_ppi q (analyze () should return list of triggering elements)
+				=> got    => [ $augmentation->analyze ($document) ]
+				=> expect => $expect_analyze
+				if defined $expect_analyze
+				;
+
+			assume q (augment () should return number of invokations)
+				=> got    { $augmentation->augment ($document) }
+				=> expect => $expect_augment // expect_compare (q (>=), 0)
+				;
+
+			if (defined $expect_result) {
+				$expect_result = $expect_result->content
+					if $expect_result->$Safe::Isa::_isa (PPI::Element::)
+					;
+
+				$document = $document->content
+					unless ref $expect_result
+					;
+
+				my $code = ref ($expect_result) ? \ &assume_ppi : \ &assume;
+
+				$code->(
+					q (augment () should transform document)
+					=> got    => $document
+					=> expect => $expect_result
+				);
+			}
+		};
+	};
+}
+
 sub assume_ppi {
 	my ($title, %args) = @_;
 
@@ -174,6 +231,10 @@ sub distribution_root {
 
 sub expect (&) {
 	expect => shift->()
+}
+
+sub expect_document {
+	expect_element (PPI::Document:: => @_);
 }
 
 sub expect_element {
@@ -298,6 +359,10 @@ sub ppi_token {
 
 sub testing_accessor (&) {
 	proclaim $SINGLETON_ACCESSOR => shift;
+}
+
+sub testing_augmentation (&) {
+	proclaim $SINGLETON_AUGMETATION => shift->();
 }
 
 sub testing_classification (&) {
