@@ -2,5 +2,6 @@
 
 perl "$(dirname "$(dirname "$(realpath "$0")")")"/ppi-cleanup.pl \
 	 --exclude t/utils/exporter.t \
+	 --exclude t/augmentation.t \
 	 --exclude t/augmentation/document-augmentation-apply-order.t \
 	 "$@"
