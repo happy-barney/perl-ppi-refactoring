@@ -357,6 +357,14 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_quotelike_command ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::QuoteLike::Command::,
+			qr (^qx),
+			@_
+		);
+	}
+
 	sub build_token_quotelike_readline ($) :Exported(builder) {
 		return _build_token_quoted (
 			PPI::Token::QuoteLike::Readline::,
@@ -1008,6 +1016,13 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_quotelike_command ($)
+
+    build_token_quotelike_command q (qx (foo bar))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::QuoteLike::Command>.
 
 =head2 build_token_quotelike_readline ($)
 
