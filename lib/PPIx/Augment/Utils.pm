@@ -357,6 +357,14 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_regexp_match ($)    :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Regexp::Match::,
+			qr (^[m/]),
+			@_
+		);
+	}
+
 	sub build_token_regexp_substitute ($) :Exported(builder) {
 		return _build_token_quoted (
 			PPI::Token::Regexp::Substitute::,
@@ -976,6 +984,13 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_regexp_match ($)
+
+    build_token_regexp_match q (m (abc))
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Regexp::Match>.
 
 =head2 build_token_regexp_substitute ($)
 
