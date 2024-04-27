@@ -30,6 +30,7 @@ my %module_build_args = (
     "Safe::Isa" => 0,
     "Scalar::Util" => 0,
     "constant" => 0,
+    "mro" => 0,
     "overload" => 0,
     "parent" => 0,
     "perl" => "5.014",
