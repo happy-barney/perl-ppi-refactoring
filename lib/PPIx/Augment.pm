@@ -3,6 +3,9 @@ use v5.14;
 use warnings;
 
 package PPIx::Augment {
+
+	use PPIx::Augment::Element;
+
 	1;
 }
 
@@ -18,8 +21,7 @@ PPIx::Augment - Improve structure of PPI document
 
 =head1 DESCRIPTION
 
-Improve data structure of PPI documents for easier work with, including
-fixing some bugs and supporting newer language features.
+Improve data structure of PPI documents for easier work with.
 
 =head1 AUTHOR
 
