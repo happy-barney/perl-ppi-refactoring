@@ -44,6 +44,7 @@ assume_pod_sections
 		q (head2 top_element),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
+		q (head2 build_token_quote_double ($)),
 		q (head2 build_token_quote_interpolate ($)),
 		q (head2 build_token_quote_literal ($)),
 		q (head2 build_token_quote_single ($)),
