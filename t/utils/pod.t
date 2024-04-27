@@ -44,6 +44,7 @@ assume_pod_sections
 		q (head2 top_element),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
+		q (head2 build_token_regexp_transliterate ($)),
 		q (head2 build_token_structure ($)),
 		q (head2 build_token_whitespace ($)),
 		q (head2 build_token_word ($)),

@@ -136,6 +136,31 @@ package PPIx::Augment::Utils {
 		return undef;
 	}
 
+	sub _build_token_quoted {
+		my ($class, $re_validate, $content) = @_;
+
+		return
+			unless defined $content
+			&& defined $re_validate
+			&& $content =~ m (^($re_validate))x
+			;
+
+		my $init = $1;
+		my $token = $class->new ($init)
+			// return no_element
+			;
+
+		$class->_fill (bless {
+			class       => $class,
+			line        => $content,
+			line_cursor => length $init,
+			line_length => length $content,
+			token       => $token,
+		}, PPI::Tokenizer::);
+
+		return $token;
+	}
+
 	sub _classification_condition {
 		my ($context, $value, @conditions) = @_;
 
@@ -330,6 +355,14 @@ package PPIx::Augment::Utils {
 
 	sub top_element                     :Exported(accessor) {
 		return _accessor_scalar (top => &element) || no_element;
+	}
+
+	sub build_token_regexp_transliterate ($) :Exported(builder) {
+		return _build_token_quoted (
+			PPI::Token::Regexp::Transliterate::,
+			qr (^ (?: (?:tr) | (?:y) ) )x,
+			@_
+		);
 	}
 
 	sub build_token_structure ($)       :Exported(builder) {
@@ -935,6 +968,13 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_regexp_transliterate ($)
+
+    build_token_regexp_transliterate q (tr [abc] [ABC]r)
+
+Returns element representing provided string. Element is an instance of
+L<PPI::Token::Regexp::Transliterate>.
 
 =head2 build_token_structure ($)
 
