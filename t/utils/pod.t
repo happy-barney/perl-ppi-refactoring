@@ -44,6 +44,7 @@ assume_pod_sections
 		q (head2 top_element),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
+		q (head2 build_token_quotelike_command ($)),
 		q (head2 build_token_quotelike_readline ($)),
 		q (head2 build_token_quotelike_regexp ($)),
 		q (head2 build_token_quotelike_words ($)),
