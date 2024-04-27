@@ -8,6 +8,7 @@ requires "Ref::Util" => "0";
 requires "Safe::Isa" => "0";
 requires "Scalar::Util" => "0";
 requires "constant" => "0";
+requires "mro" => "0";
 requires "namespace::clean" => "0";
 requires "overload" => "0";
 requires "parent" => "0";
