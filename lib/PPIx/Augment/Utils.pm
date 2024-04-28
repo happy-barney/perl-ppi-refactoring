@@ -1211,6 +1211,19 @@ package PPIx::Augment::Utils {
 		return $1;
 	}
 
+	sub elements_wrap                 :Exported(transformation) {
+		return
+			unless my @elements = &_transformation_elements
+			;
+
+		my $node = shift->new;
+
+		$_->remove for &_transformation_elements;
+
+		return;
+	}
+
+
 	sub elements_remove                 :Exported(transformation) {
 		return map { $_->remove; $_ } &_transformation_elements;
 	}
