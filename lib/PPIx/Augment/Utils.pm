@@ -163,6 +163,10 @@ package PPIx::Augment::Utils {
 		return PPIx::Augment::No_Element::->new;
 	}
 
+	sub top_element                     :Exported(accessor) {
+		return _accessor_scalar (top => &element) || no_element;
+	}
+
 	sub exclude_all (&)                 :Exported(classification) {
 		my $code = shift;
 		my $result = Ref::Util::is_plain_coderef ($code) ? $code->() : $code;
@@ -592,6 +596,14 @@ Assumed usage eg in classification function:
 =head2 no_element ()
 
 Returns value representing L<PPI> meaning "there is no element".
+
+=head2 top_element
+
+    top_element;
+    top_element $element;
+
+Returns top element (one without parent) of L</effective element>
+if possible, L</no_element ()> otherwise.
 
 =head1 BUILDER FUNCTIONS
 
