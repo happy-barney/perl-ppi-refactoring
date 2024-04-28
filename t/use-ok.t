@@ -14,6 +14,8 @@ use_ok q (PPIx::Augment::Document);
 use_ok q (PPIx::Augment::Element);
 use_ok q (PPIx::Augment::No_Element);
 use_ok q (PPIx::Augment::Node);
+use_ok q (PPIx::Augment::Scope);
+use_ok q (PPIx::Augment::Scope::Namespace);
 use_ok q (PPIx::Augment::Statement);
 use_ok q (PPIx::Augment::Statement::Break);
 use_ok q (PPIx::Augment::Statement::Compound);
