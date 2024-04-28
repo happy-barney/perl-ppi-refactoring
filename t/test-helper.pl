@@ -5,6 +5,7 @@ use warnings;
 use Carp::Always; # must be before Test::YAFT - replaces $SIG{__WARN__}
 
 use Context::Singleton;
+use List::Util;
 use Path::Tiny qw ();
 use PPI v1.277;
 use PPI::Dumper;
@@ -193,6 +194,23 @@ sub assume_augmentation {
 	};
 }
 
+sub assume_perl_behavior {
+	my ($title, %args) = @_;
+
+	my @expect =
+		map { $_ => $args{$_} }
+		List::Util::first { exists $args{$_} }
+		qw (expect throws)
+		;
+
+	Test::YAFT::test_frame {
+		assume $title
+			=> got { eval (q (no warnings;) . $args{document}) // die }
+			=> @expect
+			;
+	};
+}
+
 sub assume_ppi {
 	my ($title, %args) = @_;
 
@@ -298,6 +316,10 @@ sub expect_no_element () {
 
 sub expect_nodeset {
 	return [ @_ ];
+}
+
+sub expect_syntax_error {
+	expect_re (qr (^syntax error));
 }
 
 sub fixture {
