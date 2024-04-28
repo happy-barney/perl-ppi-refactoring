@@ -21,6 +21,30 @@ package PPIx::Augment::Utils {
 	sub ppi_exclude_all ();
 	sub ppi_include ();
 
+	sub _accessor_children {
+		my ($method, $element, $first, $last) = @_;
+
+		return
+			unless it_is_node $element
+			;
+
+		my @all = $element->$method;
+
+		$first = _array_index (scalar @all, $first // 0);
+		$last  = _array_index (scalar @all, $last // -1);
+
+		$first = $last
+			if $first > $last
+			;
+
+		my @children = @all[$first .. $last];
+
+		return wantarray
+			? @children
+			: \ @children
+			;
+	}
+
 	sub _accessor_list {
 		my ($method, $element, @args) = @_;
 
@@ -42,6 +66,16 @@ package PPIx::Augment::Utils {
 
 	sub _accessor_scalar_node {
 		return scalar &_accessor_list_node;
+	}
+
+	sub _array_index {
+		my ($count, $value) = @_;
+
+		$value = -1 unless $value < $count;
+		$value += $count if $value < 0;
+		$value = 0 if $value < 0;
+
+		return $value;
 	}
 
 	sub _classification_condition {
@@ -139,6 +173,18 @@ package PPIx::Augment::Utils {
 		return !! $condition->($context, $value);
 	}
 
+	sub child                           :Exported(accessor) {
+		return _accessor_scalar_node (child => &element, @_) || no_element;
+	}
+
+	sub children                        :Exported(accessor) {
+		return _accessor_children children => &element, @_;
+	}
+
+	sub content                         :Exported(accessor) {
+		return _accessor_scalar (content => &element) // q ();
+	}
+
 	sub current ()                      :Exported(accessor) {
 		return $_;
 	}
@@ -159,8 +205,64 @@ package PPIx::Augment::Utils {
 		return current;
 	}
 
+	sub first_child                     :Exported(accessor) {
+		return _accessor_scalar_node (child => &element, 0) || no_element;
+	}
+
+	sub first_token                     :Exported(accessor) {
+		return eval { _accessor_scalar (first_token => &element) } || no_element;
+	}
+
+	sub last_child                      :Exported(accessor) {
+		return _accessor_scalar_node (child => &element, -1) || no_element;
+	}
+
+	sub last_token                      :Exported(accessor) {
+		return eval { _accessor_scalar (last_token => &element) } || no_element;
+	}
+
+	sub next_sibling                    :Exported(accessor) {
+		return _accessor_scalar (next_sibling => &element) || no_element;
+	}
+
+	sub next_token                      :Exported(accessor) {
+		return _accessor_scalar (next_token => &element) || no_element;
+	}
+
 	sub no_element ()                   :Exported(accessor) {
 		return PPIx::Augment::DOM::No_Element::->new;
+	}
+
+	sub parent                          :Exported(accessor) {
+		return _accessor_scalar (parent => &element) || no_element;
+	}
+
+	sub previous_sibling                :Exported(accessor) {
+		return _accessor_scalar (previous_sibling => &element) || no_element;
+	}
+
+	sub previous_token                  :Exported(accessor) {
+		return _accessor_scalar (previous_token => &element) || no_element;
+	}
+
+	sub schild                          :Exported(accessor) {
+		return _accessor_scalar_node (schild => &element, @_) || no_element;
+	}
+
+	sub schildren                       :Exported(accessor) {
+		return _accessor_children (schildren => &element, @_);
+	}
+
+	sub snext_sibling                   :Exported(accessor) {
+		return _accessor_scalar (snext_sibling => &element) || no_element;
+	}
+
+	sub sprevious_sibling               :Exported(accessor) {
+		return _accessor_scalar (sprevious_sibling => &element) || no_element;
+	}
+
+	sub top_element                     :Exported(accessor) {
+		return _accessor_scalar (top => &element) || no_element;
 	}
 
 	sub exclude_all (&)                 :Exported(classification) {
@@ -577,6 +679,36 @@ All accessor functions recognize C</no element> and return the corresponding val
 
 Unless specified otherwise, all functions work with L</effective element>.
 
+=head2 child
+
+    child 1;
+    child $node, -1;
+
+Returns child of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 children
+
+    children;
+    children 0, -1;
+    children -3, -2;
+    children $element;
+
+Returns C<content> of L</effective element>, empty list otherwise.
+
+If called with additional numeric arguments, first is treated as index
+of first child to return, second (-1 unless specified) as index of last
+child to return.
+
+Both can be negative.
+
+=head2 content
+
+    content;
+    content $element;
+
+Returns C<content> of L</effective element>, empty string otherwise.
+
 =head2 current ()
 
 Returns L</current element>.
@@ -590,9 +722,129 @@ Assumed usage eg in classification function:
     # Using this syntax so shift will actually modify our arguments
     my $element = &element;
 
+=head2 first_child
+
+    first_element;
+    first_element $node;
+
+Returns C<first_element> of L</effective element> if possible,
+L<no_element> otherwise.
+
+=head2 first_token
+
+    first_token;
+    first_token $element;
+
+Returns C<first_token> of L</effective element> if possible,
+L<no_element> otherwise.
+
+=head2 last_child
+
+    last_child;
+    last_child $node;
+
+Returns last child of L</effective element> if possible,
+L<no_element> otherwise.
+
+=head2 last_token
+
+    last_token;
+    last_token $element;
+
+Returns C<last_token> of L</effective element> if possible,
+
+=head2 next_sibling
+
+    next_sibling;
+    next_sibling $element;
+
+Returns next sibling of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 next_token
+
+    next_token;
+    next_token $element;
+
+Returns next token of L</effective element> if possible,
+L</no element> otherwise.
+
 =head2 no_element ()
 
 Returns value representing L<PPI> meaning "there is no element".
+
+=head2 parent
+
+    parent;
+    parent $element;
+
+Returns parent element of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 previous_sibling
+
+    previous_sibling;
+    previous_sibling $element;
+
+Returns previous sibling of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 previous_token
+
+    previous_token;
+    previous_token $element;
+
+Returns previous token of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 schild
+
+    schild 1;
+    schild $node, -1;
+
+Returns significant child of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 schildren
+
+    schildren;
+    schildren 0, -1;
+    schildren -3, -2;
+    schildren $element;
+
+Returns significant C<children> of L</effective element> if possible,
+empty list otherwise.
+
+When called with additional numeric arguments, first is treated as index
+of first child to return, second (-1 unless specified) as index of last
+child to return.
+
+When called in scalar context, it returns corresponding arrayref
+(unlike raw L<PPI::Node> method)
+
+=head2 snext_sibling
+
+    snext_sibling;
+    snext_sibling $element;
+
+Returns next significant sibling of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 sprevious_sibling
+
+    sprevious_sibling;
+    sprevious_sibling $element;
+
+Returns previous significant sibling of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 top_element
+
+    top_element;
+    top_element $element;
+
+Returns top element (one without parent) of L</effective element>
+if possible, L</no_element ()> otherwise.
 
 =head1 BUILDER FUNCTIONS
 
