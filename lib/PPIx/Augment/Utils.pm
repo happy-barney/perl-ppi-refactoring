@@ -1104,6 +1104,15 @@ package PPIx::Augment::Utils {
 		return _return_list @insert;
 	}
 
+	sub insert_before                   :Exported(transformation) {
+		my $element = &element or return;
+		my @insert  = map { $_->clone } &_transformation_elements;
+
+		$element->__insert_before (@insert);
+
+		return _return_list @insert;
+	}
+
 	1;
 }
 
@@ -2365,7 +2374,22 @@ Inserts new elements after L</effective argument>.
 
 Before insertion it clones every new element with parent.
 
-Returns
+=over
+
+=item in list context all inserted elements
+
+=item in scalar context first inserted element
+
+=back
+
+=head2 insert_before
+
+    insert_before [ new elements ... ];
+    insert_before $element, [ new elements ... ];
+
+Inserts new elements before L</effective argument>.
+
+Before insertion it clones every new element with parent.
 
 =over
 
