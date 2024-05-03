@@ -57,7 +57,7 @@ package PPIx::Augment::Utils {
 	}
 
 	sub ppi_bool ($)                    :Exported(classification) {
-		return shift ? ppi_include : ppi_exclude;
+		return $_[0] ? ppi_include : ppi_exclude;
 	}
 
 	sub ppi_exclude ()                  :Exported(classification) {
