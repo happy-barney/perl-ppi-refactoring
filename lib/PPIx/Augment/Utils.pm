@@ -1095,6 +1095,28 @@ package PPIx::Augment::Utils {
 		goto & ppi_include;
 	}
 
+	sub elements_wrap                   :Exported(transformation) {
+		my $element = &element;
+		return no_element
+			unless my @children = &_transformation_elements
+			;
+
+		my ($node) = @_;
+
+		$node = $node->new
+			unless ref $node
+			;
+
+		$element->__insert_before ($node);
+
+		for my $child (@children) {
+			$child->remove;
+			$node->add_element ($child);
+		}
+
+		return $node;
+	}
+
 	sub insert_after                    :Exported(transformation) {
 		my $element = &element or return;
 		my @insert  = map { $_->clone } &_transformation_elements;
@@ -2371,6 +2393,23 @@ Alias for L</ppi_include ()>
 =head1 TRANSFORMATION FUNCTIONS
 
 Helper functions to modify L</effective element>.
+
+=head2 elements_wrap
+
+    elements_wrap $before?, [ ... elements ...], $CLASS | $node;
+
+    elements_wrap [ current, next_siblings ], Context::Class::;
+    elements_wrap sprevious_sibling, [ current, next_siblings ], build_block ();
+
+Wraps elements into new instance of L<$CLASS> (child of L<PPI::Node>)
+or C<$node> (instance of child of L<PPI::Node>).
+New instance/provided node is inserted before L</effective element>.
+
+Elements will be removed from their respective parents.
+
+Element is inserted only if there is at least one element to wrap.
+
+Returns created instance if possible, L</no_element ()> otherwise.
 
 =head2 insert_after
 
