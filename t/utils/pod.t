@@ -183,6 +183,7 @@ assume_pod_sections
 	],
 	q (head1 TRANSFORMATION FUNCTIONS) => [
 		q (head2 elements_remove),
+		q (head2 elements_replace),
 		q (head2 elements_wrap),
 		q (head2 insert_after),
 		q (head2 insert_before),
