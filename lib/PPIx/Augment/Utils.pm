@@ -1067,6 +1067,10 @@ package PPIx::Augment::Utils {
 		goto & ppi_include;
 	}
 
+	sub elements_remove                 :Exported(transformation) {
+		return map { $_->remove; $_ } &_transformation_elements;
+	}
+
 	sub elements_wrap                   :Exported(transformation) {
 		my $element = &element;
 		return no_element
@@ -2312,6 +2316,17 @@ Alias for L</ppi_include ()>
 
 Helper functions to modify L</effective element>.
 
+=head2 elements_remove
+
+    elements_remove $element;
+    elements_remove [ $element1, $element2, ... ];
+
+Removes provided element(s) from their parents.
+
+Function doesn't recognize neither L</effective element> nor L</current element>.
+
+Returns removed elements either as list or arrayref (in scalar context).
+
 =head2 elements_wrap
 
     elements_wrap $before?, [ ... elements ...], $CLASS | $node;
@@ -2336,7 +2351,7 @@ Returns created instance if possible, L</no_element ()> otherwise.
 
 Inserts new elements after L</effective argument>.
 
-Before insertion it clones every new element with parent.
+Before insertion it clones every new element with parent and every non-u.
 
 =over
 
