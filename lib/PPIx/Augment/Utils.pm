@@ -1099,6 +1099,18 @@ package PPIx::Augment::Utils {
 		return map { $_->remove; $_ } &_transformation_elements;
 	}
 
+	sub elements_replace                :Exported(transformation) {
+		my @elements    = &_transformation_elements;
+		my @replacement = &_transformation_elements;
+
+		return
+			if child_index (my $head = $elements[0]) < 0
+			;
+
+		insert_before ($head, \ @replacement);
+		return elements_remove (\ @elements);
+	}
+
 	sub elements_wrap                   :Exported(transformation) {
 		my $element = &element;
 		return no_element
@@ -2399,6 +2411,21 @@ Helper functions to modify L</effective element>.
 Removes provided element(s) from their parents.
 
 Function doesn't recognize neither L</effective element> nor L</current element>.
+
+Returns removed elements either as list or arrayref (in scalar context).
+
+=head2 elements_replace
+
+    elements_replace current, [ ... ];
+    elements_replace $element, [ ... ];
+    elements_replace [ current, next_sibling ], [ next_sibling, current ];
+
+Safely replace provided element(s) with new content.
+
+Function will clone replacement elements.
+
+Replaced elements doesn't need to be in sequence, helper simply
+replaces first element with new content and removes rest.
 
 Returns removed elements either as list or arrayref (in scalar context).
 
