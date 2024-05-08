@@ -14,6 +14,25 @@ package PPIx::Augment::Element {
 	require PPIx::Augment::No_Element;
 	require PPIx::Augment::Scope;
 
+	use Sub::Install;
+
+	sub _install_override {
+		my ($name, $code) = @_;
+
+		no strict q (refs);
+
+		my $orig = \ &{ $name };
+		
+
+	use namespace::clean;
+
+	BEGIN {
+		my $next_sibling     = PPI::Element::->can (q (next_sibling));
+		my $previous_sibling = PPI::Element::->can (q (previous_sibling));
+		my $snext_sibling     = PPI::Element::->can (q (snext_sibling));
+		my $sprevious_sibling = PPI::Element::->can (q (sprevious_sibling));
+		
+
 	use constant since_perl => v0.0;
 	use constant until_perl => v5.39; # developed with current perl = v5.38
 
