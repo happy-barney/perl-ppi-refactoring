@@ -2,15 +2,10 @@
 use v5.14;
 use warnings;
 
-package PPIx::Refactoring::Repair::Critic::Policy {
+package PPIx::Refactoring::Upgrade::To::Perl::V512::Package {
 	use parent q (PPIx::Refactoring);
 
-	use PPIx::Augment::Utils qw (
-		current
-		ppi_exclude
-		ppi_include
-		where
-	);
+	use PPIx::Augment::Utils;
 
 	require PPIx::Augment::Augmentation::Repair::PPI::Comment;
 	require PPIx::Augment::Augmentation::Repair::PPI::Newline_Spaces;
@@ -22,45 +17,62 @@ package PPIx::Refactoring::Repair::Critic::Policy {
 			my $from = 1 + child_index;
 
 			my $sibling = current;
-			do {
-				my $next_sibling = next_sibling;
+			while (1) {
+				my $next_sibling = next_sibling $sibling;
 				last unless $next_sibling;
 				last if it_is_statement_package ($next_sibling);
 				last if it_is_statement_end ($next_sibling);
 				last if it_is_statement_data ($next_sibling);
 
 				$sibling = $next_sibling;
-			} while (1);
+			}
 
 			my $to = child_index ($sibling) // -1;
 
 			my @children = children (parent, $from, $to);
 
 			pop @children
-				while it_is_token_whitespace ($children[-1])
+				while ! it_is_significant ($children[-1])
 				;
 
+			my $block = build_block (
+				elements_remove (\ @children),
+				build_newline,
+			);
+
+			# TODO: Augmentation Indent + increase indent
+
+			ppix_search $block
+				=> where {
+					it_is_newline
+					and it_is_not { it_is_newline (next_sibling) }
+					# it_is_not { it_is_last_token }
+					and ppi_bool (next_token next_token)
+				}
+				=> invoke {
+					it_is_token_whitespace (next_sibling)
+						? next_sibling->set_content (qq (\t) . next_sibling->content)
+						: insert_after current, [ build_token_whitespace (qq (\t)) ]
+				};
+
 			elements_replace
-				[ last_element ],
+				[ last_child ],
 				[
 					build_token_whitespace (q ( )),
-					(my $block = build_block (@children)),
+					$block,
 				];
 
-			ppix_transform $block
-				=> where { it_is_newline && it_is_not { it_is_newline next_token } }
-				=> invoke {
-					if (it_is_token_whitespace (my $next_token = next_token)) {
-						$next_token->set_content (q (\t) . $next_token->content);
-					} else {
-						insert_after (build_token_whitespace (q (\t)));
-					}
-				};
 		}
 	}
 
 	sub what_to_refactor {
-		where { it_is_package_declaration && next_sibling }
+		where {
+			return ppi_exclude unless it_is_package_declaration;
+			return ppi_exclude unless next_sibling;
+			return ppi_include;
+			say q (=> what: ), ref;
+			it_is_package_declaration and next_sibling
+		}
 	}
 
 	sub requires {
@@ -81,27 +93,22 @@ __END__
 
 =head1 NAME
 
-PPIx::Refactoring::Repair::Critic::Policy
+PPIx::Refactoring::Upgrade::To::Perl::V512::Package
 
 =head1 DESCRIPTION
 
-Base class for repairing L<Perl::Critic> violations.
+Upgrade package statement to it's v5.12 version.
 
-This class uses L<Perl::Critic::Policy> methods C<applies_to> and C<violates>
-to determine elements which violates given policy.
+For example, it transforms
 
-It recognizes L<no critic> notifications.
+	package Foo;
+	sub bar {}
 
-L<Current element|PPIx::Augment::Utils/current element> is an instances
-of class specified by L<applies_to>.
+into
 
-=head1 METHODS
-
-=head2 critic_policy
-
-Method must be implemented by child.
-
-	use constant critic_policy => Perl::Critic::Policy::...;
+	package Foo {
+		sub bar {}
+	}
 
 =head1 AUTHOR
 
