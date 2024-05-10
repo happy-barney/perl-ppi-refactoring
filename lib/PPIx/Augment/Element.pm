@@ -14,6 +14,12 @@ package PPIx::Augment::Element {
 	use constant since_perl => v0.0;
 	use constant until_perl => v5.39; # developed with current perl = v5.38
 
+	sub class {
+		my ($self) = @_;
+
+		return ref ($self) || $self;
+	}
+
 	1;
 };
 
