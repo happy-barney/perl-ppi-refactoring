@@ -54,6 +54,7 @@ assume_pod_sections
 	],
 	q (head1 BUILDER FUNCTIONS) => [
 		q (head2 build_block),
+		q (head2 build_semicolon ()),
 		q (head2 build_statement_include),
 		q (head2 build_token_cast ($)),
 		q (head2 build_token_comment ($)),
