@@ -14,6 +14,7 @@ package PPIx::Refactor {
 		my ($class, @refactorings) = @_;
 
 		bless [
+			map { ref ($_) ? $_ : $_->new }
 			PPIx::Augment::Document::->augmentation_apply_order (@refactorings)
 		], $class;
 	}

@@ -18,6 +18,9 @@ package PPIx::Refactoring {
 
 	sub how_to_augment  { shift->how_to_refactor (@_) }
 	sub refactor        { shift->augment (@_) }
+	sub requires_before_refactoring {
+	}
+
 	sub what_to_augment { shift->what_to_refactor (@_) }
 
 	1;
