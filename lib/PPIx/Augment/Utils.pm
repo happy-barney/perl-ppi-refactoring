@@ -436,6 +436,10 @@ package PPIx::Augment::Utils {
 		return $block;
 	}
 
+	sub build_semicolon ()              :Exported(builder) {
+		return build_token_structure (q (;));
+	}
+
 	sub build_statement_include         :Exported(builder) {
 		return _build_element (PPI::Statement::Include::, @_);
 	}
@@ -1359,6 +1363,12 @@ containing provided C<@content>.
 
 Builds instance of L<PPI::Structure::Block> representing closed block
 containing provided C<@content>.
+
+=head2 build_semicolon ()
+
+    build_semicolon;
+
+Builds token representing semicolon.
 
 =head2 build_statement_include
 
