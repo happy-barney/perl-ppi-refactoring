@@ -44,6 +44,7 @@ assume_pod_sections
 		q (head2 top_element),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
+		q (head2 build_token_number_octal ($)),
 		q (head2 build_token_number_version ($)),
 		q (head2 build_token_operator ($)),
 		q (head2 build_token_prototype ($)),

@@ -357,6 +357,12 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (top => &element) || no_element;
 	}
 
+	sub build_token_number_octal ($)    :Exported(builder) {
+		return _build_token
+			{ PPI::Token::Number::Octal:: => qr (^ [-]? 0 [oO]? (?= _* [0-7]) [0-7_]+ $)x },
+			@_
+	}
+
 	sub build_token_number_version ($)  :Exported(builder) {
 		return _build_token
 			{ PPI::Token::Number::Version:: => qr (^ v \d)x },
@@ -1076,6 +1082,12 @@ if possible, L</no_element ()> otherwise.
 
 Helper functions to construct new L<PPI> / L<PPIx::Augment> elements,
 usually taking decomposed values and merge them into corresponding element / node.
+
+=head2 build_token_number_octal ($)
+
+    build_token_number_octal (q (0123));
+
+Builds instance of L<PPI::Token::Number::Octal>.
 
 =head2 build_token_number_version ($)
 
