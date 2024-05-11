@@ -1,0 +1,120 @@
+
+=pod
+
+=head1 NAME
+
+PPIx::Augment::DOM
+
+=head1 DESCRIPTION
+
+L<PPIx::Augment> uses structure inspired by L<PPI> though extended
+to better suit to its purpose.
+
+Further documentation expects you are familiar with L<PPI> so it references
+it as reference of fact without need for further explanation.
+
+=head1 CONCEPTS
+
+=head2 Element Versioning
+
+As Perl evolves, some syntax appears, some disappears.
+Element versioning allows to easily distinguish for which version
+given element is valid.
+
+Versioning is implemented by L<PPIx::Augment::DOM::Element>'s methods
+C<since_perl> and C<until_perl>.
+
+L<PPIx::Augment::DOM> contains special class for each syntax variant, for example
+
+    package PPIx::Augment::DOM::Literal::Number::Octal::V500;
+    package PPIx::Augment::DOM::Literal::Number::Octal::V534;
+
+Naming pattern uses C<v5.0> as oldest version.
+
+=head2 class layout
+
+L<PPIx::Augment::DOM> follows interface / implementation pattern,
+so there is no instance of class which has subclasses.
+
+For example, unlike L<PPI::Token::Number> decimal integer has its
+own class L<PPIx::Augment::DOM::Literal::Number::Decimal>.
+
+=head2 scope element
+
+L<PPIx::Augment::DOM> uses marker elements to mark scope of declared things.
+Scope is a child of L<PPIx::Augment::DOM::Node> (and L<PPI::Node>).
+
+
+=head2 Differences
+
+=head3 interface / implementation pattern
+
+When there are multiple subclasses of single class, every possibility
+has it's own subclass, so one can address special cases by using
+class query instead of analysing document structure.
+
+Examples:
+
+=over
+
+=item L<PPIx::Augment::DOM::Literal::Number::Integer::Decimal>
+
+In L<PPI> this class represents all its subclasses as well as
+decimal integer numbers.
+
+In L<PPIx::Augment::DOM> decimal integer numbers are represented
+by its own class.
+
+=item L<PPIx::Augment::DOM::Literal::Number::Integer::Octal::V500>
+
+=item L<PPIx::Augment::DOM::Literal::Number::Integer::Octal::V534>
+
+Perl v5.34 added new syntax for octal numbers, so to distinguish it
+there are two subclasses of L<PPIx::Augment::DOM::Literal::Number::Integer::Octal>.
+
+=back
+
+=head2 Common behaviour
+
+=head3 no element
+
+Every method returning element returns instance of L<PPIx::Augment::DOM::No_Element>
+when there is no element to return.
+
+Returned instance is evaluated as false and supports all methods introduced
+by any L<PPIx::Augment::DOM> mimicking their I<no element> behaviour.
+
+L<PPI> behaviour:
+
+Depending on method empty list C<()> or empty string C<''> is returned.
+
+=head3 list vs scalar context
+
+Every method returning elements returns all elements when called in
+list context, first element when called in scalar context.
+
+Example: simple implementation pattern
+
+    return wantarray
+        ? @list
+        : $list[0] // no element
+    ;
+
+=head3 lookup classification
+
+Every method returning elements accepts additional classification expression(s),
+causing only elements matching given classification will be returned.
+
+Scalar methods (eg: C<parent>, C<next_sibling>) will chain themselves until
+they found suitable element.
+
+Example:
+
+    $element->parent (where { it_is_document })
+
+See L<PPIx::Augment::Utils> for more.
+
+
+=head1 ELEMENTS
+
+=cut
