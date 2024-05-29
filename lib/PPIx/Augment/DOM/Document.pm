@@ -12,6 +12,56 @@ package PPIx::Augment::DOM::Document {
 
 	use PPI::Document v1.278;
 
+	use PPIx::Augment::Augmentation::DOM;
+
+	sub new {
+		my ($class, $source, @args) = @_;
+
+		my $document = $source->$_DOES (PPI::Document::)
+			? $source
+			: PPI::Document::->new ($source, @args)
+			;
+
+		bless $document, $class;
+		$document->{x_epoch}     = 0;
+		$document->{x_augmented} = {};
+
+		$document->augment (
+			PPIx::Augment::Augmentation::DOM::,
+		);
+
+		return $document;
+	}
+
+	sub augment {
+		my ($self, @augmentations) = @_;
+
+		my $epoch     = $self->{x_epoch} //= 0;
+		my $augmented = $self->{x_augmented} //= {};
+
+		while (my $step = shift @augmentations) {
+			my @requires =
+				grep { ($augmented->{$_} // 0) < $epoch }
+				$step->requires,
+				$step
+				;
+
+			if (@requires > 1) {
+				unshift @augmentations, @requires;
+				next;
+			}
+
+			$self->{x_epoch} = ++$epoch
+				if $step->augment ($self)
+				;
+
+			$augmented->{$step} = $epoch;
+		}
+
+		return $self;
+	}
+
+
 	1;
 };
 
