@@ -452,6 +452,14 @@ package PPIx::Augment::Utils {
 		build_token_whitespace (qq (\n));
 	}
 
+	sub build_operator_arrow ()         :Exported(builder) {
+		return build_token_operator (q (->));
+	}
+
+	sub build_operator_fat_comma ()     :Exported(builder) {
+		return build_token_operator (q (=>));
+	}
+
 	sub build_semicolon ()              :Exported(builder) {
 		return build_token_structure (q (;));
 	}
@@ -1403,6 +1411,18 @@ Builds instance of L<PPI::Token::Operator> initialized with comma.
     build_newline;
 
 Builds instance of L<PPI::Token::Whitespace> initialized with single newline.
+
+=head2 build_operator_arrow ()
+
+    build_operator_arrow;
+
+Returns element representing operator C<-\>>.
+
+=head2 build_operator_fat_comma ()
+
+    build_operator_fat_comma;
+
+Returns element representing operator C<=\>>.
 
 =head2 build_semicolon ()
 
