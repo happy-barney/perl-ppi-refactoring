@@ -313,12 +313,20 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar_node (child => &element, 0) || no_element;
 	}
 
+	sub first_schild                    :Exported(accessor) {
+		return _accessor_scalar_node (schild => &element, 0) || no_element;
+	}
+
 	sub first_token                     :Exported(accessor) {
 		return eval { _accessor_scalar (first_token => &element) } || no_element;
 	}
 
 	sub last_child                      :Exported(accessor) {
 		return _accessor_scalar_node (child => &element, -1) || no_element;
+	}
+
+	sub last_schild                     :Exported(accessor) {
+		return _accessor_scalar_node (schild => &element, -1) || no_element;
 	}
 
 	sub last_token                      :Exported(accessor) {
@@ -1153,6 +1161,14 @@ Assumed usage eg in classification function:
 Returns C<first_element> of L</effective element> if possible,
 L<no_element> otherwise.
 
+=head2 first_schild
+
+    first_schild;
+    first_schild $node;
+
+Returns first S<schild> of L</effective element> if possible,
+L<no element> otherwise.
+
 =head2 first_token
 
     first_token;
@@ -1168,6 +1184,14 @@ L<no_element> otherwise.
 
 Returns last child of L</effective element> if possible,
 L<no_element> otherwise.
+
+=head2 last_schild
+
+    last_schild;
+    last_schild $node;
+
+Returns last S<schild> of L</effective element> if possible,
+L<no element> otherwise.
 
 =head2 last_token
 
