@@ -464,6 +464,10 @@ package PPIx::Augment::Utils {
 		return build_token_structure (q (;));
 	}
 
+	sub build_statement_expression      :Exported(builder) {
+		return _build_element (PPI::Statement::Include::, @_);
+	}
+
 	sub build_statement_include         :Exported(builder) {
 		return _build_element (PPI::Statement::Include::, @_);
 	}
@@ -1429,6 +1433,8 @@ Returns element representing operator C<=\>>.
     build_semicolon;
 
 Builds token representing semicolon.
+
+=head2 build_statement_expression
 
 =head2 build_statement_include
 
