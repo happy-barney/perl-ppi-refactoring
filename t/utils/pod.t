@@ -61,6 +61,7 @@ assume_pod_sections
 		q (head2 build_operator_arrow ()),
 		q (head2 build_operator_fat_comma ()),
 		q (head2 build_semicolon ()),
+		q (head2 build_statement_expression),
 		q (head2 build_statement_include),
 		q (head2 build_token_cast ($)),
 		q (head2 build_token_comment ($)),
