@@ -41,7 +41,9 @@ assume_pod_sections
 		q (head2 schild),
 		q (head2 schildren),
 		q (head2 snext_sibling),
+		q (head2 snext_token),
 		q (head2 sprevious_sibling),
+		q (head2 sprevious_token),
 		q (head2 top_element),
 	],
 	q (head1 BUILDER FUNCTIONS) => [
