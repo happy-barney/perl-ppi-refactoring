@@ -11,4 +11,9 @@ Setup `PPIx::Augment` environment:
 
 # stage-1-utils-ppi
 
-Utils wrapping / using PPI interface
+Utils wrapping / using PPI::Element interface
+
+# stage-2-utils-augment
+
+Extended utils wrapping / using PPIx::Augment::DOM::Element interface
+
