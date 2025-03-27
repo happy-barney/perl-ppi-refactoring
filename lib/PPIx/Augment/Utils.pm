@@ -329,6 +329,13 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (next_sibling => &element) || no_element;
 	}
 
+	sub next_siblings                   :Exported(accessor) {
+		my $element = &element;
+		my $child_index = child_index ($element);
+
+		return children (parent ($element), $child_index + 1, -1);
+	}
+
 	sub next_token                      :Exported(accessor) {
 		return _accessor_scalar (next_token => &element) || no_element;
 	}
@@ -343,6 +350,13 @@ package PPIx::Augment::Utils {
 
 	sub previous_sibling                :Exported(accessor) {
 		return _accessor_scalar (previous_sibling => &element) || no_element;
+	}
+
+	sub previous_siblings               :Exported(accessor) {
+		my $element = &element;
+		my $child_index = child_index ($element);
+
+		return children (parent ($element), 0, $child_index - 1);
 	}
 
 	sub previous_token                  :Exported(accessor) {
@@ -361,6 +375,10 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (snext_sibling => &element) || no_element;
 	}
 
+	sub snext_siblings                  :Exported(accessor) {
+		return grep { it_is_significant ($_) } &next_siblings;
+	}
+
 	sub snext_token                     :Exported(accessor) {
 		my $element = &element;
 
@@ -375,6 +393,10 @@ package PPIx::Augment::Utils {
 
 	sub sprevious_sibling               :Exported(accessor) {
 		return _accessor_scalar (sprevious_sibling => &element) || no_element;
+	}
+
+	sub sprevious_siblings              :Exported(accessor) {
+		return grep { it_is_significant ($_) } &previous_siblings;
 	}
 
 	sub sprevious_token                 :Exported(accessor) {
@@ -1097,6 +1119,14 @@ Returns C<last_token> of L</effective element> if possible,
 Returns next sibling of L</effective element> if possible,
 L</no element> otherwise.
 
+=head2 next_siblings
+
+    next_siblings;
+    next_siblings $element?;
+
+Returns next siblings of L</effective element> if possible,
+empty list otherwise.
+
 =head2 next_token
 
     next_token;
@@ -1124,6 +1154,14 @@ L</no element> otherwise.
 
 Returns previous sibling of L</effective element> if possible,
 L</no element> otherwise.
+
+=head2 previous_siblings
+
+    previous_siblings;
+    previous_siblings $element?;
+
+Returns previous siblings of L</effective element> if possible,
+empty list otherwise.
 
 =head2 previous_token
 
@@ -1166,6 +1204,14 @@ When called in scalar context, it returns corresponding arrayref
 Returns next significant sibling of L</effective element> if possible,
 L</no element> otherwise.
 
+=head2 snext_siblings
+
+    snext_siblings;
+    snext_siblings $element?;
+
+Returns next significant siblings of L</effective element> if possible,
+empty list otherwise.
+
 =head2 snext_token
 
     snext_token;
@@ -1181,6 +1227,14 @@ L</no element> otherwise.
 
 Returns previous significant sibling of L</effective element> if possible,
 L</no element> otherwise.
+
+=head2 sprevious_siblings
+
+    sprevious_siblings;
+    sprevious_siblings $element;
+
+Returns significant previous siblings of L</effective element> if possible,
+empty list otherwise.
 
 =head2 sprevious_token
 
