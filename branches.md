@@ -8,3 +8,7 @@ Setup `PPIx::Augment` environment:
 - `Utils` - minimal layout
   - current / no / effective element
   - basic traversal / transformer
+
+# stage-1-utils-ppi
+
+Utils wrapping / using PPI interface
