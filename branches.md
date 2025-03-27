@@ -17,3 +17,22 @@ Utils wrapping / using PPI::Element interface
 
 Extended utils wrapping / using PPIx::Augment::DOM::Element interface
 
+# stage-3-augmentation
+
+Augmentation of PPI documents
+- fix PPI issues (from PPIx::Augment perspective)
+  - PPIx::Augment expects parse (and fix) invalid code
+    PPI, optimistically, assumes that code is valid
+  - TODO port fixes back into PPI
+
+## plan
+  - [ ] DOM
+	- [ ] DOM::Element
+	- [ ] DOM::Node
+  - [ ] Augmentation - Augmented elements
+	- [ ] Token::Number::*
+  - [ ] Augmentation - DOM::(
+	- [ ] PPI::Newline_Spaces
+	- [ ] PPI::Comment
+	- [ ] PPI::Indent
+	- [ ] PPI::Magic_Cast
