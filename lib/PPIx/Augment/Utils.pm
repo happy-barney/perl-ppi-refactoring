@@ -361,8 +361,32 @@ package PPIx::Augment::Utils {
 		return _accessor_scalar (snext_sibling => &element) || no_element;
 	}
 
+	sub snext_token                     :Exported(accessor) {
+		my $element = &element;
+
+		while ($element = next_token ($element)) {
+			return $element
+				if $element->significant
+				;
+		}
+
+		return no_element;
+	}
+
 	sub sprevious_sibling               :Exported(accessor) {
 		return _accessor_scalar (sprevious_sibling => &element) || no_element;
+	}
+
+	sub sprevious_token                 :Exported(accessor) {
+		my $element = &element;
+
+		while ($element = previous_token ($element)) {
+			return $element
+				if $element->significant
+				;
+		}
+
+		return no_element;
 	}
 
 	sub top_element                     :Exported(accessor) {
@@ -1142,12 +1166,28 @@ When called in scalar context, it returns corresponding arrayref
 Returns next significant sibling of L</effective element> if possible,
 L</no element> otherwise.
 
+=head2 snext_token
+
+    snext_token;
+    snext_token $element;
+
+Returns next significant token of L</effective element> if possible,
+L</no element> otherwise.
+
 =head2 sprevious_sibling
 
     sprevious_sibling;
     sprevious_sibling $element;
 
 Returns previous significant sibling of L</effective element> if possible,
+L</no element> otherwise.
+
+=head2 sprevious_token
+
+    sprevious_token;
+    sprevious_token $element;
+
+Returns previous significant token of L</effective element> if possible,
 L</no element> otherwise.
 
 =head2 top_element
