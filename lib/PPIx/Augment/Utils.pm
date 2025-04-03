@@ -3,6 +3,8 @@ use v5.14;
 use warnings;
 
 package PPIx::Augment::Utils {
+	use PPIx::Augment::Internals::Exporter;
+
 	1;
 }
 
