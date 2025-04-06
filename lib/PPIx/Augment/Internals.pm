@@ -6,7 +6,17 @@ package PPIx::Augment::Internals {
 	use parent qw (Exporter::Tiny);
 
 	our @EXPORT_OK = qw (
+		push_unique_string
 	);
+
+	sub push_unique_string (\@;@) {
+		my $push_into = shift;
+
+		my %exists;
+		@exists{@$push_into} = ();
+
+		push @$push_into, grep { ! exists $exists{$_} } @_;
+	}
 
 	1;
 }
