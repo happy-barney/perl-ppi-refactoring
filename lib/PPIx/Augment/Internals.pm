@@ -12,6 +12,15 @@ package PPIx::Augment::Internals {
 		push_unique_string
 	);
 
+	sub ensure_isa {
+		my $base = shift;;
+		my $into = shift // caller (2);
+
+		no strict q (refs);
+
+		push @{ qq (${into}::ISA) }, $base;
+	}
+
 	sub flatten_array {
 		map { Ref::Util::is_arrayref ($_) ? flatten_array (@$_) : $_ } @_;
 	}
