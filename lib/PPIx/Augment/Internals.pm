@@ -5,9 +5,16 @@ use warnings;
 package PPIx::Augment::Internals {
 	use parent qw (Exporter::Tiny);
 
+	use Ref::Util qw ();
+
 	our @EXPORT_OK = qw (
+		flatten_array
 		push_unique_string
 	);
+
+	sub flatten_array {
+		map { Ref::Util::is_arrayref ($_) ? flatten_array (@$_) : $_ } @_;
+	}
 
 	sub push_unique_string (\@;@) {
 		my $push_into = shift;
