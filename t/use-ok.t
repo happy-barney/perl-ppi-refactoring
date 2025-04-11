@@ -9,6 +9,7 @@ use_ok $_
 	for (
 		q (PPIx::Augment),
 		q (PPIx::Augment::Internals),
+		q (PPIx::Augment::Internals::Exporter),
 	);
 
 had_no_warnings;
