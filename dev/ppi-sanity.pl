@@ -903,11 +903,15 @@ END_OF_COMPONENT_LICENSE
 	sub _sub_classification {
 		my ($sub) = @_;
 
-		my @attributes = grep { $_->isa (PPI::Token::Attribute::) } $sub->children;
+		return q ()
+			unless my @attributes = grep { $_->isa (PPI::Token::Attribute::) } $sub->children;
+			;
 
-		return q () unless @attributes;
-		return q () unless $attributes[0]->identifier eq q (Exported);
-		return $attributes[0]->parameters;
+		return $attributes[0]->parameters
+			if $attributes[0]->identifier eq q (Exported)
+			;
+
+		return lc $attributes[0]->identifier;
 	}
 
 	sub _sort_subs_by_name {
