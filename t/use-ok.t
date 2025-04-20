@@ -8,9 +8,11 @@ use Test::Warnings qw (:no_end_test had_no_warnings);
 use_ok q (PPIx::Augment);
 use_ok q (PPIx::Augment::Augmentation);
 use_ok q (PPIx::Augment::DOM::No_Element);
+use_ok q (PPIx::Augment::Declare::Augmentation);
 use_ok q (PPIx::Augment::Document);
 use_ok q (PPIx::Augment::Internals);
 use_ok q (PPIx::Augment::Internals::Exporter);
+use_ok q (PPIx::Augment::Utils);
 use_ok q (PPIx::Augment::Utils);
 
 had_no_warnings;
