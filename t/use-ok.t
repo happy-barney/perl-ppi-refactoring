@@ -8,6 +8,7 @@ use Test::Warnings qw (:no_end_test had_no_warnings);
 use_ok q (PPIx::Augment);
 use_ok q (PPIx::Augment::Augmentation);
 use_ok q (PPIx::Augment::Augmentation::PPI::Comment);
+use_ok q (PPIx::Augment::Augmentation::PPI::Magic_Cast);
 use_ok q (PPIx::Augment::Augmentation::PPI::Newline_Spaces);
 use_ok q (PPIx::Augment::DOM::No_Element);
 use_ok q (PPIx::Augment::Document);
