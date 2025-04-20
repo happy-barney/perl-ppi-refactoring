@@ -24,3 +24,10 @@ Augmentation of PPI documents
   - PPIx::Augment expects parse (and fix) invalid code
     PPI, optimistically, assumes that code is valid
   - TODO port fixes back into PPI
+
+# stage-4-refactorings
+
+Refactorings:
+- repair Perl::Critic policies
+- repair Layout (aka tidy but deterministic)
+- upgrade / downgrade versioned constructs
