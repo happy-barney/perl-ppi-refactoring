@@ -176,6 +176,10 @@ sub expect (&) {
 	expect => shift->()
 }
 
+sub expect_document {
+	return expect_element (PPI::Document:: => @_);
+}
+
 sub expect_element {
 	my ($class, @children) = @_;
 
@@ -237,6 +241,62 @@ sub expect_no_element () {
 
 sub expect_nodeset {
 	return [ @_ ];
+}
+
+sub expect_statement {
+	return expect_element (PPI::Statement:: => @_);
+}
+
+sub expect_statement_expression {
+	return expect_element (PPI::Statement::Expression:: => @_);
+}
+
+sub expect_statement_null {
+	return expect_element (PPI::Statement::Null:: => @_);
+}
+
+sub expect_statement_package {
+	return expect_element (PPI::Statement::Package:: => @_);
+}
+
+sub expect_structure_block {
+	return expect_element (PPI::Structure::Block:: => @_);
+}
+
+sub expect_structure_list {
+	return expect_element (PPI::Structure::List:: => @_);
+}
+
+sub expect_token_comment {
+	return expect_element (PPI::Token::Comment:: => @_);
+}
+
+sub expect_token_newline {
+	return expect_token_whitespace (qq (\n), @_);
+}
+
+sub expect_token_number {
+	return expect_element (PPI::Token::Number:: => @_);
+}
+
+sub expect_token_operator {
+	return expect_element (PPI::Token::Operator:: => @_);
+}
+
+sub expect_token_semicolon {
+	return expect_token_structure (q (;), @_);
+}
+
+sub expect_token_structure {
+	return expect_element (PPI::Token::Structure:: => @_);
+}
+
+sub expect_token_whitespace {
+	return expect_element (PPI::Token::Whitespace:: => @_);
+}
+
+sub expect_token_word {
+	return expect_element (PPI::Token::Word:: => @_);
 }
 
 sub fixture {
