@@ -23,7 +23,11 @@ my %module_build_args = (
   "module_name" => "PPIx::Augment",
   "recursive_test_files" => 1,
   "requires" => {
+    "Exporter::Tiny" => 0,
+    "Ref::Util" => 0,
+    "parent" => 0,
     "perl" => "5.014",
+    "strict" => 0,
     "warnings" => 0
   },
   "test_requires" => {
