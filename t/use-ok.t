@@ -10,7 +10,7 @@ use_ok $_
 		q (PPIx::Augment),
 		q (PPIx::Augment::Internals),
 		q (PPIx::Augment::Internals::Exporter),
-        q (PPIx::Augment::Utils).
+        q (PPIx::Augment::Utils),
 	);
 
 had_no_warnings;

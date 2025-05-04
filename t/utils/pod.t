@@ -3,9 +3,7 @@
 use v5.14;
 use warnings;
 
-use Path::Tiny qw ();
-
-use require::relative q (test-helper.pl);
+use require::relative q (../test-helper.pl);
 
 note <<'';
 	Poor man's protection against rebase errors.
@@ -45,7 +43,7 @@ done_testing;
 
 sub assume_pod_sections {
 	my $file = shift;
-	my @sections = map { Ref::Util::is_plain_arrayref ($_) ? sort { $a cmp $b } @$_ : $_ } @_;
+	my @sections = map { is_plain_arrayref ($_) ? sort { $a cmp $b } @$_ : $_ } @_;
 
 	my %mandatory_command = map +($_ => 1), qw (
 		encoding
@@ -53,7 +51,7 @@ sub assume_pod_sections {
 		head2
 	);
 
-	for my $line (Path::Tiny::->new ($file)->lines) {
+	for my $line (path ($file)->lines) {
 		next
 			unless $line =~ m (^ = (?<command>\w+) \s* (?<section>.+) $)x
 			;
