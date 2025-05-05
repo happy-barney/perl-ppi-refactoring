@@ -1,4 +1,5 @@
 #!/bin/bash
 
 perl "$(dirname "$(dirname "$(realpath "$0")")")"/dev/ppi-sanity.pl \
+	--exclude t/use-ok \
 	 "$@"

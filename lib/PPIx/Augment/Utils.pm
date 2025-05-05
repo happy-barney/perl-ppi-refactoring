@@ -6,16 +6,29 @@ package PPIx::Augment::Utils {
 	use PPIx::Augment::Internals::Exporter;
 
 	use PPI v1.278;
+	use Ref::Util;
 
 	### ############################################################
 
-	sub ppix_include;
-	sub ppix_exclude;
+	sub ppix_exclude ();
+	sub ppix_exclude_all ();
+	sub ppix_include ();
 
 	### ############################################################
+
+	sub exclude_all (&)                 :Exported(classification) {
+		my $code = shift;
+		my $result = Ref::Util::is_plain_coderef ($code) ? $code->() : $code;
+
+		return $result ? ppi_include : ppi_exclude_all;
+	}
 
 	sub ppix_exclude ()                 :Exported(classification) {
 		return 1;
+	}
+
+	sub ppix_exclude_all ()             :Exported(classification) {
+		return undef;
 	}
 
 	sub ppix_include ()                 :Exported(classification) {
@@ -124,10 +137,28 @@ Helper functions to identify an instance of L<PPI::Element>.
 
 Unless specified otherwise, all functions work with the L</effective element>.
 
+Unless specified explicitly, classification functions do not return L<ppix_exclude_all>.
+When you need such behaviour, you can use one of the following patterns:
+
+	return classification || ppix_exclude_all;
+	return exclude_all { classification };
+
+=head2 exclude_all (&)
+
+    exclude_all { ... }
+
+Executes provided code as a classification and converts returned
+L</ppix_exclude ()> to L</ppix_exclude_all ()>.
+
 =head2 ppix_exclude ()
 
 Handy named constant representing the value, which L<PPI> considers as
 "exclude this element but continue with its children".
+
+=head2 ppix_exclude_all ()
+
+Handy named constant representing the value, which L<PPI> considers as
+"exclude this element and all its children".
 
 =head2 ppix_include ()
 
