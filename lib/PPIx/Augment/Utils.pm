@@ -10,8 +10,13 @@ package PPIx::Augment::Utils {
 	### ############################################################
 
 	sub ppix_include;
+	sub ppix_exclude;
 
 	### ############################################################
+
+	sub ppix_exclude ()                 :Exported(classification) {
+		return 1;
+	}
 
 	sub ppix_include ()                 :Exported(classification) {
 		return 1;
@@ -118,6 +123,11 @@ usually taking decomposed values and merging them into the corresponding element
 Helper functions to identify an instance of L<PPI::Element>.
 
 Unless specified otherwise, all functions work with the L</effective element>.
+
+=head2 ppix_exclude ()
+
+Handy named constant representing the value, which L<PPI> considers as
+"exclude this element but continue with its children".
 
 =head2 ppix_include ()
 
