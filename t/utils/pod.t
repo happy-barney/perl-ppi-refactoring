@@ -28,6 +28,7 @@ assume_pod_sections
 	q (head1 BUILDER FUNCTIONS) => [
 	],
 	q (head1 CLASSIFICATION FUNCTIONS) => [
+		q (ppix_include ()),
 	],
 	q (head1 TRANSFORMATION FUNCTIONS) => [
 	],

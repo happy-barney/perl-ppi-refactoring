@@ -7,6 +7,16 @@ package PPIx::Augment::Utils {
 
 	use PPI v1.278;
 
+	### ############################################################
+
+	sub ppix_include;
+
+	### ############################################################
+
+	sub ppix_include ()                 :Exported(classification) {
+		return 1;
+	}
+
 	1;
 }
 
@@ -108,6 +118,11 @@ usually taking decomposed values and merging them into the corresponding element
 Helper functions to identify an instance of L<PPI::Element>.
 
 Unless specified otherwise, all functions work with the L</effective element>.
+
+=head2 ppix_include ()
+
+Handy named constant representing the value, which L<PPI> considers as
+"include this element and continue with its children".
 
 =head1 TRANSFORMATION FUNCTIONS
 
