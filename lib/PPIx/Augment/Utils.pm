@@ -7,6 +7,12 @@ package PPIx::Augment::Utils {
 
 	use PPI v1.278;
 	use Ref::Util;
+	use Scalar::Util qw ();
+
+	use PPIx::Augment::DOM::No_Element;
+	sub current ();
+	sub element;
+	sub no_element ();
 
 	### ############################################################
 
@@ -15,6 +21,30 @@ package PPIx::Augment::Utils {
 	sub ppix_include ();
 
 	### ############################################################
+
+	sub current ()                      :Exported(accessor) {
+		return $_;
+	}
+
+	sub element                         :Exported(accessor) {
+		return current
+			unless Scalar::Util::blessed ($_[0])
+			;
+
+		return shift
+			if $_[0]->isa (PPI::Element::)
+			;
+
+		return shift
+			if $_[0]->isa (PPIx::Augment::DOM::No_Element::)
+			;
+
+		return current;
+	}
+
+	sub no_element ()                   :Exported(accessor) {
+		return PPIx::Augment::DOM::No_Element::->new;
+	}
 
 	sub exclude_all (&)                 :Exported(classification) {
 		my $code = shift;
@@ -108,10 +138,18 @@ L<PPI::Element>; otherwise, the L</current element>.
 
 =item no element
 
-False value returned by the element accessor when there is no such element.
-The value is compatible with L<PPI> as an empty string.
+A false value returned by an element accessor when there is no element to be returned.
+The value is compatible with L<PPI> (as an empty string).
 
-The value supports all L<PPI::Element> / L<PPI::Node> methods.
+The value is a blessed value that:
+
+=over
+
+=item evaluates to false
+
+=item mimics PPI elements by returning safe false values
+
+=back
 
 See L</PPIx::Augment::DOM::No_Element> for more information.
 
@@ -125,6 +163,23 @@ whether they are accessible via a direct method or have to be populated.
 All accessor functions recognise C</no element> and return the corresponding value.
 
 Unless specified otherwise, all functions work with the L</effective element>.
+
+=head2 current ()
+
+Returns L</current element>.
+
+=head2 element
+
+Returns L</effective element>.
+
+Assumed usage eg in classification function:
+
+    # Using this syntax so shift will actually modify our arguments
+    my $element = &element;
+
+=head2 no_element ()
+
+Returns value representing L<PPI> meaning "there is no element".
 
 =head1 BUILDER FUNCTIONS
 

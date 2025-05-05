@@ -14,6 +14,7 @@ use Scalar::Util;
 use Test::YAFT qw (:all), it => { -as => q (assume) };
 
 use PPIx::Augment;
+use PPIx::Augment::DOM::No_Element;
 use PPIx::Augment::Utils;
 
 ### ############################################################
@@ -250,7 +251,8 @@ sub expect_instance_of {
 }
 
 sub expect_no_element () {
-	return q ();
+	& expect_false
+	& expect_obj_isa (PPIx::Augment::DOM::No_Element::)
 }
 
 sub expect_nodeset {
