@@ -102,6 +102,10 @@ sub expect_instance_of {
 		;
 }
 
+sub expect_nodeset {
+	return [ @_ ];
+}
+
 sub ppi_document {
 	my ($source) = @_;
 
