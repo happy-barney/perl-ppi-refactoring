@@ -48,6 +48,30 @@ sub distribution_root {
 	return tests_root->parent;
 }
 
+sub expect_element {
+	my ($class, @children) = @_;
+
+	my $expectation = expect_instance_of ($class);
+
+	$expectation &= expect_methods (content => shift @children)
+		if @children && ! ref $children[0]
+		;
+
+	$expectation &= expect_methods (%{ shift @children })
+		if @children && Ref::Util::is_plain_hashref ($children[0])
+		;
+
+	$expectation &= expect_listmethods (children => shift @children)
+		if @children == 1 && Ref::Util::is_plain_arrayref ($children[0])
+		;
+
+	$expectation &= expect_listmethods (children => \ @children)
+		if @children
+		;
+
+	return $expectation;
+}
+
 sub expect_instance_of {
 	state $class = test_deep_cmp (
 		isa             => [ Test::Deep::Obj:: ],
