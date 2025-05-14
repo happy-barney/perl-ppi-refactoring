@@ -16,7 +16,7 @@ assume q (ppi_document () should parse inline source)
 	;
 
 assume q (ppi_document () should parse Path::Tiny referenced source)
-	=> with_source => tests_root->child (qw (fixture simple-document.pl))
+	=> with_source => fixture_path (q (simple-document.pl))
 	=> expect      =>
 		expect_obj_isa (PPI::Document::)
 		& expect_method (content => qq (1;\n))

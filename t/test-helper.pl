@@ -41,6 +41,7 @@ use Test::YAFT qw (:all);
 sub deduce_undef;
 sub distribution_root;
 sub expect_instance_of;
+sub fixture_root;
 sub ppi_document;
 sub ppi_dump;
 sub ppi_find;
@@ -243,6 +244,24 @@ sub expect_ppi_token_whitespace {
 
 sub expect_ppi_token_word {
 	return expect_element (PPI::Token::Word::, @_);
+}
+
+sub fixture {
+	return fixture_path (@_)->slurp_utf8;
+}
+
+sub fixture_list {
+	my $root = fixture_root;
+
+	return map { $_->relative ($root) } $root->children;
+}
+
+sub fixture_path {
+	return fixture_root ()->child (@_);
+}
+
+sub fixture_root {
+	return tests_root->child (q (fixture));
 }
 
 sub ppi_document {
