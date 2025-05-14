@@ -106,6 +106,10 @@ sub expect_nodeset {
 	return [ @_ ];
 }
 
+sub expect_ppi_token_symbol {
+	return expect_element (PPI::Token::Symbol::, @_);
+}
+
 sub expect_ppi_token_whitespace {
 	return expect_element (PPI::Token::Whitespace::, @_);
 }
