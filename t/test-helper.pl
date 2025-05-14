@@ -39,12 +39,43 @@ use Test::YAFT qw (:all);
 }
 
 sub distribution_root;
+sub expect_instance_of;
 sub ppi_document;
 sub ppi_dump;
 sub tests_root;
 
 sub distribution_root {
 	return tests_root->parent;
+}
+
+sub expect_instance_of {
+	state $class = test_deep_cmp (
+		isa             => [ Test::Deep::Obj:: ],
+		descend         => sub {
+			my ($self, $got) = @_;
+			return $self->Test::Deep::Obj::descend ($got) && ref ($got) eq $self->{val};
+		},
+		diag_message    => sub {
+			my ($self, $where) = @_;
+			return qq (Checking instance type of $where);
+		},
+		renderGot       => sub {
+			my ($self, $got) = @_;
+
+			return $self->Test::Deep::Obj::renderGot ($got)
+				unless Scalar::Util::blessed ($got);
+			return qq (blessed into '${\ ref $got }');
+		},
+		renderExp       => sub {
+			my ($self) = @_;
+			return qq (blessed into '$self->{val}');
+		},
+	);
+
+	return @_
+		? $class->new (@_)
+		: $class
+		;
 }
 
 sub ppi_document {

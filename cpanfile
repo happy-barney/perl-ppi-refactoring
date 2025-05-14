@@ -17,6 +17,7 @@ on 'test' => sub {
   requires "Path::Tiny" => "0";
   requires "Safe::Isa" => "0";
   requires "Test::More" => "0";
+  requires "Test::Tester" => "0";
   requires "Test::Warnings" => "0";
   requires "Test::YAFT" => "0";
   requires "require::relative" => "0";
