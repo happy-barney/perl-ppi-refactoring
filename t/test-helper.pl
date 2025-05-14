@@ -106,6 +106,10 @@ sub expect_nodeset {
 	return [ @_ ];
 }
 
+sub expect_ppi_token_number {
+	return expect_element (PPI::Token::Number::, @_);
+}
+
 sub expect_ppi_token_operator {
 	return expect_element (PPI::Token::Operator::, @_);
 }
