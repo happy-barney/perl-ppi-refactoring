@@ -5,7 +5,9 @@ use warnings;
 use Carp::Always; # must be before Test::YAFT - replaces $SIG{__WARN__}
 
 use Context::Singleton;
+use PPI v1.278;
 use Path::Tiny;
+use Safe::Isa;
 use Test::YAFT qw (:all);
 
 {
@@ -36,10 +38,33 @@ use Test::YAFT qw (:all);
 }
 
 sub distribution_root;
+sub ppi_document;
 sub tests_root;
 
 sub distribution_root {
 	return tests_root->parent;
+}
+
+sub ppi_document {
+	my ($source) = @_;
+
+	return
+		unless defined $source
+		;
+
+	return $source
+		if $source->$Safe::Isa::_isa (PPI::Element::)
+		;
+
+	$source = qq ($source)
+		if ref $source
+		;
+
+	PPI::Document::->new (
+		($source =~ m/\n/ || ! -e $source)
+			? \ $source
+			: $source
+		);
 }
 
 sub tests_root {

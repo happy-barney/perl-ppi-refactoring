@@ -29,10 +29,14 @@ my %module_build_args = (
   "test_requires" => {
     "Carp::Always" => 0,
     "Context::Singleton" => 0,
+    "FindBin" => 0,
+    "PPI" => "v1.278.0",
     "Path::Tiny" => 0,
+    "Safe::Isa" => 0,
     "Test::More" => 0,
     "Test::Warnings" => 0,
-    "Test::YAFT" => 0
+    "Test::YAFT" => 0,
+    "require::relative" => 0
   }
 );
 
@@ -40,11 +44,15 @@ my %module_build_args = (
 my %fallback_build_requires = (
   "Carp::Always" => 0,
   "Context::Singleton" => 0,
+  "FindBin" => 0,
   "Module::Build" => "0.28",
+  "PPI" => "v1.278.0",
   "Path::Tiny" => 0,
+  "Safe::Isa" => 0,
   "Test::More" => 0,
   "Test::Warnings" => 0,
-  "Test::YAFT" => 0
+  "Test::YAFT" => 0,
+  "require::relative" => 0
 );
 
 
