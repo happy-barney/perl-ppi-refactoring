@@ -11,6 +11,9 @@ use Path::Tiny;
 use Safe::Isa;
 use Test::YAFT qw (:all);
 
+use PPIx::Augment;
+use PPIx::Augment::Utils;
+
 {
 	### TODO: functions which should be available in respective modules
 	### TODO: move them there

@@ -3,6 +3,7 @@
 
 requires "Attribute::Handlers" => "0";
 requires "Exporter::Tiny" => "0";
+requires "PPI" => "v1.278.0";
 requires "Ref::Util" => "0";
 requires "namespace::clean" => "0";
 requires "parent" => "0";
@@ -18,7 +19,6 @@ on 'test' => sub {
   requires "Carp::Always" => "0";
   requires "Context::Singleton" => "0";
   requires "FindBin" => "0";
-  requires "PPI" => "v1.278.0";
   requires "PPI::Dumper" => "0";
   requires "Path::Tiny" => "0";
   requires "Safe::Isa" => "0";
