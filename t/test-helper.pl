@@ -38,11 +38,98 @@ use Test::YAFT qw (:all);
 		;
 }
 
+sub deduce_undef;
 sub distribution_root;
 sub expect_instance_of;
 sub ppi_document;
 sub ppi_dump;
+sub ppi_find;
 sub tests_root;
+
+my $SINGLETON_DOCUMENT       = q (arrange-ppixa-document);
+
+sub _build_document_found {
+	my (%args) = @_;
+
+	my $found = my $got = $args{got}
+		// return
+		;
+
+	if (my $where = _build_document_where (%args)) {
+		$found = $got->find ($where) || [ ];
+	}
+
+	if (my $invoke = $args{invoke}) {
+		$invoke->($got, $_)
+			for @$found
+			;
+	}
+
+	return $found;
+}
+
+sub _build_document_got {
+	my (%args) = @_;
+
+	return $args{got}     if exists $args{got};
+	return $args{element} if exists $args{element};
+
+	my $got = $args{document}
+		// deduce_undef ($SINGLETON_DOCUMENT)
+		// return
+		;
+
+	# Preserve built document as long as possible (typically one per assumption)
+	state $document;
+
+	return $document = ppi_document ($got);
+}
+
+sub _build_document_where {
+	my (%args) = @_;
+
+	if (my $where_first = $args{first}) {
+		return sub { state $i = 0; $where_first->(@_) && ($i++ > 0 ? undef : 1) };
+	}
+
+	return $args{where};
+}
+
+sub arrange_document (&) {
+	proclaim $SINGLETON_DOCUMENT => shift->();
+}
+
+sub assume_ppi_document {
+	my ($title, %args) = @_;
+
+	$args{caller} //= scalar caller;
+
+	Test::YAFT::test_frame {
+		my $got   = _build_document_got   (%args);
+		my $found = _build_document_found (%args, got => $got);
+
+		assume ($title
+			=> got    => $found
+			=> expect => $args{expect}
+			=> diag   => \& Test::Deep::deep_diag
+		) or do {
+			diag (q (Got PPI document:));
+			ppi_dump ($got);
+			diag (q (Found PPI nodes:));
+			ppi_dump ($found);
+		};
+	};
+}
+
+sub deduce_undef {
+	my ($singleton) = @_;
+
+	return undef
+		unless try_deduce $singleton
+		;
+
+	return deduce $singleton;
+}
 
 sub distribution_root {
 	return tests_root->parent;
@@ -187,6 +274,12 @@ sub ppi_dump {
 		map { Ref::Util::is_plain_arrayref ($_) ? @$_ : $_ }
 		@_
 		;
+}
+
+sub ppi_find {
+	my ($document, @where) = @_;
+
+	return $document->find (@where) || [ ];
 }
 
 sub tests_root {
