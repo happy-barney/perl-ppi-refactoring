@@ -106,6 +106,10 @@ sub expect_nodeset {
 	return [ @_ ];
 }
 
+sub expect_ppi_token_heredoc {
+	return expect_element (PPI::Token::HereDoc::, @_);
+}
+
 sub expect_ppi_token_number {
 	return expect_element (PPI::Token::Number::, @_);
 }
