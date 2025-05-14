@@ -6,6 +6,7 @@ use Carp::Always; # must be before Test::YAFT - replaces $SIG{__WARN__}
 
 use Context::Singleton;
 use PPI v1.278;
+use PPI::Dumper;
 use Path::Tiny;
 use Safe::Isa;
 use Test::YAFT qw (:all);
@@ -39,6 +40,7 @@ use Test::YAFT qw (:all);
 
 sub distribution_root;
 sub ppi_document;
+sub ppi_dump;
 sub tests_root;
 
 sub distribution_root {
@@ -65,6 +67,15 @@ sub ppi_document {
 			? \ $source
 			: $source
 		);
+}
+
+sub ppi_dump {
+	diag (PPI::Dumper::->new ($_)->string =~ s ((?<= [#])) (    )xr)
+		for
+		map { ppi_document ($_) }
+		map { Ref::Util::is_plain_arrayref ($_) ? @$_ : $_ }
+		@_
+		;
 }
 
 sub tests_root {

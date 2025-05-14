@@ -13,6 +13,7 @@ on 'test' => sub {
   requires "Context::Singleton" => "0";
   requires "FindBin" => "0";
   requires "PPI" => "v1.278.0";
+  requires "PPI::Dumper" => "0";
   requires "Path::Tiny" => "0";
   requires "Safe::Isa" => "0";
   requires "Test::More" => "0";
