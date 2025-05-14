@@ -106,6 +106,10 @@ sub expect_nodeset {
 	return [ @_ ];
 }
 
+sub expect_ppi_statement_sub {
+	return expect_element (PPI::Statement::Sub::, @_);
+}
+
 sub expect_ppi_structure_block {
 	return expect_element (PPI::Structure::Block::, @_);
 }
