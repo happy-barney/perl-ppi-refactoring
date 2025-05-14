@@ -106,6 +106,10 @@ sub expect_nodeset {
 	return [ @_ ];
 }
 
+sub expect_ppi_token_word {
+	return expect_element (PPI::Token::Word::, @_);
+}
+
 sub ppi_document {
 	my ($source) = @_;
 
