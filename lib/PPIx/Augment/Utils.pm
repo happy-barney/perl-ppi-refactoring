@@ -6,6 +6,37 @@ package PPIx::Augment::Utils {
 	use PPIx::Augment::Internals::Exporter;
 
 	use PPI v1.278;
+	use Scalar::Util qw ();
+
+	use PPIx::Augment::DOM::No_Element;
+
+	sub current ();
+	sub element;
+	sub no_element ();
+
+	sub current ()                        :Exported(accessor) {
+		return $_;
+	}
+
+	sub element                           :Exported(accessor) {
+		return current
+			unless Scalar::Util::blessed ($_[0])
+			;
+
+		return shift
+			if $_[0]->isa (PPI::Element::)
+			;
+
+		return shift
+			if $_[0]->isa (PPIx::Augment::DOM::No_Element::)
+			;
+
+		return current;
+	}
+
+	sub no_element ()                     :Exported(accessor) {
+		return PPIx::Augment::DOM::No_Element::->new;
+	}
 
 	1;
 }
@@ -90,7 +121,15 @@ The value is a blessed value that:
 
 =back
 
-The value supports all L<PPI::Element> / L<PPI::Node> methods.
+The value is a blessed value that:
+
+=over
+
+=item evaluates to false
+
+=item mimics PPI elements by returning safe false values
+
+=back
 
 Every function recognises L</no element> and acts properly.
 
@@ -104,6 +143,27 @@ whether they are accessible via a direct method or have to be populated.
 All accessor functions recognise C</no element> and return the corresponding value.
 
 Unless specified otherwise, all functions work with L</effective element>.
+
+=head2 current ()
+
+Returns L</current element>.
+
+=head2 element
+
+Returns L</effective element>.
+
+Assumed usage eg in classification function:
+
+    sub my_classification {
+        # Reminder: using this syntax, `element` will modify our arguments
+        my $element = &element;
+        my @other_arguments = @_;
+        ...
+    }
+
+=head2 no_element ()
+
+Returns value representing L</no element>.
 
 =head1 BUILDER FUNCTIONS
 

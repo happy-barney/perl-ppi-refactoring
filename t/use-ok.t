@@ -8,6 +8,7 @@ use Test::Warnings qw ( :no_end_test had_no_warnings );
 use_ok $_
 	for (
 		q (PPIx::Augment),
+        q (PPIx::Augment::DOM::No_Element),
 		q (PPIx::Augment::Internals),
 		q (PPIx::Augment::Internals::Exporter),
 		q (PPIx::Augment::Utils),

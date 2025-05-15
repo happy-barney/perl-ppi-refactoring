@@ -12,6 +12,7 @@ use Safe::Isa;
 use Test::YAFT qw (:all);
 
 use PPIx::Augment;
+use PPIx::Augment::DOM::No_Element;
 use PPIx::Augment::Utils;
 
 {
@@ -191,6 +192,11 @@ sub expect_instance_of {
 		? $class->new (@_)
 		: $class
 		;
+}
+
+sub expect_no_element () {
+	& expect_false
+	& expect_obj_isa (PPIx::Augment::DOM::No_Element::)
 }
 
 sub expect_nodeset {
