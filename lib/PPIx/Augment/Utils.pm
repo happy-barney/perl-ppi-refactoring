@@ -9,15 +9,20 @@ package PPIx::Augment::Utils {
 	use Ref::Util;
 	use Scalar::Util qw ();
 
+	use constant CLASS_INVOKE => q (PPIx::Augment::Utils::__::Invoke);
+	use constant CLASS_WHERE  => q (PPIx::Augment::Utils::__::Where);
+
 	use PPIx::Augment::DOM::No_Element;
 
 	sub current ();
 	sub element;
+	sub invoke (&);
 	sub it_is;
 	sub no_element ();
 	sub ppi_exclude ();
 	sub ppi_exclude_all ();
 	sub ppi_include ();
+	sub where (&);
 
 	sub _classification_condition {
 		my ($context, $value, @conditions) = @_;
@@ -188,6 +193,18 @@ package PPIx::Augment::Utils {
 
 	sub ppi_include ()                    :Exported(classification) {
 		return 1;
+	}
+
+	sub invoke (&)                        :Exported(traversal) {
+		my ($code) = @_;
+
+		return bless sub { local $_ = $_[1]; $code->(@_) }, CLASS_INVOKE;
+	}
+
+	sub where (&)                         :Exported(traversal) {
+		my ($code) = @_;
+
+		return bless sub { local $_ = $_[1]; $code->(@_) }, CLASS_WHERE;
 	}
 
 	1;
@@ -428,6 +445,78 @@ Helper functions to modify L</effective element>.
 =head1 TRAVERSAL FUNCTIONS
 
 Helper functions to navigate through documents / elements.
+
+=head2 invoke (&)
+
+	traversal_function $document
+		=> where  { ... }
+		=> where  { ... }
+		=> invoke { ... your code ... }
+		=> invoke { ... your code ... }
+		;
+
+Helper function registering code to be invoked when requested element is found.
+
+When used multiple times, L</invoke (&)> block is executed in order of appearance
+after all L</where (&)> blocks are executed.
+
+L</invoke (&)> block, when executed,
+
+=over
+
+=item receives arguments as L<PPI>'s find functions
+
+    $invoke_block->($document, $element);
+
+=item has L</current element> populated with found element
+
+=back
+
+=head2 where (&)
+
+	tranversal_function $document
+		=> where { ... condition ... }
+		=> where { ... condition ... }
+
+Helper functions to pick documents / elements.
+
+Returned value works with L<PPI>'s C<find> method as well.
+
+L</where (&)> block should return
+
+=over
+
+=item L<ppi_include ()>
+
+=item L</ppi_exclude ()>
+
+=item L</ppi_exclude_all ()>
+
+=back
+
+When used multiple times,
+
+=over
+
+=item L</where (&)> blocks are executed before any L</invoke (&)> block
+
+=item L</where (&)> blocks are executed in order of appearance
+
+=item L</where (&)> blocks are combined using C<logical and> operator
+
+=back
+
+L</where (&)> block, when executed
+
+=over
+
+=item receives arguments as L<PPI>'s find functions
+
+    $where_block->($document, $element);
+
+=item has L</current element> populated with found element
+
+=back
 
 =head1 AUTHOR
 

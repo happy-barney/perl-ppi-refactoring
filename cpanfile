@@ -6,6 +6,7 @@ requires "Exporter::Tiny" => "0";
 requires "PPI" => "v1.278.0";
 requires "Ref::Util" => "0";
 requires "Scalar::Util" => "0";
+requires "constant" => "0";
 requires "namespace::clean" => "0";
 requires "overload" => "0";
 requires "parent" => "0";

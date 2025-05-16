@@ -28,6 +28,7 @@ my %module_build_args = (
     "PPI" => "v1.278.0",
     "Ref::Util" => 0,
     "Scalar::Util" => 0,
+    "constant" => 0,
     "namespace::clean" => 0,
     "overload" => 0,
     "parent" => 0,
