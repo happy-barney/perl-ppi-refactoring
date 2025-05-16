@@ -6,6 +6,7 @@ package PPIx::Augment::Utils {
 	use PPIx::Augment::Internals::Exporter;
 
 	use PPI v1.278;
+	use Ref::Util;
 	use Scalar::Util qw ();
 
 	use PPIx::Augment::DOM::No_Element;
@@ -13,6 +14,9 @@ package PPIx::Augment::Utils {
 	sub current ();
 	sub element;
 	sub no_element ();
+	sub ppi_exclude ();
+	sub ppi_exclude_all ();
+	sub ppi_include ();
 
 	sub current ()                        :Exported(accessor) {
 		return $_;
@@ -36,6 +40,46 @@ package PPIx::Augment::Utils {
 
 	sub no_element ()                     :Exported(accessor) {
 		return PPIx::Augment::DOM::No_Element::->new;
+	}
+
+	sub exclude_all (&)                   :Exported(classification) {
+		my $code = $_[0];
+
+		my $result = Ref::Util::is_coderef ($code)
+			? $code->()
+			: $code
+			;
+
+		return $result
+			? ppi_include
+			: ppi_exclude_all
+			;
+	}
+
+	sub it_is_not (&)                     :Exported(classification) {
+		my $code = $_[0];
+
+		my $result = Ref::Util::is_coderef ($code)
+			? $code->()
+			: $code
+			;
+
+		return $result
+			? ppi_exclude
+			: ppi_include
+			;
+	}
+
+	sub ppi_exclude ()                    :Exported(classification) {
+		return 0;
+	}
+
+	sub ppi_exclude_all ()                :Exported(classification) {
+		return undef;
+	}
+
+	sub ppi_include ()                    :Exported(classification) {
+		return 1;
 	}
 
 	1;
@@ -175,6 +219,41 @@ usually taking decomposed values and merging them into the corresponding element
 Helper functions to identify an instance of L<PPI::Element>.
 
 Unless specified otherwise, all functions work with L</effective element>.
+
+Classification functions do not return L</ppix_exclude_all> unless specified otherwise.
+When you need to return L</ppix_exclude_all ()> you can use one of following patterns:
+
+    return classification || ppix_exclude_all;
+    return exclude_all { classification };
+
+=head2 exclude_all (&)
+
+    exclude_all { ... }
+
+Executes the provided code as a classification and converts the returned
+L</ppi_exclude ()> to L</ppi_exclude_all ()>.
+
+=head2 it_is_not (&)
+
+    it_is_not { ... }
+
+Executes provided code as a classification and negates its return value,
+returning L</ppi_include ()> or L</ppi_exclude ()>.
+
+=head2 ppi_exclude ()
+
+Handy named constant representing the value L<PPI> treats as
+I<exclude this element but continue with its children>.
+
+=head2 ppi_exclude_all ()
+
+Handy named constant representing the value L<PPI> treats as
+I<do not include this element and do not continue with its children>.
+
+=head2 ppi_include ()
+
+Handy named constant representing the value L<PPI> treats as
+L<include this element and continue search with its children>.
 
 =head1 TRANSFORMATION FUNCTIONS
 
