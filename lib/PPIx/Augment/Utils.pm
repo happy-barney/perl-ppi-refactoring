@@ -224,9 +224,12 @@ PPIx::Augment::Utils - PPI / PPIx::Augment document utilities
 
 Inspired by L<PPIx::Utils>, this module provides functions to make working
 with L<PPI> and L<PPIx::Augment> documents easier (to both read and write).
-It provides similar functions for features L<PPIx::Augment> introduces.
+It also provides similar functions for features that L<PPIx::Augment> introduces.
 
-Unless specified otherwise, every function is exported by default.
+All functions, unless specified otherwise, are exported by default.
+
+All functions, unless specified otherwise, work with both L<PPI>
+and L<PPIx::Augment> document models.
 
 Exportable tags:
 
@@ -250,7 +253,7 @@ Exports all L</CLASSIFICATION FUNCTIONS>.
 
 =item C<:default>
 
-Exports all functions exported by default.
+Exports all functions that are exported by default.
 
 =item C<:transformation>
 
@@ -302,6 +305,8 @@ The value is a blessed value that:
 
 Every function recognises L</no element> and acts properly.
 
+See L</PPIx::Augment::DOM::No_Element> for more information.
+
 =back
 
 =head1 ACCESSOR FUNCTIONS
@@ -311,7 +316,7 @@ whether they are accessible via a direct method or have to be populated.
 
 All accessor functions recognise C</no element> and return the corresponding value.
 
-Unless specified otherwise, all functions work with L</effective element>.
+Unless specified otherwise, all functions work with the L</effective element>.
 
 =head2 current ()
 
@@ -343,7 +348,7 @@ usually taking decomposed values and merging them into the corresponding element
 
 Helper functions to identify an instance of L<PPI::Element>.
 
-Unless specified otherwise, all functions work with L</effective element>.
+Unless specified otherwise, all functions work with the L</effective element>.
 
 Classification functions do not return L</ppix_exclude_all> unless specified otherwise.
 When you need to return L</ppix_exclude_all ()> you can use one of following patterns:
@@ -440,7 +445,7 @@ L<include this element and continue search with its children>.
 
 =head1 TRANSFORMATION FUNCTIONS
 
-Helper functions to modify L</effective element>.
+Helper functions to modify the L</effective element>.
 
 =head1 TRAVERSAL FUNCTIONS
 
