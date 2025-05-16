@@ -79,6 +79,10 @@ package PPIx::Augment::DOM::Element {
 
 	sub classify {
 		my ($self, @classifications) = @_;
+
+		return
+			unless $class->identify ($element)
+			;
 	}
 
 	sub classify_value {
