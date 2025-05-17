@@ -5,6 +5,8 @@ use warnings;
 package PPIx::Augment::DOM::Element {
 	use parent q (PPI::Element);
 
+	use mro q (c3);
+
 	use constant ppi_class => PPI::Element::;
 
 	sub Classify {
@@ -13,17 +15,53 @@ package PPIx::Augment::DOM::Element {
 
 	sub Identify {
 		my ($class, $element) = @_;
+
+		return
+			unless Scalar::Util::blessed ($element)
+			;
+
+		return
+			unless $element->isa (PPI::Element::)
+			;
+
+		return 1
+			if $element->isa (ref ($class) || $class)
+			;
+
+		return
+			if $element->isa (PPIx::Augment::DOM::Element::)
+			;
+
+		return !! scalar $class->identify_ppi_scope ($element);
 	}
 
 	sub Identify_Span {
 		my ($class, $ppi_element) = @_;
+
+		return
+			if $ppi_element->isa (PPIx::Augment::DOM::Element::)
+			;
+
+		return
+			unless my $ppi_class = $self->ppi_class
+			;
+
+		return
+			unless $ppi_element->isa ($ppi_class)
+			;
+
+		return
+			unless defined (my $index = $ppi_element->PPIx::Augment::DOM::Element::child_index)
+			;
+
+		return $index;
 	}
 
 	sub child_index {
 		my ($self) = @_;
 
-		if ($self->parent) {
-			my @children = $self->parent->children;
+		if (my $parent = $self->parent) {
+			my @children = $parent->children;
 			for my $index (0 .. (@children - 1)) {
 				return $index
 					if $children[$index] == $self
@@ -85,6 +123,12 @@ Method should return empty list when C<$element> doesn't represent it.
 
 =head1 METHODS
 
+=head2 child_index
+
+    my $index = $element->child_index;
+
+Returns position of element in its parent's children list.
+
 =head2 classify
 
     $element->classify (@classifications);
@@ -92,6 +136,18 @@ Method should return empty list when C<$element> doesn't represent it.
 Identifies whether C<$element> conforms to provided classification(s).
 
 See also L</CLASSIFICATION SPECIFICATION>.
+
+For example, for a document:
+
+    $foo = $bar->method ($args)
+
+a class representing method call will return:
+
+    5 - index of q ($bar)
+    6 - index of q (->)
+    7 - index of q (method)
+    8 - index of q ( )
+    9 - index of q (($args))
 
 =head2 ppi_class
 
