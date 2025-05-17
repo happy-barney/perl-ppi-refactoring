@@ -596,6 +596,7 @@ sub remove_unused_private_functions {
 		_arrayref_expand
 		_build_element
 		_build_token
+		_classification_conditions
 		_create_element
 		_element_key
 		_its

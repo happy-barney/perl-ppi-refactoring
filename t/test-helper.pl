@@ -310,6 +310,18 @@ sub ppi_find {
 	return $document->find (@where) || [ ];
 }
 
+sub ppi_statement {
+	ppi_document (@_)->first_element->clone;
+}
+
+sub ppi_token {
+	ppi_document (@_)->first_token->clone;
+}
+
+sub testing_classification (&) {
+	proclaim $SINGLETON_CLASSIFICATION => shift;
+}
+
 sub tests_root {
 	return Path::Tiny::->new (__FILE__)->parent;
 }
