@@ -36,3 +36,6 @@ Augmentation of PPI documents
 	- [ ] PPI::Comment
 	- [ ] PPI::Indent
 	- [ ] PPI::Magic_Cast
+
+# stage-4-refactorings
+
