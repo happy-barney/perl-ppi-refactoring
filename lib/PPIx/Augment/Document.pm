@@ -4,6 +4,7 @@ use warnings;
 
 package PPIx::Augment::Document {
 	use parent qw (
+		PPIx::Augment::Node
 		PPI::Document
 	);
 
