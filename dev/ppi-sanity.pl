@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use v5.14;
-use strict;
+use warnings;
 
 package App::ppi_sanity {
 
@@ -10,6 +10,7 @@ package App::ppi_sanity {
 	use Path::Iterator::Rule;
 	use Path::Tiny;
 	use PPI;
+	use Ref::Util;
 
 	use constant ALIGN_EXPORT_BASE_COLUMN => 40;
 
@@ -33,6 +34,7 @@ package App::ppi_sanity {
 
 	sub verbose (&);
 	sub where (&;@);
+	sub invoke (&;@);
 
 	sub _build_path_iterator {
 		my ($options) = @_;
@@ -60,12 +62,39 @@ package App::ppi_sanity {
 			unless my $regex =
 			join q (|),
 			map {
-				join q ([/]+), map { quotemeta ($_) } split qr ([/]), $_
+				Ref::Util::is_regexpref ($_)
+					? $_
+					: join q ([/]+), map { quotemeta ($_) } split qr ([/]), $_
 			}
 			@_
 			;
 
 		return qr (\b $regex $)x;
+	}
+
+	sub _cmp_sub_names {
+		my ($name_a, $name_b) = @_;
+
+		my $result = ($name_a cmp $name_b);
+
+		return $result if $name_a =~ m (^_) or $name_b =~ m (^_);
+		return -1 if $name_a eq q (new);
+		return 1 if $name_b eq q (new);
+		return $result;
+	}
+
+	sub _child_index {
+		my ($element) = @_;
+		my $children = $element->parent->{children};
+
+		my $index = @$children;
+		while ($index -- > 0) {
+			return $index
+				if $children->[$index] == $element
+				;
+		}
+
+		return -1;
 	}
 
 	sub _column {
@@ -83,6 +112,22 @@ package App::ppi_sanity {
 		my ($element) = @_;
 
 		return _is ($element, PPI::Statement::Sub::);
+	}
+
+	sub _is_sub_definition {
+		my ($element) = @_;
+
+		return 0 unless _is_sub ($element);
+		return 0 unless $element->block;
+		return 1;
+	}
+
+	sub _is_sub_declaration {
+		my ($element) = @_;
+
+		return 0 unless _is_sub ($element);
+		return 0 if     $element->block;
+		return 1;
 	}
 
 	sub _is_token {
@@ -104,87 +149,88 @@ package App::ppi_sanity {
 		_is_token ($element, PPI::Token::Whitespace::, $regex);
 	}
 
-	sub _maintain_order_of_sub_declarations {
-		my ($document) = @_;
+	sub _sub_classification {
+		my ($sub) = @_;
 
-		# TODO: move all together
+		my @attributes = grep { $_->isa (PPI::Token::Attribute::) } $sub->children;
 
-		return
-			unless my @subs = find ($document, where { _is_sub_declaration ($_) });
-
-		my $insert_after = $subs[0]->sprevious_sibling;
-		my @sort = sort {
-			_sub_classification ($a) cmp _sub_classification ($b)
-				or
-				_cmp_sub_names ($a->name, $b->name)
-			} @subs;
-
-		my $subs = join q (-), map { $_->name } @subs;
-		my $sort = join q (-), map { $_->name } @sort;
-
-		return if $subs eq $sort;
-
-		@sort = map {
-			my @insert = ($_->clone);
-			while (_is_insignificant ($_->previous_sibling)) {
-				unshift @insert, $_->previous_sibling->clone;
-				$_->previous_sibling->remove;
-			}
-			$_->remove;
-			\ @insert
-		} @sort;
-
-		my $insert_before = $insert_after->next_sibling;
-
-		for my $sort (@sort) {
-			$insert_before->parent->__insert_before_child ($insert_before, @$sort);
-		}
+		return q () unless @attributes;
+		return q () unless $attributes[0]->identifier eq q (Exported);
+		return $attributes[0]->parameters;
 	}
 
-	sub _maintain_order_of_sub_definitions {
-		my ($document) = @_;
-
-		my ($insert_head) = find ($document, where { _is_named_sub_definition ($_) });
-		my @sorted = _sorted_named_subs ($document);
-
-		while (@sorted) {
-			if ($insert_head->name eq $sorted[0]->name) {
-				shift @sorted;
-				if (my $next_sub = _find_next_named_sub ($insert_head)) {
-					$insert_head = $next_sub;
-				}
-				next;
+	sub _sort_subs_by_name {
+		sort {
+			0
+				|| _sub_classification ($a) cmp _sub_classification ($b)
+				|| _cmp_sub_names ($a->name, $b->name)
 			}
+			@_;
+	}
 
-			my $sorted_tag = _sub_tag ($sorted[0]);
-			my $head_tag   = _sub_tag ($insert_head);
+	sub _order_subs {
+		my ($document, $where) = @_;
+		my @subs = ppi_search ($document, $where);
 
-			if ($head_tag gt $sorted_tag) {
-				my $inserting = my $point = shift @sorted;
-				my @elements;
-				while (_is_ws (my $previous_sibling = $point->previous_sibling)) {
-					unshift @elements, $previous_sibling;
-					$point = $previous_sibling;
-				}
+		my $changes = 0;
 
-				$insert_head->__insert_before (map $_->remove, $inserting, @elements);
+		my @sort =
+			map { [ $_, $_->parent ] }
+			_sort_subs_by_name (@subs)
+			;
 
-				next;
-			}
+		@subs =
+			map { [ $_, $_->parent, _child_index ($_) ] }
+			@subs
+			;
 
-			if ($head_tag lt $sorted_tag) {
-				my $inserting = my $point = shift @sorted;
-				my @elements;
-				while (_is_ws (my $previous_sibling = $point->previous_sibling)) {
-					unshift @elements, $previous_sibling;
-					$point = $previous_sibling;
-				}
+		my $requires_link = 0;
 
-				$insert_head->__insert_after (map $_->remove, @elements, $inserting);
-				$insert_head = $inserting;
-				next;
-			}
+		my $index = @subs;
+		my @tmp;
+		while ($index -- > 0) {
+			my $subs = $subs[$index];
+			my $sort = $sort[$index];
+
+			next
+				if $subs->[0] == $sort->[0]
+				;
+
+			$changes ++;
+			$requires_link ||= $subs->[1] == $subs->[1];
+
+			$subs->[1]{children}[ $subs->[2] ] = $sort->[0];
 		}
+
+		$document->__link_children
+			if $requires_link
+			;
+
+		return $changes;
+	}
+
+	sub ppi_replace {
+		my ($document, $where, $invoke) = @_;
+
+		my $changes = 0;
+
+		for my $found (ppi_search ($document, $where)) {
+			$found->insert_before ($_), $changes++
+				for $invoke->(undef, $found)
+				;
+			$found->remove;
+		}
+
+		return $changes;
+	}
+
+	sub invoke (&;@) {
+		my ($code, @rest) = @_;
+
+		return (
+			sub { local $_ = $_[1]; $code->(@_) },
+			@rest,
+		);
 	}
 
 	sub ppi_search {
@@ -223,22 +269,22 @@ package App::ppi_sanity {
 		# ##########################################################
 
 		$options{include}  //= \ @DEFAULT_INCLUDE;
-		$options{policies} //= \ @POLICIES;
+		$options{policies} //= \ @POLICIES_DEFAULT;
 
 		return \ %options;
 	}
 
+	sub remove_previous_whitespaces {
+		my ($element) = @_;
+
+		while (my $previous_sibling = $element->previous_sibling) {
+			last unless _is_ws ($element);
+			$previous_sibling->remove;
+		}
+	}
+
 	sub policy_align_export_attributes  :Policy :Default {
 		my ($document) = @_;
-
-		my @policy_include = (
-			q (lib/PPIx/Augment/Utils.pm),
-			q (dev/ppi-sanity.pl),
-		);
-
-		return 0
-			unless $document->filename =~ _build_path_regex (@policy_include)
-			;
 
 		my $changes = 0;
 		my @operators = ppi_search $document, where {
@@ -247,7 +293,7 @@ package App::ppi_sanity {
 			return 1;
 		};
 
-		for my $operator (reverse @operators) {
+		for my $operator (@operators) {
 			my $previous_sibling = $operator->previous_sibling;
 			my $has_length       = length ($previous_sibling->content);
 
@@ -271,16 +317,175 @@ package App::ppi_sanity {
 	sub policy_maintain_subs_order      :Policy :Default {
 		my ($document) = @_;
 
-		my $apply = 0;
-		$apply = 1 if $document->filename =~ qr ([.]pm$);
-		$apply = 1 if $document->filename =~ qr (\btest-helper[.]pl$);
+		state $include_file_regex = _build_path_regex (
+			q (lib/PPIx/Augment/Utils.pm),
+			q (dev/ppi-sanity.pl),
+			q (test-helper.pl),
+			qr (lib/PPIx/Augment/DOM\b.*[.]pm),
+		);
 
-		return unless $apply;
+		return 0
+			unless $document->filename =~ $include_file_regex
+			;
 
-		$document->index_locations;
+		$document->index_locations
+			if my $changes = 0
+			+ _order_subs ($document, where { _is_sub_declaration ($_) })
+			+ _order_subs ($document, where { _is_sub_definition ($_) })
+			;
 
-		_maintain_order_of_sub_definitions  ($document);
-		_maintain_order_of_sub_declarations ($document);
+		return $changes;
+	}
+
+	sub policy_remove_unused_private_functions :Policy {
+		my ($document) = @_;
+
+		my @preserve;
+
+		REDO:
+		my %tokens =
+			map { $_ => 1 }
+			@preserve,
+			(
+				map { $_->content => 1 }
+				grep { ! $_->parent->isa (PPI::Statement::Sub::) }
+				ppi_search ($document, where { _is_token ($_, PPI::Token::Word::) })
+			),
+			(
+				map { substr $_->content, 1 }
+				grep { $_->symbol_type eq q (&) }
+				ppi_search ($document, where { _is_token ($_, PPI::Token::Symbol::) })
+			)
+			;
+
+		my $redo = 0;
+		for my $sub (ppi_search ($document, where { _is_sub_definition ($_) })) {
+			next unless $sub->name =~ qr (^_);
+			next if exists $tokens{$sub->name};
+			next if $sub->name =~ qr (^_exporter_);
+			next if $sub->name =~ qr (^_generate_);
+
+			say q (Found unused sub: ), $sub->name;
+			remove_previous_whitespaces ($sub);
+			$sub->remove;
+			$redo = 1;
+		}
+
+		goto REDO if $redo;
+	}
+
+	sub policy_replace_quotes           :Policy :Default {
+		my ($document) = @_;
+
+		ppi_replace (
+			$document,
+			where {
+				return 1 if $_->isa (PPI::Token::Quote::Double::);
+				return 1 if $_->isa (PPI::Token::Quote::Single::);
+				return 0;
+			},
+			invoke {
+				my $content = $_->string;
+				my $q = $content =~ m ([\$\@]) ? q (qq) : q (q);
+				$_->set_content (qq ($q ($content)));
+				$_;
+			}
+		);
+	}
+
+	sub policy_require_documentation    :Policy :Default {
+		my ($document) = @_;
+
+		my @policy_include = (
+			q (lib/PPIx/Augment/Utils.pm),
+		);
+
+		return 0
+			unless $document->filename =~ _build_path_regex (@policy_include)
+			;
+
+		my (%structure, %sections);
+		my ($pod) = ppi_search $document, where { $_->isa (PPI::Token::Pod::) };
+
+		my $file = $document->filename;
+
+		warn qq ([$file] no pod)
+			unless $pod
+			;
+
+		return
+			unless $pod
+			;
+
+
+		my @sections = split qr (^(?==head[12]))sm, $pod->content;
+
+		{
+			my $current = [];
+
+			for my $section (@sections) {
+				my ($directive, $value) = $section =~ m (^ = (\w+) (?: \s+ (.*)))x;
+				next unless defined $value;
+				next unless length $value;
+				warn qq ([$file] duplicated section '$value')
+					if exists $sections{$value};
+				$sections{$value} = $section;
+				if ($directive eq q (head1)) {
+					$structure{$value} = $current = [];
+				} else {
+					push @$current, $section;
+				}
+			}
+		}
+
+		my %insert_sections;
+		my ($structure, $current_tag) = (q (), q ());
+		my $current;
+
+		for my $sub (_sort_subs_by_name (ppi_search ($document, where { _is_sub_declaration ($_) }))) {
+			next
+				unless my $tag = _sub_classification ($sub)
+				;
+
+			unless ($tag eq $current_tag) {
+				my $section_name = uc ($tag) . q ( FUNCTIONS);
+				die qq (Section '$section_name' doesn't exist)
+					unless exists $structure{$section_name};
+				$current_tag = $tag;
+				$current = $insert_sections{$sections{$section_name}} = [];
+				push @$current, $sections{$section_name};
+			}
+
+			my $prototype = List::Util::first {
+				$_->isa (PPI::Token::Prototype::)
+			} $sub->children;
+
+			my $title = join q ( ) => grep $_, $sub->name, $prototype ? $prototype->content : undef;
+			unless ($sections{$title}) {
+				say q ([require-documentation] ), $title;
+				$sections{$title} = qq (=head2 $title\n\n);
+			}
+			push @$current, $sections{$title};
+		}
+
+		my @result;
+		my %inserted;
+
+		#use DDP; p %insert_sections;
+
+		for my $section (@sections) {
+			next if exists $inserted{$section};
+			if (exists $insert_sections{$section}) {
+				push @result, my @insert = @{ $insert_sections{$section} };
+				@inserted{@insert} = ();
+				next;
+			}
+			push @result, $section;
+		}
+
+		$pod->set_content (join q () => @result);
+
+		return scalar keys %inserted;
 	}
 
 	sub run {
@@ -289,6 +494,7 @@ package App::ppi_sanity {
 		$verbose = $options->{verbose};
 
 		my $iterator = _build_path_iterator ($options);
+		my $exit_value = 0;
 
 		while (my $file = $iterator->()) {
 			verbose { qq (==> $file) };
@@ -307,15 +513,18 @@ package App::ppi_sanity {
 					};
 				}
 
-				Path::Tiny::->new ($file)->spew_utf8 ($document->content)
-					if $changes
-					;
+				if ($changes) {
+					Path::Tiny::->new ($file)->spew ($document->serialize);
+					$exit_value = 1;
+				}
 
 				1;
 			} // do {
 				say qq ([$file] Oops, something went wrong: $@);
 			};
 		}
+
+		exit $exit_value;
 	}
 
 	sub verbose (&) {
