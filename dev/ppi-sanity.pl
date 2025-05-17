@@ -319,6 +319,7 @@ package App::ppi_sanity {
 
 		my @policy_include = (
 			q (lib/PPIx/Augment/Utils.pm),
+			qr (lib/PPIx/Augment/DOM/.*.pm),
 			q (dev/ppi-sanity.pl),
 			q (test-helper.pl),
 		);
