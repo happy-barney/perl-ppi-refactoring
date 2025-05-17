@@ -104,6 +104,89 @@ package App::ppi_sanity {
 		_is_token ($element, PPI::Token::Whitespace::, $regex);
 	}
 
+	sub _maintain_order_of_sub_declarations {
+		my ($document) = @_;
+
+		# TODO: move all together
+
+		return
+			unless my @subs = find ($document, where { _is_sub_declaration ($_) });
+
+		my $insert_after = $subs[0]->sprevious_sibling;
+		my @sort = sort {
+			_sub_classification ($a) cmp _sub_classification ($b)
+				or
+				_cmp_sub_names ($a->name, $b->name)
+			} @subs;
+
+		my $subs = join q (-), map { $_->name } @subs;
+		my $sort = join q (-), map { $_->name } @sort;
+
+		return if $subs eq $sort;
+
+		@sort = map {
+			my @insert = ($_->clone);
+			while (_is_insignificant ($_->previous_sibling)) {
+				unshift @insert, $_->previous_sibling->clone;
+				$_->previous_sibling->remove;
+			}
+			$_->remove;
+			\ @insert
+		} @sort;
+
+		my $insert_before = $insert_after->next_sibling;
+
+		for my $sort (@sort) {
+			$insert_before->parent->__insert_before_child ($insert_before, @$sort);
+		}
+	}
+
+	sub _maintain_order_of_sub_definitions {
+		my ($document) = @_;
+
+		my ($insert_head) = find ($document, where { _is_named_sub_definition ($_) });
+		my @sorted = _sorted_named_subs ($document);
+
+		while (@sorted) {
+			if ($insert_head->name eq $sorted[0]->name) {
+				shift @sorted;
+				if (my $next_sub = _find_next_named_sub ($insert_head)) {
+					$insert_head = $next_sub;
+				}
+				next;
+			}
+
+			my $sorted_tag = _sub_tag ($sorted[0]);
+			my $head_tag   = _sub_tag ($insert_head);
+
+			if ($head_tag gt $sorted_tag) {
+				my $inserting = my $point = shift @sorted;
+				my @elements;
+				while (_is_ws (my $previous_sibling = $point->previous_sibling)) {
+					unshift @elements, $previous_sibling;
+					$point = $previous_sibling;
+				}
+
+				$insert_head->__insert_before (map $_->remove, $inserting, @elements);
+
+				next;
+			}
+
+			if ($head_tag lt $sorted_tag) {
+				my $inserting = my $point = shift @sorted;
+				my @elements;
+				while (_is_ws (my $previous_sibling = $point->previous_sibling)) {
+					unshift @elements, $previous_sibling;
+					$point = $previous_sibling;
+				}
+
+				$insert_head->__insert_after (map $_->remove, @elements, $inserting);
+				$insert_head = $inserting;
+				next;
+			}
+		}
+	}
+
 	sub ppi_search {
 		my ($document, $where) = @_;
 
@@ -183,6 +266,21 @@ package App::ppi_sanity {
 		}
 
 		return $changes;
+	}
+
+	sub policy_maintain_subs_order      :Policy :Default {
+		my ($document) = @_;
+
+		my $apply = 0;
+		$apply = 1 if $document->filename =~ qr ([.]pm$);
+		$apply = 1 if $document->filename =~ qr (\btest-helper[.]pl$);
+
+		return unless $apply;
+
+		$document->index_locations;
+
+		_maintain_order_of_sub_definitions  ($document);
+		_maintain_order_of_sub_declarations ($document);
 	}
 
 	sub run {
