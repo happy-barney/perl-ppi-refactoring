@@ -363,6 +363,9 @@ package App::ppi_sanity {
 	use Getopt::Long qw (GetOptionsFromArray);
 	use PPI;
 	use Path::Iterator::Rule;
+	use Path::Tiny;
+
+	use constant ALIGN_EXPORT_BASE_COLUMN => 40;
 
 	BEGIN {
 		App::ppi_sanity::attributes->import;
@@ -371,6 +374,8 @@ package App::ppi_sanity {
 	}
 
 	my @DEFAULT_INCLUDE = qw (bin lib t);
+
+	sub where (&;@);
 
 	sub _build_path_iterator {
 		my ($options) = @_;
@@ -395,10 +400,57 @@ package App::ppi_sanity {
 
 	sub _build_path_regex {
 		return
-			unless my $regex = join q (|), map { qr ((?:\Q$_\E)) } @_
+			unless my $regex =
+			join q (|),
+			map {
+				join q ([/]+), map { quotemeta ($_) } split qr ([/]), $_
+			}
+			@_
 			;
 
 		return qr (\b $regex $)x;
+	}
+
+	sub _column {
+		my ($element) = @_;
+		$element->location->[2];
+	}
+
+	sub _is {
+		my ($element, $class) = @_;
+
+		return $element->isa ($class);
+	}
+
+	sub _is_sub {
+		my ($element) = @_;
+
+		return _is ($element, PPI::Statement::Sub::);
+	}
+
+	sub _is_token {
+		my ($element, $class, $regex) = @_;
+
+		$regex = qr (^\Q$regex\E$)
+			if defined $regex
+			&& ! ref $regex
+			;
+
+		return 0 unless _is ($element, $class);
+		return 0 unless ! $regex || $element =~ $regex;
+		return 1;
+	}
+
+	sub _is_ws {
+		my ($element, $regex) = @_;
+
+		_is_token ($element, PPI::Token::Whitespace::, $regex);
+	}
+
+	sub ppi_search {
+		my ($document, $where) = @_;
+
+		@{ $document->find ($where) || [] };
 	}
 
 	sub parse_options {
@@ -436,11 +488,45 @@ package App::ppi_sanity {
 		return \ %options;
 	}
 
-	sub _normalise_policy_name ($) {
-		lc shift
-			=~ s (^policy_) ()r
-			=~ tr [_] [-]r
+	sub policy_align_export_attributes  :Policy :Default {
+		my ($document) = @_;
+
+		my @policy_include = (
+			q (lib/PPIx/Augment/Utils.pm),
+			q (dev/ppi-sanity.pl),
+		);
+
+		return 0
+			unless $document->filename =~ _build_path_regex (@policy_include)
+			;
+
+		my $changes = 0;
+		my @operators = ppi_search $document, where {
+			return 0 unless _is_token ($_, PPI::Token::Operator::, q (:));
+			return 0 unless _is_sub ($_->parent);
+			return 1;
+		};
+
+		for my $operator (reverse @operators) {
+			my $previous_sibling = $operator->previous_sibling;
+			my $has_length       = length ($previous_sibling->content);
+
+			unless (_is_ws ($previous_sibling)) {
+				$has_length = 0;
+				$operator->insert_before ($previous_sibling = PPI::Token::Whitespace::->new (q ( )));
+			}
+
+			my $new_length = ALIGN_EXPORT_BASE_COLUMN - $operator->sprevious_sibling->next_sibling->visual_column_number + 1;
+			$new_length = 1 if $new_length < 1;
+
+			if ($has_length != $new_length) {
+				$previous_sibling->set_content (q ( ) x $new_length);
+				$changes ++;
+			}
 		}
+
+		return $changes;
+	}
 
 	my @DEFAULT_INCLUDE = qw (bin lib t);
 	my $dry_run       = 0;
@@ -770,9 +856,10 @@ package App::ppi_sanity {
 
 			eval {
 				my $document = PPI::Document::->new (qq ($file));
+				$document->tab_width (4);
 				my $changes = 0;
 
-				for my $policy (@POLICIES_EFFECTIVE) {
+				for my $policy (@{ $options->{policies} }) {
 					verbose { q (  > policy ), $policy };
 
 					if (__PACKAGE__->can ($policy)->($document)) {
@@ -781,7 +868,7 @@ package App::ppi_sanity {
 					};
 				}
 
-				$document->save ($file)
+				Path::Tiny::->new ($file)->spew_utf8 ($document->content)
 					if $changes
 					;
 
@@ -840,6 +927,15 @@ package App::ppi_sanity {
 
 		say $code->() if $verbose;
 	}
+	sub where (&;@) {
+		my ($code, @rest) = @_;
+
+		return (
+			sub { local $_ = $_[1]; $code->(@_) },
+			@rest,
+		);
+	}
+
 }
 
 exit App::ppi_sanity::run (@ARGV)
