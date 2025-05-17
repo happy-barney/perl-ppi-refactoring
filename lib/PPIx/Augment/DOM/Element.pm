@@ -7,6 +7,11 @@ package PPIx::Augment::DOM::Element {
 
 	use mro q (c3);
 
+	use Ref::Util;
+	use Safe::Isa;
+
+	require PPIx::Augment::Utils;
+
 	use constant ppi_class => PPI::Element::;
 
 	sub Classify {
@@ -74,6 +79,65 @@ package PPIx::Augment::DOM::Element {
 
 	sub classify {
 		my ($self, @classifications) = @_;
+	}
+
+	sub classify_value {
+		my ($self, $value, @conditions) = @_;
+
+		my $document;
+		my @value_conditions = map { [ $value, $_ ] } @conditions;
+
+		while (@value_conditions) {
+			my ($value, $condition) = @{ shift @value_conditions };
+
+			unless (ref ($condition)) {
+				return !! $value
+					unless defined $condition
+					;
+
+				return $value eq $condition;
+			}
+
+			if (Ref::Util::is_plain_arrayref ($condition)) {
+				unshift @value_conditions, map { [ $value, $_ ] } @$condition;
+				next;
+			}
+
+			if (Ref::Util::is_regexpref ($condition)) {
+				return !! scalar $value =~ $condition;
+			}
+
+			if (Ref::Util::is_coderef ($condition)) {
+				$document //= $self->document;
+				local $_ = $value;
+
+				return !! $condition->($document, $value);
+			}
+
+			if (Ref::Util::is_hashref ($condition)) {
+				for my $method (keys %$condition) {
+					my $method_condition = $condition->{$method};
+
+					if ($method eq q (isa)) {
+						return
+							unless $value->$Safe::Isa::_isa ($method_condition)
+							;
+					}
+
+					my $accessor = undef
+						// PPIx::Augment::Utils::->can ($method)
+						// $value->$Safe::Isa::_can ($method)
+						// return
+						;
+
+					unshift @value_conditions, [ $value->$accessor, $method_condition ];
+				}
+
+				next;
+			}
+		}
+
+		return 1;
 	}
 
 	1;
