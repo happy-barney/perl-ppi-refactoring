@@ -19,6 +19,21 @@ package PPIx::Augment::DOM::Element {
 		my ($class, $ppi_element) = @_;
 	}
 
+	sub child_index {
+		my ($self) = @_;
+
+		if ($self->parent) {
+			my @children = $self->parent->children;
+			for my $index (0 .. (@children - 1)) {
+				return $index
+					if $children[$index] == $self
+					;
+			}
+		}
+
+		return undef;
+	}
+
 	sub classify {
 		my ($self, @classifications) = @_;
 	}
