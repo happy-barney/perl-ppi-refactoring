@@ -3,6 +3,8 @@
 
 requires "Attribute::Handlers" => "0";
 requires "Exporter::Tiny" => "0";
+requires "Module::Find" => "0";
+requires "Module::Load" => "0";
 requires "PPI" => "v1.278.0";
 requires "Ref::Util" => "0";
 requires "Safe::Isa" => "0";
