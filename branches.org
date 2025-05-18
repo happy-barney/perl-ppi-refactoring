@@ -7,3 +7,10 @@
   - [ ] Exporter
 
 * phase-1-utils-ppi
+
+* phase-2-dom-ppi
+  - [ ] DOM concept
+  - [ ] ::Element - Identify
+  - [ ] ::Element - classify
+  - [ ] ::Token
+  - [ ] ::Token::Whitespace
