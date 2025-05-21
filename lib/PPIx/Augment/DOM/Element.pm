@@ -11,6 +11,23 @@ package PPIx::Augment::DOM::Element {
 
 	use PPI v1.278;
 
+	sub add_trait {
+		my ($self, $trait) = @_;
+
+		$self->{_traits}{$trait} = 1;
+	}
+
+	sub isa {
+		my ($self, $trait) = @_;
+
+		return 1
+			if $self->{_traits}
+			&& exists $self->{_traits}{$trait}
+			;
+
+		return $self->next::method ($trait);
+	}
+
 	1;
 };
 
