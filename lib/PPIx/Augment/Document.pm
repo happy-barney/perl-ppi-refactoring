@@ -26,6 +26,16 @@ package PPIx::Augment::Document {
 		return %required;
 	}
 
+	sub _is_augmentation_up_to_date {
+		my ($self, $augmentation) = @_;
+
+		return
+			unless my $last_update = $self->{_epoch_mapping}{$augmentation}
+			;
+
+		return $last_update == $self->{_epoch};
+	}
+
 	sub new {
 		my ($class, $source, @args) = @_;
 
@@ -44,52 +54,47 @@ package PPIx::Augment::Document {
 			;
 
 		$source->{_epoch} = 1;
-		$source->{_augmentation_epoch} = { };
+		$source->{_epoch_mapping} = { };
 
 		return bless $source, ref ($class) || $class;
 	}
 
-	sub augment {
-		my ($self, @augmentations) = @_;
+	sub _obsoleted_requirements {
+		my ($self, $augmentation) = @_;
 
-		for my $step ($self->augmentation_apply_order (@augmentations)) {
-			$step->augment ($self);
-		}
-
-		return $self;
+		return
+			grep { ! $self->_is_augmentation_up_to_date ($_) }
+			$augmentation->requires
+			;
 	}
 
-	sub augmentation_apply_order {
-		my ($self, @augmentations) = @_;
+	sub augment {
+		my ($self, @with_augmentations) = @_;
 
-		my %required = _build_requires_map (@augmentations);
+		return
+			unless @with_augmentations
+			;
 
-		my @apply_order;
-		my (%seen, %watching);
+		my $last_epoch = $self->{_epoch};
 
-		for my $augmentation (@augmentations) {
-			my @queue = ($augmentation);
-			while (my $step = shift @queue) {
-				next if exists $seen{$step};
+		for my $augmentation (@with_augmentations) {
+			next
+				if $self->_is_augmentation_up_to_date ($augmentation)
+				;
 
-				if (Ref::Util::is_plain_ref ($step)) {
-					$seen{$$step} = delete $watching{$$step};
-
-					push @apply_order, $$step;
-					next;
-				}
-
-				die qq (Dependency cycle detected in $augmentation <-> $step)
-					if exists $watching{$step}
-					;
-
-				$watching{$step} = 1;
-				unshift @queue, \ $step;
-				unshift @queue, @{ $required{$step} };
+			if (my @requires = $self->_obsoleted_requirements ($augmentation)) {
+				unshift @with_augmentations, @requires, $augmentation;
+				next;
 			}
+
+			$self->{_epoch}++
+				if $augmentation->augment ($self)
+				;
+
+			$self->{_epoch_mapping}{$augmentation} = $self->{_epoch};
 		}
 
-		return @apply_order;
+		return $self->{_epoch} == $last_epoch;
 	}
 
 	1;
