@@ -1,0 +1,130 @@
+
+=pod
+
+WIP formalizing my set of rules.
+
+No automated checks (yet).
+
+=head1 PROJECT GOALS
+
+C<PPIx::Augment> is to provide set of tools for automated Perl codebase refactorings,
+for example:
+
+=over
+
+=item upgrade / downgrade for Perl version
+
+=item fix Perl::Critic violations
+
+=item refactoring libraries
+
+=item project specific refactoring
+
+=back
+
+=head1 CODE STANDARDS
+
+Rules mentioned in this sections are designed to lower project's learning curve
+as well as maintenance.
+
+Every rule must include a brief explanation of its purpose, so that the original
+intention is not forgotten and the rule can be properly challenged when necessary.
+
+See also L</CODE STANDARDS BASICS> bellow containing longer explanation behind
+some rules.
+
+=head2 Naming convention
+
+=over
+
+=item choose good words
+
+Choose words with clear meaning consistently for one aspect.
+
+For some examples, see L<NAMING DICTIONARY> below.
+
+=item favour intention over implementation
+
+Name functions after what they should do, not how they are implemented.
+
+Also, don't be afraid to use little bit longer names, like:
+
+    sub it_is_followed_by_empty_line;
+
+=item snake case
+
+Unless symbol is related to external module (for example: Perl::Critic policy name),
+always separated words by visual anchor.
+
+For module names, use common sense, whether to use C<::> or C<_>.
+
+Example:
+
+=over
+
+=item C<PPIx::Augment::DOM::No_Element>
+
+=item if applied on C<Perl::Critic> policies
+
+names will be like:
+
+    Builtin_Functions::Prohibit_Boolean_Grep
+    Builtin_Functions::Prohibit_Boolean_Map
+
+=back
+
+=back
+
+=head2 Coding style
+
+=over
+
+=item Indent code with tabs
+
+Be tolerant.
+
+1 tab means 1 indent level. Let fellow contributors to set their preferred
+tab width in their environment.
+
+But use 4 spaces as indent in POD's verbatim blocks.
+
+=item Align with spaces
+
+Use tab only for indentation, for alignment use spaces.
+
+=item No multi-indent align
+
+Do not align code lines with different indent levels.
+
+=item Whitespace before function / method argument list
+
+    $obj->foo (...);
+
+Reason: provide visual anchor for reader eyes
+
+Applies also on quoting operators:
+
+    q (foo)
+    qw (foo)
+    qr (foo)
+
+=item Always use quoting operators C<q>/C<qq>
+
+    q  (this is "literal" string)
+    qq (this is "$literal" string)
+
+Motivation: change between interpolated/not-interpolated takes only one character.
+
+Quoting operators also allows you to use paired delimiters so it limits necessity
+of using backslashes in strings.
+
+=item Do not import functions used in runtime
+
+Use them fully qualified instead.
+
+Motivation: you may need to override them in tests and when removed
+from namespace by L<namespace::clean> / L<namespace::autoclean> you cannot
+do that anymore.
+
+=back
+
