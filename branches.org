@@ -7,3 +7,26 @@
   - [ ] test-helper
   - [ ] test fixtures
 
+* a-00-ppix-augment [0/2]
+  - [ ] PPIx::Augment [0/1]
+    - [ ] commit (code, test, sanity)
+  - [ ] PPIx::Augment::Augmentation [0/3]
+    - [ ] commit (code, test, sanity)
+    - [ ] PPIx::Augment::Utils / ppix_search
+      - [ ] code
+      - [ ] tests
+      - [ ] sanity
+      - [ ] Utils - element
+      - [ ] Utils - it_is_element
+      - [ ] Utils - invoke
+      - [ ] Utils - via
+        - [ ] Utils - elements
+      - [ ] Utils - where
+        - [ ] Utils - ppi_include
+    - [ ] Utils - ppix_transform
+      - [ ] code
+      - [ ] tests
+      - [ ] sanity
+      - [ ] Utils - element_key
+      - [ ] Utils - parents
+
