@@ -11,6 +11,8 @@ package PPIx::Augment {
 	use Module::Load;
 	use PPI v1.278;
 
+	use PPIx::Augment::Augmentation;
+
 	sub new {
 		my ($class, $source, @with_augmentations) = @_;
 
@@ -42,7 +44,89 @@ package PPIx::Augment {
 
 		$source = bless $source, ref ($class) || $class;
 
+		$source->augment (@augmentations);
+
 		return $source;
+	}
+
+	sub _is_augmentation_up_to_date {
+		my ($self, $augmentation) = @_;
+
+		return
+			unless my $last_update = $self->{_epoch_mapping}{$augmentation}
+			;
+
+		return $last_update == $self->{_epoch};
+	}
+
+	sub _obsoleted_requirements {
+		my ($self, $augmentation) = @_;
+
+		return
+			grep { ! $self->_is_augmentation_up_to_date ($_) }
+			$augmentation->requires
+			;
+	}
+
+	sub augment {
+		my ($self, @with_augmentations) = @_;
+
+		return
+			unless @with_augmentations
+			;
+
+		my $starting_epoch = $self->{_epoch};
+
+		for my $augmentation (@with_augmentations) {
+			# Optimistic handling of cycles - expect them to break naturally
+			next
+				if $self->_is_augmentation_up_to_date ($augmentation)
+				;
+
+			if (my @requires = $self->_obsoleted_requirements ($augmentation)) {
+				unshift @with_augmentations, @requires, $augmentation;
+				next;
+			}
+
+			$self->{_epoch}++
+				if $augmentation->augment ($self)
+				;
+		} continue {
+			$self->{_epoch_mapping}{$augmentation} = $self->{_epoch};
+		}
+
+		# current epoch and starting epoch doesn't match => something was modified
+		return $self->{_epoch} != $starting_epoch;
+	}
+
+	sub available_augmentations {
+		my ($class, $root) = @_;
+
+		$root //= $class->available_augmentations_root;
+
+		state %augmentations;
+
+		return @{
+			$augmentations{$root} //= [
+				grep { $_->$_DOES (PPIx::Augment::Augmentation::) }
+				grep { eval { Module::Load::load ($_) } }
+				Module::Find::findallmod ($root)
+			]
+		};
+	}
+
+	sub available_augmentations_root {
+		return PPIx::Augment::Augmentation::;
+	}
+
+	sub consolidate {
+		my ($self) = @_;
+
+		my @augmentations = keys %{ $self->{_epoch_mapping} };
+
+		1
+			while $self->augment (@augmentations)
+			;
 	}
 
 	1;
@@ -63,6 +147,12 @@ PPIx::Augment - Augment structure of PPI document
     my $document = PPIx::Augment::->new ($file);
     my $document = PPIx::Augment::->new (\ $source);
     my $document = PPIx::Augment::->new ($ppi_document);
+    my $document = PPIx::Augment::->new (
+        $file,
+        { tab_width => 4 },
+        Augmentation::Class::
+        Augmentation::Another::Class::
+    );
 
 =head1 INHERITANCE
 
@@ -123,6 +213,32 @@ In addition, L<PPIx::Augment> recognises and sets C<tab_width>.
 Applies specified augmentations during construction.
 
 =back
+
+=head2 augment
+
+    $ppix_augment->augment (@with_augmentations)
+
+Applies specified augmentations.
+
+=head2 available_augmentations
+
+Returns list of available augmentations.
+
+The method searches for all modules under L</available_augmentations_root>
+extending L<PPIx::Augment::Augmentation>.
+
+=head2 available_augmentations_root
+
+Default: L<PPIx::Augment::Augmentation>.
+
+=head2 consolidate
+
+L<PPIx::Augment> uses a lazy approach to augment the data model, applying augmentations
+only when they are needed, so it does not automatically re-evaluate already applied
+augmentations when changes are applied.
+
+One can use the method L</augment> with proper arguments or call this method, which
+is a shortcut for calling L</augment> with all applied augmentations.
 
 =head1 AUTHOR
 
