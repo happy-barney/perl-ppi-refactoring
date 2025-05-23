@@ -7,3 +7,27 @@
   - [ ] test-helper
   - [ ] test fixtures
 
+* a-00-dom-elements [2/11]
+  - [X] DOM elements counterparts
+  - [ ] concept - element-node
+  - [X] concept - no_element ()
+  - [ ] concept - identify ()
+  - [ ] concept - classify ()
+  - [ ] concept - is_available_for ()
+  - [ ] concept - augment ()
+  - [ ] concept - diminish ()
+  - [ ] concept - trait ()
+  - [ ] concept - build ()
+  - [ ] special tokens [0/3]
+    - [ ] DOM::Token::Number::Decimal
+    - [ ] DOM::Token::Whitespace::Newline
+    - [ ] DOM::Token::Whitespace::Indent
+  - [ ] versioned tokens [0/8]
+    - [ ] DOM::Topen::Number::Octal::Traditional
+    - [ ] DOM::Topen::Number::Octal::V534
+    - [ ] DOM::Statement::Package::Traditional
+    - [ ] DOM::Statement::Package::V512
+    - [ ] DOM::Statement::Package::V514
+    - [ ] DOM::Statement::Sub::Traditional
+    - [ ] DOM::Statement::Sub::V520
+    - [ ] DOM::Statement::Sub::V526
