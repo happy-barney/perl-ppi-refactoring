@@ -105,6 +105,46 @@ package PPIx::Augment::Utils {
 		return @found;
 	}
 
+	sub ppix_transform                  :Exported(traversal) {
+		my $element = &element;
+		my $where   = &_process_args_where;
+		my $invoke  = &_process_args_invoke;
+		my $via     = _process_args_via;
+
+		return 0
+			unless $where
+			&& $invoke
+			&& it_is_node $element
+			;
+
+		my $rv = 0;
+
+		# avoid processing same parent twice
+		my %reflog;
+
+		my @queue = ($element);
+		while (my $current = shift @queue) {
+			next
+				if $reflog{element_key $current}
+				;
+
+			if ($where->($element, $current)) {
+				delete %reflog{ map { element_key $_ } parents $element };
+
+				$rv++;
+				$invoke->($element, $current);
+
+				@queue = ($element);
+			}
+
+			$reflog{element_key $current}++;
+
+			unshift @queue, $via->($element, $current);
+		}
+
+		return $rv;
+	}
+
 	1;
 }
 
@@ -276,6 +316,22 @@ in list context, it returns all found elements (or an empty list);
 in scalar context, it returns only the first found element (or L</no element>).
 
 =back
+
+=head2 ppix_transform
+
+	ppix_transform $document
+		=> where  { ... condition 1 ... }
+		=> where  { ... condition 2 ... }
+		=> invoke { ... }
+		=> invoke { ... }
+		;
+
+Similar to L</ppix_search> but assumes that L</invoke (&)> modifies the document
+so it will include new nodes and skip removed ones.
+
+Unlike L</ppix_search>, it always walks via C</elements>.
+
+Returns number of found elements.
 
 =head1 AUTHOR
 
