@@ -119,6 +119,13 @@ By returning a C<No Element> value, one can simplify this:
 
 for both C<parent> and C<snext_sibling> returning blessed-but-false C<No Element> value.
 
+=head2 Identity
+
+    my $augmentation_class = PPIX_ELEMENT_SUBCLASS->identify ($element)
+
+Augmented DOM classes provide a method to identify whether a given C<$element> is
+either a head element representing code structure or an already augmented element.
+
 =head1 AUTHOR
 
 Branislav Zahradník <barney@cpan.org>

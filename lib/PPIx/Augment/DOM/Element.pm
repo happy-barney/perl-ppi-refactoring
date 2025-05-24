@@ -10,6 +10,7 @@ package PPIx::Augment::DOM::Element {
 	use mro q (c3);
 
 	use PPI v1.278;
+	use Scalar::Util;
 
 	use PPIx::Augment::DOM::No_Element;
 
@@ -21,6 +22,28 @@ package PPIx::Augment::DOM::Element {
 
 	sub document {
 		$_[0]->next::method () || $_[0]->_no_element;
+	}
+
+	sub identify {
+		my ($class, $element) = @_;
+
+		return
+			unless Scalar::Util::blessed ($element)
+			;
+
+		return 1
+			if $element->isa (ref ($class) || $class)
+			;
+
+		return ! 1
+			if $element->isa (__PACKAGE__)
+			;
+
+		return 1
+			if $element->isa ($class->ppi_class)
+			;
+
+		return ! 1;
 	}
 
 	sub next_sibling {
@@ -132,6 +155,25 @@ This concept affects the following methods:
 =head2 statement
 
 =head2 top
+
+=head1 CONCEPT - IDENTIFY
+
+=head2 identify
+
+    PPIX_ELEMENT_SUBCLASS->identify ($element)
+
+This method should identify whether C<$element> is an element it augments or
+an element already augmented by C<PPIX_ELEMENT_SUBCLASS>.
+
+Default implementation returns true when C<$element> an instance of (C<isa>) of
+the class itself or an unaugmented instance of the class returned by
+the L</ppi_class> method.
+
+=head2 ppi_class
+
+    PPIX_ELEMENT_SUBCLASS->ppi_class;
+
+The L<PPI> element class of the element C<PPIX_ELEMENT_SUBCLASS> augments.
 
 =head1 AUTHOR
 
