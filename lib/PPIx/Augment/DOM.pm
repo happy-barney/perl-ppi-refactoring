@@ -4,6 +4,8 @@ use warnings;
 
 package PPIx::Augment::DOM {
 
+	use PPIx::Augment::DOM::No_Element;
+
 	use PPIx::Augment::DOM::Element;
 	use PPIx::Augment::DOM::Node;
 	use PPIx::Augment::DOM::Statement;
@@ -97,6 +99,25 @@ to better suit to static analysis and automated refactoring.
 
 Further documentation assumes you are familiar with L<PPI>, so it references
 it as a point of reference of fact without need for further explanation.
+
+=head1 CONCEPTS
+
+=head2 No Element
+
+A value implementing all element/node methods, evaluated as false in boolean context.
+
+Many L<PPI> accessor methods return a blessed value when a value exists,
+or an empty string otherwise, requiring to use patterns like:
+
+    while ($element->parent && $element->parent->snext_sibling) {
+    }
+
+By returning a C<No Element> value, one can simplify this:
+
+    while ($element->parent->snext_sibling) {
+    }
+
+for both C<parent> and C<snext_sibling> returning blessed-but-false C<No Element> value.
 
 =head1 AUTHOR
 

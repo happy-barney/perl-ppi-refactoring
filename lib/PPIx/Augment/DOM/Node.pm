@@ -14,6 +14,22 @@ package PPIx::Augment::DOM::Node {
 
 	use constant ppi_class => q (PPI::Node);
 
+	sub child {
+		$_[0]->next::method () || PPIx::Augment::DOM::Element::_no_element;
+	}
+
+	sub first_element {
+		$_[0]->next::method () || PPIx::Augment::DOM::Element::_no_element;
+	}
+
+	sub last_element {
+		$_[0]->next::method () || PPIx::Augment::DOM::Element::_no_element;
+	}
+
+	sub schild {
+		$_[0]->next::method () || PPIx::Augment::DOM::Element::_no_element;
+	}
+
 	1;
 };
 
