@@ -1,0 +1,57 @@
+
+* Overview
+
+  1. environment
+  2. testing environment
+  3. internal modules
+  4. Utils - ppix_search, ppi_bool, where / invoke (including overload operators)
+  5. Utils - PPI accessors
+  6. Utils - PPI build + classify
+  7. Utils - PPIx accessors
+  8. Utils - PPIx build + classify
+  9. how to declare (and test) augmentations
+  10. augmentation - PPI::Newlines
+  11. augmentation - PPI::Comment
+  12. augmentation - PPI::Magic
+  13. augmentation - DOM::Elements
+  14. augmentation - DOM::Quoted_Words
+  15. augmentation - DOM::Interpolated_Literals
+  16. augmentation - DOM::Regexp
+  17. augmentation - DOM::POD
+
+* Branches
+
+** TODO common-0-dew-sanity-ppi [0/12]
+  - provide PPIx::Augment::Utils interface
+  - [ ] main
+  - [ ] config file (Config::MVP)
+  - [ ] _where { }
+  - [ ] _ppi_search
+  - [ ] policy_align_export_attributes
+  - [ ] policy_maintain_sub_order
+  - [ ] policy_remove_unused_private_functions
+  - [ ] policy_replace_quotes
+  - [ ] policy_require_documentation
+  - [ ] policy_require_copyright
+  - [ ] policy_indentation
+
+** TODO common-1-test-helper [0/3]
+  - [ ] test-helper [0/2]
+    - [ ] Carp::Always, Context::Singleton, Test::YAFT
+    - [ ] Path::Tiny, test_root, distribution_root
+  - [ ] test fixtures
+  - [ ] assume_ppi, expect_ppi_*
+
+** TODO common-2-internals [0/2]
+  - [ ] Internals
+  - [ ] Exporter
+
+** a-00-augment [0/7]
+  - [ ] PPIx::Augment::Augmentation
+  - [ ] PPIx::Augment::Declare::Augmentation
+  - [ ] PPIx::Augment (Document)
+  - [ ] PPI counterparts
+  - [ ] PPIx::Augment::Augmentation::DOM::Elements
+  - [ ] Concept - identify
+  - [ ] Concept - classify
+
