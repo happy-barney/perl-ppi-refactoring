@@ -378,6 +378,9 @@ package App::ppi_sanity {
 
 	my @DEFAULT_INCLUDE = qw (bin lib t);
 
+	sub dist_ini;
+	sub dist_module;
+	sub dist_root;
 	sub where (&;@);
 	sub invoke (&;@);
 
@@ -724,6 +727,39 @@ package App::ppi_sanity {
 		return @include;
 	}
 
+	sub _column {
+		my ($element) = @_;
+		$element->location->[2];
+	}
+
+	sub _component_module_license_text {
+		my $license_text = <<"END_OF_COMPONENT_LICENSE";
+This module is part of the L<${\ (dist_module)}> distribution.
+It may be modified and distributed under the same terms as the distribution itself.
+END_OF_COMPONENT_LICENSE
+
+		chomp ($license_text);
+		return $license_text;
+	}
+
+	sub _distribution_module_license_text {
+		require Software::LicenseUtils;
+
+		my $license = eval {
+			Software::LicenseUtils->new_from_short_name ({
+				short_name => dist_ini->{_}{license},
+				holder     => dist_ini->{_}{copyright_holder},
+			})
+		} // do {
+			my $class = q (Software::License::) . dist_ini->{_}{license};
+			Module::Load::load ($class);
+
+			$class;
+		};
+
+		return qq (L<${\ dist_module }> is distributed under L<"${\ $license->name }"|${\ $license->url }>.)
+	}
+
 	sub _is {
 		my ($value, @classifications) = @_;
 
@@ -920,6 +956,44 @@ package App::ppi_sanity {
 		return $changes;
 	}
 
+	sub dist_ini {
+		state $dist_ini = do {
+			require Config::INI::Reader;
+			Config::INI::Reader->read_file (
+				dist_root->child (q (dist.ini))
+			);
+		};
+	}
+
+	sub dist_module {
+		state $dist_module = do {
+			dist_ini->{_}{name} =~ s ([-]) (::)gr;
+		};
+	}
+
+	sub dist_root {
+		state $dist_root = do {
+			require Path::Tiny;
+			my $pwd = Path::Tiny::->cwd;
+
+			while (1) {
+				$pwd = undef
+					if $pwd eq $pwd->rootdir
+					;
+
+				last
+					if ! defined $pwd
+					|| $pwd->child (q (.git))->exists
+					|| $pwd->child (q (dist.ini))->exists
+					;
+
+				$pwd = $pwd->parent;
+			}
+
+			$pwd;
+		};
+	}
+
 	sub ppi_replace {
 		my ($document, $where, $invoke) = @_;
 
@@ -1014,6 +1088,15 @@ package App::ppi_sanity {
 		);
 	}
 
+	sub remove_previous_whitespaces {
+		my ($element) = @_;
+
+		while (my $previous_sibling = $element->previous_sibling) {
+			last unless _is_ws ($element);
+			$previous_sibling->remove;
+		}
+	}
+
 	sub parse_options {
 		my (@argv) = @_;
 
@@ -1047,15 +1130,6 @@ package App::ppi_sanity {
 		$options{policies} //= \ @POLICIES_DEFAULT;
 
 		return \ %options;
-	}
-
-	sub remove_previous_whitespaces {
-		my ($element) = @_;
-
-		while (my $previous_sibling = $element->previous_sibling) {
-			last unless _is_ws ($element);
-			$previous_sibling->remove;
-		}
 	}
 
 	sub policy_align_export_attributes  :Policy :Default {
@@ -1297,6 +1371,9 @@ package App::ppi_sanity {
 		}
 
 		return @options;
+	}
+
+	sub policy_enforce_license_text     :Policy :Default {
 	}
 
 	sub policy_replace_quotes                   :Policy {
