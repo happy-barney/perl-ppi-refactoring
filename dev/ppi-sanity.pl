@@ -32,6 +32,9 @@ package App::ppi_sanity {
 		push @POLICIES_DEFAULT, *{$symbol}{NAME};
 	}
 
+	sub dist_ini;
+	sub dist_module;
+	sub dist_root;
 	sub verbose (&);
 	sub where (&;@);
 	sub invoke (&;@);
@@ -100,6 +103,34 @@ package App::ppi_sanity {
 	sub _column {
 		my ($element) = @_;
 		$element->location->[2];
+	}
+
+	sub _component_module_license_text {
+		my $license_text = <<"END_OF_COMPONENT_LICENSE";
+This module is part of the L<${\ (dist_module)}> distribution.
+It may be modified and distributed under the same terms as the distribution itself.
+END_OF_COMPONENT_LICENSE
+
+		chomp ($license_text);
+		return $license_text;
+	}
+
+	sub _distribution_module_license_text {
+		require Software::LicenseUtils;
+
+		my $license = eval {
+			Software::LicenseUtils->new_from_short_name ({
+				short_name => dist_ini->{_}{license},
+				holder     => dist_ini->{_}{copyright_holder},
+			})
+		} // do {
+			my $class = q (Software::License::) . dist_ini->{_}{license};
+			Module::Load::load ($class);
+
+			$class;
+		};
+
+		return qq (L<${\ dist_module }> is distributed under L<"${\ $license->name }"|${\ $license->url }>.)
 	}
 
 	sub _is {
@@ -207,6 +238,44 @@ package App::ppi_sanity {
 			;
 
 		return $changes;
+	}
+
+	sub dist_ini {
+		state $dist_ini = do {
+			require Config::INI::Reader;
+			Config::INI::Reader->read_file (
+				dist_root->child (q (dist.ini))
+			);
+		};
+	}
+
+	sub dist_module {
+		state $dist_module = do {
+			dist_ini->{_}{name} =~ s ([-]) (::)gr;
+		};
+	}
+
+	sub dist_root {
+		state $dist_root = do {
+			require Path::Tiny;
+			my $pwd = Path::Tiny::->cwd;
+
+			while (1) {
+				$pwd = undef
+					if $pwd eq $pwd->rootdir
+					;
+
+				last
+					if ! defined $pwd
+					|| $pwd->child (q (.git))->exists
+					|| $pwd->child (q (dist.ini))->exists
+					;
+
+				$pwd = $pwd->parent;
+			}
+
+			$pwd;
+		};
 	}
 
 	sub ppi_replace {
@@ -488,6 +557,9 @@ package App::ppi_sanity {
 		return scalar keys %inserted;
 	}
 
+	sub policy_enforce_license_text     :Policy :Default {
+	}
+
 	sub run {
 		my $options = & parse_options;
 
@@ -542,6 +614,10 @@ package App::ppi_sanity {
 	}
 
 }
+
+say App::ppi_sanity::_distribution_module_license_text;
+exit;
+
 
 App::ppi_sanity::run (@ARGV)
 	unless caller
