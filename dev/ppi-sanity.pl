@@ -149,6 +149,7 @@ package App::ppi_sanity {
 	use Getopt::Long qw (GetOptionsFromArray);
 	use List::Util;
 	use POSIX qw (strftime);
+	use Path::Iterator::Rule;
 	use Term::ANSIColor qw ();
 
 	my %POLICIES_ALL;
@@ -170,6 +171,8 @@ package App::ppi_sanity {
 		$POLICIES_ALL{$name}{handler} = $referent;
 		$POLICIES_ALL{$name}{key}     = $name =~ s (^policy_) ()r =~ tr [_] [-]r,
 	}
+
+	my @DEFAULT_INCLUDE = qw (bin lib t);
 
 	my $color_theme = {
 		ERROR => q (red),
@@ -200,6 +203,21 @@ package App::ppi_sanity {
 		return Term::ANSIColor::colored ([ $color ], @what);
 	}
 
+	sub _includes_from_options {
+		my @include =
+			grep { -e $_ }
+			map  { @{ $_ // [] } }
+			map { $_->{include}, $_->{with} }
+			@_
+			;
+
+		@include = @DEFAULT_INCLUDE
+			unless @include
+			;
+
+		return @include;
+	}
+
 	sub _log {
 		my ($level, $code) = @_;
 
@@ -214,6 +232,20 @@ package App::ppi_sanity {
 			$log_with_time ? strftime (q ([%T]), localtime) : (),
 			_colored ($level, sprintf q (%-*s), $length, $level),
 			@message
+			;
+	}
+
+	sub _path_iterator {
+		return Path::Iterator::Rule
+			->new
+			->not_name (q (.git))
+			->skip_dir (q (.git))
+			->file
+			->or (
+				Path::Iterator::Rule->new->name (qr ( [.] (?: pm | pl | t ) $ )x),
+				Path::Iterator::Rule->new->shebang (qr (^[#]! .* \b perl \b )x),
+			)
+			->iter (@_, { recurse => 1 })
 			;
 	}
 
@@ -276,6 +308,8 @@ package App::ppi_sanity {
 	sub run {
 		my $config = App::config->new;
 		my @options = parse_options (@_);
+
+		my $iterator = _path_iterator _includes_from_options @options;
 
 		return 0;
 	}
