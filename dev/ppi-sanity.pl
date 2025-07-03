@@ -298,6 +298,7 @@ package App::ppi_sanity::logger {
 
 	use List::Util;
 	use POSIX qw (strftime);
+	use Path::Iterator::Rule;
 	use Term::ANSIColor qw ();
 
 	BEGIN {
@@ -1393,6 +1394,8 @@ END_OF_COMPONENT_LICENSE
 			;
 	}
 
+	my @DEFAULT_INCLUDE = qw (bin lib t);
+
 	my $color_theme = {
 		ERROR => q (red),
 		WARN  => q (magenta),
@@ -1422,6 +1425,21 @@ END_OF_COMPONENT_LICENSE
 		return Term::ANSIColor::colored ([ $color ], @what);
 	}
 
+	sub _includes_from_options {
+		my @include =
+			grep { -e $_ }
+			map  { @{ $_ // [] } }
+			map { $_->{include}, $_->{with} }
+			@_
+			;
+
+		@include = @DEFAULT_INCLUDE
+			unless @include
+			;
+
+		return @include;
+	}
+
 	sub _log {
 		my ($level, $code) = @_;
 
@@ -1436,6 +1454,20 @@ END_OF_COMPONENT_LICENSE
 			$log_with_time ? strftime (q ([%T]), localtime) : (),
 			_colored ($level, sprintf q (%-*s), $length, $level),
 			@message
+			;
+	}
+
+	sub _path_iterator {
+		return Path::Iterator::Rule
+			->new
+			->not_name (q (.git))
+			->skip_dir (q (.git))
+			->file
+			->or (
+				Path::Iterator::Rule->new->name (qr ( [.] (?: pm | pl | t ) $ )x),
+				Path::Iterator::Rule->new->shebang (qr (^[#]! .* \b perl \b )x),
+			)
+			->iter (@_, { recurse => 1 })
 			;
 	}
 
@@ -1537,6 +1569,8 @@ END_OF_COMPONENT_LICENSE
 		}
 
 		return $exit_value;
+		my $iterator = _path_iterator _includes_from_options @options;
+
 		my $iterator = _path_iterator _includes_from_options @options;
 
 		return 0;
