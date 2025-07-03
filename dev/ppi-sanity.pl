@@ -360,13 +360,50 @@ package App::ppi_sanity::logger {
 }
 
 package App::ppi_sanity {
+	use Getopt::Long qw (GetOptionsFromArray);
+
 	BEGIN {
 		App::ppi_sanity::attributes->import;
 		App::ppi_sanity::config::->import;
 		App::ppi_sanity::logger::->import;
 	}
 
+	sub parse_options {
+		my (@argv) = @_;
+
+		my @options = (my $current = { });
+
+		my $parser = Getopt::Long::Parser->new (
+			config => [qw [require_order]],
+		);
+
+		while (@argv) {
+			$parser->getoptionsfromarray (
+				\ @argv,
+				$current,
+				'include=s@',
+				'exclude=s@',
+				'verbose',
+				'with=s@',
+				'without=s@',
+			);
+
+			while (my $policy = shift @argv) {
+				die qq (Unknown policy '$policy')
+					unless policy_search ($policy)
+					;
+
+				push @options, $current = { policy => $policy_key };
+			}
+		}
+
+		return @options;
+	}
+
 	sub run {
+		my $config = App::config->new;
+		my @options = parse_options (@_);
+
 		return 0;
 	}
 }
