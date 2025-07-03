@@ -146,6 +146,7 @@ package App::config {
 
 package App::ppi_sanity {
 	use Attribute::Handlers;
+	use Getopt::Long qw (GetOptionsFromArray);
 	use List::Util;
 	use POSIX qw (strftime);
 	use Term::ANSIColor qw ();
@@ -238,7 +239,44 @@ package App::ppi_sanity {
 		_log WARN => @_;
 	}
 
+	sub parse_options {
+		my (@argv) = @_;
+
+		my @options = (my $current = { });
+
+		my $parser = Getopt::Long::Parser->new (
+			config => [qw [require_order]],
+		);
+
+		while (@argv) {
+			$parser->getoptionsfromarray (
+				\ @argv,
+				$current,
+				'include=s@',
+				'exclude=s@',
+				'verbose',
+				'with=s@',
+				'without=s@',
+			);
+
+			if (my $policy = shift @argv) {
+				my $policy_key = lc ($policy) =~ tr [_] [-]r;
+
+				die qq (Unknown policy '$policy')
+					unless exists $POLICIES_ALL{$policy_key}
+					;
+
+				push @options, $current = { policy => $policy_key };
+			}
+		}
+
+		return @options;
+	}
+
 	sub run {
+		my $config = App::config->new;
+		my @options = parse_options (@_);
+
 		return 0;
 	}
 }
