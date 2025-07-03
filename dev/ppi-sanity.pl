@@ -42,11 +42,11 @@ package App::config {
 	sub new {
 		my ($class) = @_;
 
-		my $self = bless { }, $class;
-
-		$self->{config} = $self->load_config_file;
-
-		return $self;
+		state $self = do {
+			my $self = bless { }, $class;
+			$self->{config} = $self->load_config_file;
+			$self;
+		};
 	}
 
 	sub config {
@@ -55,6 +55,16 @@ package App::config {
 		return $self->{config}
 			&& exists $self->{config}{$policy}
 			&& $self->{config}{$policy}{$key}
+			;
+	}
+
+	sub default_policies {
+		my ($self) = @_;
+
+		return
+			map  { $_->{policy} }
+			grep { $_->{default} }
+			values %{ $self->{config} // +{ } }
 			;
 	}
 
@@ -128,6 +138,18 @@ package App::config {
 			;
 	}
 
+	sub policy_sections {
+		my ($self, $policy) = @_;
+
+		my $config = $self->{config};
+
+		return
+			grep { $config->{$_}{policy} eq $policy }
+			grep { $_ }
+			keys %$config
+			;
+	}
+
 	sub search_config_file {
 		my $path = Path::Tiny::cwd;
 
@@ -186,11 +208,94 @@ package App::ppi_sanity {
 	my $log_verbose   = 0;
 	my $log_with_time = 1;
 
+	my $dry_run       = 0;
+
 	sub log_done (&);
 	sub log_error (&);
 	sub log_info (&);
 	sub log_verbose (&);
 	sub log_warning (&);
+
+	sub _build_path_lookup {
+		return
+			unless my @parts = grep { $_ } @_
+			;
+
+		my $parts = join q (|) => map { qr ((?:$_)) } grep { $_ } @parts;
+
+		return qr ((?:$parts)$);
+	}
+
+	sub _build_policies {
+		my ($config, $default, @policy_options) = @_;
+
+		my @policies = _effective_policies ($config, @policy_options);
+		my %options  = map { ($_->{policy} => $_) } @policy_options;
+
+		return
+			map {
+				my $policy  = $_;
+				my $handler = _policy_handler ($_);
+
+				map {
+					my $section = $config->{config}{$_};
+					+{
+						policy    => $policy,
+						section   => $_,
+						handler   => $handler,
+						options   => $section->{__options},
+						qualifies => _build_policy_qualifier ($_, $config, $default, $options{$policy}),
+					}
+				} $config->policy_sections ($policy)
+			}
+			@policies
+			;
+	}
+
+	sub _build_policy_qualifier {
+		my ($policy, $config, $default, @options) = @_;
+
+		my @policy_option = grep { $_->{policy} eq $policy } @options;
+
+		my $with    = _build_path_lookup (map { $_->{with}    } $default, @policy_option);
+		my $without = _build_path_lookup (map { $_->{without} } $default, @policy_option);
+
+		my $policy_include  = _build_path_lookup (@{ $policy_option[0]->{include} // [] });
+		my $policy_exclude  = _build_path_lookup (@{ $policy_option[0]->{exclude} // [] });
+
+		my $default_include = _build_path_lookup (@{ $default->{include} // [] });
+		my $default_exclude = _build_path_lookup (@{ $default->{exclude} // [] });
+
+		my $config_include  = _build_path_lookup (@{ $config->config ($policy => q (include)) // []});
+		my $config_exclude  = _build_path_lookup (@{ $config->config ($policy => q (exclude)) // []});
+
+		my $global_include  = _build_path_lookup (@{ $config->config (q () => q (include)) // []});
+		my $global_exclude  = _build_path_lookup (@{ $config->config (q () => q (exclude)) // []});
+
+		return sub {
+			my ($path) = @_;
+
+			return 1 if $with            && $path =~ $with;
+			return 0 if $without         && $path =~ $without;
+
+			return 1 if $policy_include  && $path =~ $policy_include;
+			return 0 if $policy_exclude  && $path =~ $policy_exclude;
+
+			return 1 if $default_include && $path =~ $default_include;
+			return 0 if $default_exclude && $path =~ $default_exclude;
+
+			return 1 if $config_include  && $path =~ $config_include;
+			return 0 if $config_exclude  && $path =~ $config_exclude;
+
+			return 1 if $global_include  && $path =~ $global_include;
+			return 0 if $global_exclude  && $path =~ $global_exclude;
+
+			return 0 if $policy_include || $default_include || $config_include || $global_include;
+			return 1 if $policy_exclude || $default_exclude || $config_exclude || $global_exclude;
+
+			return 0;
+		}
+	}
 
 	sub _colored {
 		my ($semantic_color, @what) = @_;
@@ -201,6 +306,21 @@ package App::ppi_sanity {
 			;
 
 		return Term::ANSIColor::colored ([ $color ], @what);
+	}
+
+	sub _effective_policies {
+		my ($config, @options) = @_;
+
+		my @policies = @options
+			? map { $_->{policy} } @options
+			: $config->default_policies
+			;
+
+		@policies = map  { $_->{key} } grep { $_->{default} } values %POLICIES_ALL
+			unless @policies
+			;
+
+		return @policies;
 	}
 
 	sub _includes_from_options {
@@ -249,6 +369,28 @@ package App::ppi_sanity {
 			;
 	}
 
+	sub _policy_handler {
+		my ($key) = @_;
+
+		for my $policy (values %POLICIES_ALL) {
+			return $policy->{handler}
+				if $key eq $policy->{name}
+				|| $key eq $policy->{key}
+				;
+		}
+
+		return;
+	}
+
+	sub _ppi_document {
+		my ($path, %options) = @_;
+
+		my $document = PPI::Document::->new (qq ($path));
+		$document->tab_width (4);
+
+		return $document;
+	}
+
 	sub log_done (&) {
 		_log DONE => @_;
 	}
@@ -280,6 +422,8 @@ package App::ppi_sanity {
 			config => [qw [require_order]],
 		);
 
+		my %policies;
+
 		while (@argv) {
 			$parser->getoptionsfromarray (
 				\ @argv,
@@ -298,7 +442,9 @@ package App::ppi_sanity {
 					unless exists $POLICIES_ALL{$policy_key}
 					;
 
-				push @options, $current = { policy => $policy_key };
+				unless (($current = $policies{$policy})) {
+					push @options, $current = $policies{$policy} = { policy => $policy_key };
+				}
 			}
 		}
 
@@ -309,9 +455,45 @@ package App::ppi_sanity {
 		my $config = App::config->new;
 		my @options = parse_options (@_);
 
-		my $iterator = _path_iterator _includes_from_options @options;
+		$log_verbose = $options[0]{verbose};
+		$dry_run     = $options[0]{dry_run};
 
-		return 0;
+		my $iterator = _path_iterator (_includes_from_options (@options));
+		my @policies = _build_policies ($config, @options);
+
+		my $exit_value = 0;
+		while (my $path = $iterator->()) {
+			verbose { qq (process file $path) };
+
+			my $changes = 0;
+			my $document;
+
+			for my $policy (@policies) {
+				verbose { qq (qualify policy $policy->{key}) };
+
+				next
+					unless $policy->{qualifies}->($path)
+					;
+
+				$document //= _ppi_document ($path);
+
+				verbose { qq (Apply '$policy->{key}' to $path) };
+
+				if (my $count = $policy->{handler}->($document)) {
+					info { qq (Applied '$policy->{key}' $count time(s) to $path) };
+					$changes += $count;
+				}
+			}
+
+			if ($changes) {
+				$exit_value = 1;
+				$document->save ($path)
+					unless $dry_run
+					;
+			}
+		}
+
+		return $exit_value;
 	}
 }
 
