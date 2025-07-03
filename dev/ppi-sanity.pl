@@ -100,6 +100,196 @@ package App::ppi_sanity::attributes {
 	1;
 }
 
+package App::ppi_sanity::config {
+	use Exporter q (import);
+
+	use Path::Tiny;
+	use Ref::Util;
+
+	BEGIN {
+		our @EXPORT = (
+			q (config),
+		);
+	}
+
+	my $re_section  = qr (
+		^
+		\s* \[
+		\s* ( [^/\]]+) (?<= \S)
+		(?:
+			\s* /
+			\s* ( [^/\]]+) (?<= \S)
+		)*
+		\s* \]
+	)x;
+
+	my $re_property = qr (
+		^
+		\s* ((?&property_name))
+		\s* [=]
+		\s* ((?&property_value))
+
+		(?(DEFINE)
+			(?<value_quoted>
+				(?<quote> ['"] )
+				(?: (?: \\.)+ | (?: (?! \g{quote} ) [^\\] )+ )*
+				\g{quote}
+			)
+
+			(?<value_unquoted> (?= \S) [^;#]+ (?<= \S))
+
+			(?<property_name> (?= \S) [^;#=]+ (?<= \S))
+
+			(?<property_value> (?&value_quoted) | (?&value_unquoted))
+        )
+	)x;
+
+	sub _config_file_load;
+	sub _config_file_search;
+
+	sub config {
+		state $config = bless { coonfig => _config_file_load };
+	}
+
+	sub _accessor {
+		my ($self, @path) = @_;
+
+		my $current = $self;
+		for my $key (@path) {
+			return
+				unless defined $current->{$key}
+				;
+
+			$current = $current->{$key};
+		}
+
+		return $current;
+	}
+
+	sub _config_file_load {
+		return
+			unless my $file = _config_file_search
+			;
+
+		my $current  = { };
+		my %sections = ( q () => $current );
+
+		my @lines = $file->lines_utf8;
+		while (@lines) {
+			my $line = shift @lines;
+			chomp $line;
+
+			if (my ($policy, $key) = $line =~ $re_section) {
+				my $section = join (q ( / ) => grep { defined && length } $policy, $key);
+
+				$current = $sections{$section} //= {
+					policy  => $policy,
+					section => $section,
+					default => 0,
+					include => [ ],
+					exclude => [ ],
+					_       => { },
+				};
+
+				next;
+			}
+
+			if (my ($property, $value) = $line =~ $re_property) {
+				if (exists $current->{$property}) {
+					Ref::Util::is_arrayref ($current->{$property})
+						? ( push @{ $current->{$property} }, $value )
+						: ( $current->{$property} = $value )
+						;
+					next;
+				}
+
+				my $properties = $current->{_};
+
+				unless (exists $properties->{$property}) {
+					$properties->{$property} = $value;
+					next;
+				}
+
+				unless (Ref::Util::is_arrayref ($properties->{$property})) {
+					$properties->{$property} = [ $properties->{$property}, $value ];
+					next;
+				}
+
+				push @{ $properties->{$property} }, $value;
+
+				next;
+			}
+		}
+
+		return \ %sections;
+	}
+
+	sub _config_file_search {
+		my $path = Path::Tiny::cwd;
+
+		until ($path->is_rootdir) {
+			my $candidate = $path->child (q (.ppi-sanity.ini));
+			return $candidate
+				if $candidate->is_file
+				&& $candidate->exists
+				;
+			$path = $path->parent;
+		}
+
+		return;
+	}
+
+	sub default_policies {
+		my ($self) = @_;
+
+		my %uniq =
+			map  { $_->{policy} => 1 }
+			grep { $_->{default} }
+			values %{ $self->{config} // +{ } }
+			;
+
+		return keys %uniq;
+	}
+
+	sub policy_sections {
+		my ($self, $policy) = @_;
+
+		my $config = $self->{config} // { };
+
+		return
+			grep { $_->{policy} eq $policy }
+			grep { $_ }
+			values %$config
+			;
+	}
+
+	sub section_config {
+		my ($self, $section, $key) = @_;
+
+		return $self->_accessor (config => $section => $key);
+	}
+
+	sub section_property {
+		my ($self, $section, $key) = @_;
+
+		return $self->_accessor (config => _ => $section => $key);
+	}
+
+	sub set_default_section_config {
+		my ($self, $section, $key, $value) = @_;
+
+		$self->{config}{$section}{$key} //= $value;
+	}
+
+	sub set_default_section_property {
+		my ($self, $section, $key, $value) = @_;
+
+		$self->{config}{$section}{_}{$key} //= $value;
+	}
+
+	1;
+}
+
 package App::ppi_sanity::logger {
 	use Exporter q (import);
 
@@ -172,6 +362,7 @@ package App::ppi_sanity::logger {
 package App::ppi_sanity {
 	BEGIN {
 		App::ppi_sanity::attributes->import;
+		App::ppi_sanity::config::->import;
 		App::ppi_sanity::logger::->import;
 	}
 
