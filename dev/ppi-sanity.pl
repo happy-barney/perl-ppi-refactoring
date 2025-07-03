@@ -566,7 +566,7 @@ package App::ppi_sanity {
 	}
 
 	sub _path_iterator {
-		return Path::Iterator::Rule
+		return Path::Iterator::Rule::
 			->new
 			->not_name (q (.git))
 			->skip_dir (q (.git))
@@ -728,6 +728,9 @@ package App::ppi_sanity {
 		}
 
 		return $exit_value;
+		my $iterator = _path_iterator _includes_from_options @options;
+
+		return 0;
 	}
 }
 
