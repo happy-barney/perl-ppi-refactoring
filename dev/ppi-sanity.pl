@@ -361,6 +361,7 @@ package App::ppi_sanity::logger {
 
 package App::ppi_sanity {
 	use Getopt::Long qw (GetOptionsFromArray);
+	use PPI;
 	use Path::Iterator::Rule;
 
 	BEGIN {
@@ -371,6 +372,10 @@ package App::ppi_sanity {
 
 	my @DEFAULT_INCLUDE = qw (bin lib t);
 	my $dry_run       = 0;
+
+	sub invoke (&;@);
+	sub ppix_search;
+	sub where (&;@);
 
 	sub _build_path_lookup {
 		return
@@ -453,6 +458,15 @@ package App::ppi_sanity {
 		}
 	}
 
+	sub _element {
+		return shift
+			if Scalar::Util::blessed ($_[0])
+			&& $_[0]->isa (q (PPI::Element))
+			;
+
+		return $_;
+	}
+
 	sub _effective_policies {
 		my ($config, @options) = @_;
 
@@ -517,6 +531,31 @@ package App::ppi_sanity {
 		$document->tab_width (4);
 
 		return $document;
+	}
+
+	sub invoke (&;@) {
+		my ($code, @rest) = @_;
+
+		return (
+			sub { local $_ = $_[1]; $code->(@_) },
+			@rest,
+		);
+	}
+
+	sub ppix_search {
+		local $_ = &_element;
+		my ($where) = @_;
+
+		@{ $_->find ($where) || [] };
+	}
+
+	sub where (&;@) {
+		my ($code, @rest) = @_;
+
+		return (
+			sub { local $_ = $_[1]; $code->(@_) },
+			@rest,
+		);
 	}
 
 	sub parse_options {
