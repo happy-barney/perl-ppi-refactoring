@@ -217,7 +217,6 @@ package App::ppi_sanity {
 	sub log_info (&);
 	sub log_verbose (&);
 	sub log_warning (&);
-	sub ppix_search;
 	sub where (&;@);
 
 	sub _build_path_lookup {
@@ -312,6 +311,10 @@ package App::ppi_sanity {
 		return Term::ANSIColor::colored ([ $color ], @what);
 	}
 
+	sub _current {
+		$_;
+	}
+
 	sub _element {
 		return shift
 			if Scalar::Util::blessed ($_[0])
@@ -349,6 +352,71 @@ package App::ppi_sanity {
 			;
 
 		return @include;
+	}
+
+	sub _is {
+		my ($value, @classifications) = @_;
+
+		my @queue = ([ $value => \ @classifications ]);
+
+		while (@queue) {
+			my ($value, $condition) = @{ shift @queue };
+
+			return 0
+				unless defined $value
+				;
+
+			next
+				unless defined $condition
+				;
+
+			if (Ref::Util::is_arrayref ($condition)) {
+				unshift @queue, map { +[ $value => $_ ] } @$condition;
+				next;
+			}
+
+			if (Ref::Util::is_hashref ($condition)) {
+				return 0
+					unless Scalar::Util::blessed ($value)
+					;
+
+				for my $method (keys %$condition) {
+					my $sub_condition = $condition->{$method};
+
+					$value->isa ($sub_condition) ? next : return 0
+						if $method eq q (isa)
+						;
+
+					unshift @queue, [ $value->$method => $sub_condition ];
+				}
+
+				next;
+			}
+
+			$value =~ $condition ? next : return 0
+				if Ref::Util::is_regexpref ($condition)
+				;
+
+			$condition->($value) ? next : return 0
+				if Ref::Util::is_coderef ($condition)
+				;
+
+			$value eq $condition ? next : return 0;
+		}
+
+		return 1;
+	}
+
+	sub _is_quote_double {
+		local $_ = &_element;
+
+		_is $_, { isa => PPI::Token::Quote::Double:: }, @_;
+	}
+
+	sub _is_quote_single {
+		local $_ = &_element;
+
+		_is $_, { isa => PPI::Token::Quote::Single:: }, @_;
 	}
 
 	sub _log {
@@ -442,6 +510,15 @@ package App::ppi_sanity {
 		@{ $_->find ($where) || [] };
 	}
 
+	sub ppix_replace {
+		my ($element, $where, $invoke) = (&_element, @_);
+
+		for my $found (ppix_search $element, $where) {
+			$found->insert_before ($invoke->($found));
+			$found->remove;
+		}
+	}
+
 	sub where (&;@) {
 		my ($code, @rest) = @_;
 
@@ -487,6 +564,20 @@ package App::ppi_sanity {
 		}
 
 		return @options;
+	}
+
+	sub policy_replace_quotes                   :Policy {
+		local $_ = &_element;
+
+		ppix_replace
+			where  { _is_quote_double },
+			invoke { _current->set_content (qq (qq (${\ _current->string }))) }
+			;
+
+		ppix_replace
+			where  { _is_quote_single },
+			invoke { _current->set_content (qq (q (${\ _current->string }))) }
+			;
 	}
 
 	sub run {
