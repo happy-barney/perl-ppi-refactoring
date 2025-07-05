@@ -171,6 +171,7 @@ package App::ppi_sanity {
 	use Getopt::Long qw (GetOptionsFromArray);
 	use List::Util;
 	use POSIX qw (strftime);
+	use PPI;
 	use Path::Iterator::Rule;
 	use Term::ANSIColor qw ();
 
@@ -210,11 +211,14 @@ package App::ppi_sanity {
 
 	my $dry_run       = 0;
 
+	sub invoke (&;@);
 	sub log_done (&);
 	sub log_error (&);
 	sub log_info (&);
 	sub log_verbose (&);
 	sub log_warning (&);
+	sub ppix_search;
+	sub where (&;@);
 
 	sub _build_path_lookup {
 		return
@@ -308,6 +312,15 @@ package App::ppi_sanity {
 		return Term::ANSIColor::colored ([ $color ], @what);
 	}
 
+	sub _element {
+		return shift
+			if Scalar::Util::blessed ($_[0])
+			&& $_[0]->isa (q (PPI::Element))
+			;
+
+		return $_;
+	}
+
 	sub _effective_policies {
 		my ($config, @options) = @_;
 
@@ -391,6 +404,15 @@ package App::ppi_sanity {
 		return $document;
 	}
 
+	sub invoke (&;@) {
+		my ($code, @rest) = @_;
+
+		return (
+			sub { local $_ = $_[1]; $code->(@_) },
+			@rest,
+		);
+	}
+
 	sub log_done (&) {
 		_log DONE => @_;
 	}
@@ -411,6 +433,22 @@ package App::ppi_sanity {
 
 	sub log_warning (&) {
 		_log WARN => @_;
+	}
+
+	sub ppix_search {
+		local $_ = &_element;
+		my ($where) = @_;
+
+		@{ $_->find ($where) || [] };
+	}
+
+	sub where (&;@) {
+		my ($code, @rest) = @_;
+
+		return (
+			sub { local $_ = $_[1]; $code->(@_) },
+			@rest,
+		);
 	}
 
 	sub parse_options {
