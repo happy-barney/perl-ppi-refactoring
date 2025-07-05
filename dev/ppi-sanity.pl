@@ -211,6 +211,7 @@ package App::ppi_sanity {
 
 	my $dry_run       = 0;
 
+	sub _is_ws;
 	sub invoke (&;@);
 	sub log_done (&);
 	sub log_error (&);
@@ -407,6 +408,12 @@ package App::ppi_sanity {
 		return 1;
 	}
 
+	sub _is_nl {
+		local $_ = &_element;
+
+		_is_ws qr (^\n$);
+	}
+
 	sub _is_quote_double {
 		local $_ = &_element;
 
@@ -417,6 +424,12 @@ package App::ppi_sanity {
 		local $_ = &_element;
 
 		_is $_, { isa => PPI::Token::Quote::Single:: }, @_;
+	}
+
+	sub _is_ws {
+		local $_ = &_element;
+
+		_is { isa => PPI::Token::Whitespace::}, @_;
 	}
 
 	sub _log {
@@ -503,6 +516,15 @@ package App::ppi_sanity {
 		_log WARN => @_;
 	}
 
+	sub ppix_replace {
+		my ($element, $where, $invoke) = (&_element, @_);
+
+		for my $found (ppix_search $element, $where) {
+			$found->insert_before ($invoke->($found));
+			$found->remove;
+		}
+	}
+
 	sub ppix_search {
 		local $_ = &_element;
 		my ($where) = @_;
@@ -526,6 +548,20 @@ package App::ppi_sanity {
 			sub { local $_ = $_[1]; $code->(@_) },
 			@rest,
 		);
+	}
+
+	sub policy_replace_quotes                   :Policy {
+		local $_ = &_element;
+
+		ppix_replace
+			where  { _is_quote_double },
+			invoke { _current->set_content (qq (qq (${\ _current->string }))) }
+			;
+
+		ppix_replace
+			where  { _is_quote_single },
+			invoke { _current->set_content (qq (q (${\ _current->string }))) }
+			;
 	}
 
 	sub parse_options {
