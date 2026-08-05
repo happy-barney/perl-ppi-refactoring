@@ -1,0 +1,13 @@
+
+=pod
+
+=head1 CONTRIBUTING
+
+=head2 Coding Style
+
+=head3 indent with tabs
+
+Let another contributors (hope there will be any) to decide their preferred
+tab size.
+
+=item 
