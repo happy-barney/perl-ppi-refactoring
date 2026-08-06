@@ -361,11 +361,162 @@ package App::ppi_sanity::logger {
 
 package App::ppi_sanity {
 	use Getopt::Long qw (GetOptionsFromArray);
+	use Path::Iterator::Rule;
 
 	BEGIN {
 		App::ppi_sanity::attributes->import;
 		App::ppi_sanity::config::->import;
 		App::ppi_sanity::logger::->import;
+	}
+
+	my @DEFAULT_INCLUDE = qw (bin lib t);
+	my $dry_run       = 0;
+
+	sub _build_path_lookup {
+		return
+			unless my @parts = grep { $_ } @_
+			;
+
+		my $parts = join q (|) => map { qr ((?:$_)) } grep { $_ } @parts;
+
+		return qr ((?:$parts)$);
+	}
+
+	sub _build_policies {
+		my ($config, $default, @policy_options) = @_;
+
+		my @policies = _effective_policies ($config, @policy_options);
+		my %options  = map { ($_->{policy} => $_) } @policy_options;
+
+		return
+			map {
+				my $policy  = $_;
+				my $handler = _policy_handler ($_);
+
+				map {
+					my $section = $config->{config}{$_};
+					+{
+						policy    => $policy,
+						section   => $_,
+						handler   => $handler,
+						options   => $section->{_options},
+						qualifies => _build_policy_qualifier ($_, $config, $default, $options{$policy}),
+					}
+				} $config->policy_sections ($policy)
+			}
+			@policies
+			;
+	}
+
+	sub _build_policy_qualifier {
+		my ($policy, $config, $default, @options) = @_;
+
+		my @policy_option = grep { $_->{policy} eq $policy } @options;
+
+		my $with    = _build_path_lookup (map { $_->{with}    } $default, @policy_option);
+		my $without = _build_path_lookup (map { $_->{without} } $default, @policy_option);
+
+		my $policy_include  = _build_path_lookup (@{ $policy_option[0]->{include} // [] });
+		my $policy_exclude  = _build_path_lookup (@{ $policy_option[0]->{exclude} // [] });
+
+		my $default_include = _build_path_lookup (@{ $default->{include} // [] });
+		my $default_exclude = _build_path_lookup (@{ $default->{exclude} // [] });
+
+		my $config_include  = _build_path_lookup (@{ $config->config ($policy => q (include)) // []});
+		my $config_exclude  = _build_path_lookup (@{ $config->config ($policy => q (exclude)) // []});
+
+		my $global_include  = _build_path_lookup (@{ $config->config (q () => q (include)) // []});
+		my $global_exclude  = _build_path_lookup (@{ $config->config (q () => q (exclude)) // []});
+
+		return sub {
+			my ($path) = @_;
+
+			return 1 if $with            && $path =~ $with;
+			return 0 if $without         && $path =~ $without;
+
+			return 1 if $policy_include  && $path =~ $policy_include;
+			return 0 if $policy_exclude  && $path =~ $policy_exclude;
+
+			return 1 if $default_include && $path =~ $default_include;
+			return 0 if $default_exclude && $path =~ $default_exclude;
+
+			return 1 if $config_include  && $path =~ $config_include;
+			return 0 if $config_exclude  && $path =~ $config_exclude;
+
+			return 1 if $global_include  && $path =~ $global_include;
+			return 0 if $global_exclude  && $path =~ $global_exclude;
+
+			return 0 if $policy_include || $default_include || $config_include || $global_include;
+			return 1 if $policy_exclude || $default_exclude || $config_exclude || $global_exclude;
+
+			return 0;
+		}
+	}
+
+	sub _effective_policies {
+		my ($config, @options) = @_;
+
+		my @policies = @options
+			? map { $_->{policy} } @options
+			: $config->default_policies
+			;
+
+		@policies = policy_list_default
+			unless @policies
+			;
+
+		return @policies;
+	}
+
+	sub _includes_from_options {
+		my @include =
+			grep { -e $_ }
+			map  { @{ $_ // [] } }
+			map { $_->{include}, $_->{with} }
+			@_
+			;
+
+		@include = @DEFAULT_INCLUDE
+			unless @include
+			;
+
+		return @include;
+	}
+
+	sub _path_iterator {
+		return Path::Iterator::Rule
+			->new
+			->not_name (q (.git))
+			->skip_dir (q (.git))
+			->file
+			->or (
+				Path::Iterator::Rule->new->name (qr ( [.] (?: pm | pl | t ) $ )x),
+				Path::Iterator::Rule->new->shebang (qr (^[#]! .* \b perl \b )x),
+			)
+			->iter (@_, { recurse => 1 })
+			;
+	}
+
+	sub _policy_handler {
+		my ($key) = @_;
+
+		for my $policy (values %POLICIES_ALL) {
+			return $policy->{handler}
+				if $key eq $policy->{name}
+				|| $key eq $policy->{key}
+				;
+		}
+
+		return;
+	}
+
+	sub _ppi_document {
+		my ($path, %options) = @_;
+
+		my $document = PPI::Document::->new (qq ($path));
+		$document->tab_width (4);
+
+		return $document;
 	}
 
 	sub parse_options {
@@ -376,6 +527,8 @@ package App::ppi_sanity {
 		my $parser = Getopt::Long::Parser->new (
 			config => [qw [require_order]],
 		);
+
+		my %policies;
 
 		while (@argv) {
 			$parser->getoptionsfromarray (
@@ -390,10 +543,12 @@ package App::ppi_sanity {
 
 			while (my $policy = shift @argv) {
 				die qq (Unknown policy '$policy')
-					unless policy_search ($policy)
+					unless my $policy_key = policy_search ($policy)
 					;
 
-				push @options, $current = { policy => $policy_key };
+				unless (($current = $policies{$policy_key})) {
+					push @options, $current = $policies{$policy_key} = { policy => $policy_key };
+				}
 			}
 		}
 
@@ -404,7 +559,45 @@ package App::ppi_sanity {
 		my $config = App::config->new;
 		my @options = parse_options (@_);
 
-		return 0;
+		$log_verbose = $options[0]{verbose};
+		$dry_run     = $options[0]{dry_run};
+
+		my $iterator = _path_iterator (_includes_from_options (@options));
+		my @policies = _build_policies ($config, @options);
+
+		my $exit_value = 0;
+		while (my $path = $iterator->()) {
+			verbose { qq (process file $path) };
+
+			my $changes = 0;
+			my $document;
+
+			for my $policy (@policies) {
+				verbose { qq (qualify policy $policy->{key}) };
+
+				next
+					unless $policy->{qualifies}->($path)
+					;
+
+				$document //= _ppi_document ($path);
+
+				verbose { qq (Apply '$policy->{key}' to $path) };
+
+				if (my $count = $policy->{handler}->($document)) {
+					info { qq (Applied '$policy->{key}' $count time(s) to $path) };
+					$changes += $count;
+				}
+			}
+
+			if ($changes) {
+				$exit_value = 1;
+				$document->save ($path)
+					unless $dry_run
+					;
+			}
+		}
+
+		return $exit_value;
 	}
 }
 
