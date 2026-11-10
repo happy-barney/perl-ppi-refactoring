@@ -2,7 +2,7 @@
 use v5.14;
 use warnings;
 
-use require::relative q (test-helper.pl);
+use Test::Load::Helper;
 
 my @fixtures = fixture_list;
 plan tests => 1 + (@fixtures || 1);

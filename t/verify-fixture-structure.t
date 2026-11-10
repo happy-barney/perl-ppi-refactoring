@@ -2,7 +2,7 @@
 use v5.14;
 use warnings;
 
-use require::relative q (test-helper.pl);
+use Test::Load::Helper;
 
 assume_ppi q (should parse fixture path 'simple-document.pl')
 	=> document => fixture (q (simple-document.pl))

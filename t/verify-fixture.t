@@ -2,7 +2,7 @@
 use v5.14;
 use warnings;
 
-use require::relative q (test-helper.pl);
+use Test::Load::Helper;
 
 it q (should build even non-existing fixture path)
 	=> got    => fixture_path (q (foo), q (bar), q (baz))
