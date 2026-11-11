@@ -2,7 +2,7 @@
 use v5.14;
 use warnings;
 
-use require::relative q (../test-helper.pl);
+use Test::Load::Helper;
 
 sub assume_classification {
 	my ($title, %args) = @_;
